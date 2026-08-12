@@ -1,0 +1,3761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Truth Button</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14110F;
+    --void-2:#1C1814;
+    --paper:#EDE6D6;
+    --paper-dark:#DCD1AE;
+    --red:#E8402C;
+    --red-dim:#7A2A20;
+    --teal:#2F8F7A;
+    --teal-dim:#1F5C4D;
+    --ink:#F2EDE1;
+    --ink-soft:#C9C0AE;
+    --muted:#8C8377;
+    --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(34,29,23,0.55) 0%, transparent 55%),
+      linear-gradient(rgba(20,17,15,0.82), rgba(20,17,15,0.88)),
+      url('washington-backdrop.png') center / cover no-repeat fixed,
+      var(--void);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:56px 24px 96px;}
+  .wrap{opacity:0; transition:opacity 1.1s ease;}
+  .wrap.revealed{opacity:1;}
+
+  /* header */
+  header{text-align:center;margin-bottom:44px;}
+  .kicker{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-stamp);
+    font-size:clamp(34px,7vw,56px);
+    letter-spacing:0.03em;
+    margin:0 0 12px;
+    color:var(--ink);
+    text-shadow:0 0 30px rgba(232,64,44,0.15);
+  }
+  h1 .btn-word{color:var(--red);}
+  .tagline{
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:480px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  /* upload card */
+  /* auth bar */
+  .auth-bar{
+    display:flex;
+    justify-content:flex-end;
+    padding-top:16px;
+  }
+  .auth-bar-btn{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.06em;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .auth-bar-btn:hover{border-color:var(--red); color:var(--ink);}
+  .auth-bar-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .auth-bar-role{
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--teal);
+    border:1px solid rgba(47,143,122,0.4);
+    padding:2px 8px;
+    border-radius:10px;
+  }
+  .auth-bar-signout{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:var(--font-mono);
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:5px;
+    cursor:pointer;
+  }
+  .auth-bar-signout:hover{color:var(--red); border-color:var(--red);}
+
+  /* auth modal */
+  .auth-modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,8,7,0.82);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:1100;
+    padding:20px;
+  }
+  .auth-modal-overlay.show{display:flex;}
+  .auth-modal{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:24px;
+    max-width:400px;
+    width:100%;
+  }
+  .auth-tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .auth-tab{
+    flex:1;
+    text-align:center;
+    padding:10px;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .auth-tab.active{color:var(--red); border-color:var(--red);}
+  .auth-form{display:none;}
+  .auth-form.show{display:block;}
+  .auth-form input{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:13.5px;
+    margin-bottom:10px;
+    box-sizing:border-box;
+  }
+  .auth-form input:focus{border-color:var(--red); outline:none;}
+  .auth-form label{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+  .auth-submit{
+    width:100%;
+    background:var(--red);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:11px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .auth-submit:hover{opacity:0.85;}
+  .auth-close{
+    position:absolute;
+    top:14px; right:16px;
+    background:none; border:none;
+    color:var(--muted);
+    font-size:18px;
+    cursor:pointer;
+  }
+  .auth-modal-wrap{position:relative;}
+  .auth-status{
+    font-size:12.5px;
+    margin-top:10px;
+    display:none;
+    line-height:1.5;
+  }
+  .auth-status.show{display:block;}
+  .auth-status.error{color:var(--red);}
+  .auth-status.ok{color:var(--teal);}
+  .auth-gate-note{
+    font-size:12.5px;
+    color:var(--muted);
+    padding:12px 14px;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:5px;
+    margin-bottom:12px;
+    line-height:1.6;
+  }
+  .auth-gate-note a, .auth-gate-note b.link{color:var(--teal); cursor:pointer; text-decoration:underline;}
+
+  /* QOTD + leaderboard */
+  .qotd-card{
+    background:linear-gradient(135deg, rgba(232,64,44,0.08), rgba(47,143,122,0.05));
+    border:1px solid rgba(232,64,44,0.25);
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .qotd-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:8px;
+  }
+  .qotd-question{
+    font-family:var(--font-stamp);
+    font-size:19px;
+    color:var(--ink);
+    line-height:1.4;
+    margin-bottom:8px;
+  }
+  .qotd-meta{font-family:var(--font-mono); font-size:11px; color:var(--muted);}
+  .qotd-set-row{display:flex; gap:8px; margin-top:14px;}
+  .qotd-set-row input{
+    flex:1;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:9px 12px;
+    color:var(--ink);
+    font-size:13px;
+  }
+  .qotd-set-row button{
+    background:var(--red); color:var(--void); border:none;
+    border-radius:4px; padding:9px 16px;
+    font-family:var(--font-mono); font-size:11px;
+    text-transform:uppercase; cursor:pointer; white-space:nowrap;
+  }
+  .leaderboard{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+  }
+  .lb-entry{
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 12px;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .lb-entry.top{border-color:#E8A02C; color:#E8A02C;}
+
+  /* peptide calculator */
+  .pc-input-group{display:flex; gap:8px;}
+  .pc-input-group input{
+    flex:1; min-width:0;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:14px;
+  }
+  .pc-input-group select, .pc-input-group .pc-unit-label{
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 10px;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    white-space:nowrap;
+  }
+  .pc-input-group input:focus{border-color:var(--red); outline:none;}
+  #pcSyringeType{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:13px;
+  }
+  .pc-results{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+    gap:12px;
+    margin-top:20px;
+  }
+  .pc-result-row{
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 16px;
+  }
+  .pc-result-row.highlight{
+    background:rgba(232,64,44,0.08);
+    border-color:rgba(232,64,44,0.35);
+  }
+  .pc-result-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .pc-result-value{
+    font-family:var(--font-mono);
+    font-size:20px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .pc-result-row.highlight .pc-result-value{color:var(--red);}
+  .pc-warning{
+    margin-top:14px;
+    padding:12px 14px;
+    background:rgba(232,160,44,0.1);
+    border:1px solid rgba(232,160,44,0.35);
+    border-radius:6px;
+    color:#E8A02C;
+    font-size:12.5px;
+    line-height:1.6;
+  }
+
+  /* admin panel */
+  .admin-card{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .admin-card h3{
+    font-family:var(--font-stamp);
+    font-size:17px;
+    margin:0 0 14px;
+    color:var(--ink);
+  }
+  .admin-stats-row{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:6px;}
+  .admin-stat{
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:12px 16px;
+    flex:1;
+    min-width:110px;
+    text-align:center;
+  }
+  .admin-stat .num{font-family:var(--font-mono); font-size:22px; color:var(--ink); font-weight:600;}
+  .admin-stat .lbl{font-family:var(--font-mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;}
+  .admin-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .admin-table th{
+    text-align:left; font-family:var(--font-mono); font-size:10.5px;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);
+    padding:8px 10px; border-bottom:1px solid var(--line);
+  }
+  .admin-table td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink-soft);}
+  .admin-table button{
+    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
+    font-family:var(--font-mono); font-size:10.5px; padding:5px 10px;
+    border-radius:4px; cursor:pointer; margin-right:6px;
+  }
+  .admin-table button:hover{border-color:var(--red); color:var(--red);}
+  .admin-review-row{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:10px; padding:12px 0; border-bottom:1px solid var(--line);
+  }
+  .admin-review-row:last-child{border-bottom:none;}
+  .admin-review-row .arr-text{font-size:13px; color:var(--ink-soft); flex:1;}
+  .admin-review-row .arr-meta{font-family:var(--font-mono); font-size:10.5px; color:var(--muted); margin-top:4px;}
+
+  /* how to use */
+  .howto{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .howto summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--teal);
+  }
+  .howto summary::-webkit-details-marker{display:none;}
+  .howto summary .chev{transition:transform .2s ease; color:var(--muted); font-family:var(--font-body); text-transform:none; letter-spacing:0;}
+  .howto[open] summary .chev{transform:rotate(180deg);}
+  .howto-body{padding:0 18px 18px;}
+  .howto-steps{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:10px;}
+  .howto-steps li{font-size:13.5px; color:var(--ink-soft); line-height:1.6;}
+  .howto-steps li b{color:var(--ink); font-weight:600;}
+  .howto-note{
+    margin-top:14px;
+    padding:10px 12px;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:5px;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  /* donate */
+  .donate-card{
+    background:linear-gradient(135deg, rgba(232,64,44,0.10), rgba(47,143,122,0.06));
+    border:1px solid rgba(232,64,44,0.28);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .donate-copy{flex:1; min-width:220px;}
+  .donate-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:6px;
+  }
+  .donate-title{
+    font-family:var(--font-stamp);
+    font-size:19px;
+    color:var(--ink);
+    margin-bottom:6px;
+    letter-spacing:0.01em;
+  }
+  .donate-text{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    max-width:440px;
+  }
+  .donate-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--red);
+    color:var(--void);
+    text-decoration:none;
+    padding:13px 22px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    white-space:nowrap;
+    transition:transform .15s ease, opacity .15s ease;
+    flex-shrink:0;
+  }
+  .donate-btn:hover{opacity:0.88; transform:translateY(-1px);}
+  .donate-btn:active{transform:translateY(0);}
+  .donate-fine{
+    width:100%;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:2px;
+    letter-spacing:0.02em;
+  }
+  .donate-fine a{color:var(--teal);}
+
+  /* mode tabs */
+  .mode-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .mode-tab{
+    flex:1;
+    min-width:120px;
+    background:var(--void-2);
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:12px 8px;
+    border-radius:6px;
+    cursor:pointer;
+    text-align:center;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .mode-tab:hover{color:var(--ink-soft);}
+  .mode-tab.active{
+    color:var(--red);
+    border-color:var(--red);
+    background:rgba(232,64,44,0.06);
+  }
+
+  .desk{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px;
+  }
+  .dropzone{
+    border:1.5px dashed rgba(242,237,225,0.25);
+    border-radius:4px;
+    padding:56px 24px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+    position:relative;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--red);
+    background:rgba(232,64,44,0.04);
+  }
+  .dropzone .icon{
+    font-family:var(--font-mono);
+    font-size:28px;
+    color:var(--muted);
+    margin-bottom:14px;
+    letter-spacing:0.1em;
+  }
+  .dropzone p{margin:0;color:var(--ink-soft);font-size:14px;}
+  .dropzone .sub{color:var(--muted);font-size:12px;margin-top:6px;font-family:var(--font-mono);}
+  input[type=file]{display:none;}
+
+  /* evidence panel */
+  /* report bar */
+  /* lookup panels (flock cameras / data centers) */
+  .lookup-panel{display:none;}
+  .lookup-panel.show{display:block;}
+  .lookup-card{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .lookup-card h3{
+    font-family:var(--font-stamp);
+    font-size:18px;
+    margin:0 0 6px;
+    color:var(--ink);
+    letter-spacing:0.01em;
+  }
+  .lookup-card .lc-sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    margin-bottom:16px;
+  }
+  .lookup-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .lookup-row select, .lookup-row input{
+    flex:1;
+    min-width:140px;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:13px;
+    outline:none;
+  }
+  .lookup-row select:focus, .lookup-row input:focus{border-color:var(--red);}
+  .lookup-row button{
+    background:var(--red);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:10px 20px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .lookup-row button:hover{opacity:0.85;}
+
+  .lookup-results{margin-top:16px; display:none;}
+  .lookup-results.show{display:block;}
+  .result-link{
+    display:block;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    text-decoration:none;
+    transition:border-color .2s ease;
+  }
+  .result-link:hover{border-color:var(--red);}
+  .result-link .rl-title{
+    font-family:var(--font-body);
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .result-link .rl-desc{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:3px;
+    line-height:1.5;
+  }
+  .result-link .rl-domain{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-top:6px;
+  }
+
+  .report-callout{
+    border-left:2px solid var(--red);
+    padding:16px 18px;
+    background:rgba(232,64,44,0.05);
+    border-radius:0 6px 6px 0;
+  }
+  .report-callout h3{
+    font-family:var(--font-stamp);
+    font-size:16px;
+    color:var(--red);
+    margin:0 0 8px;
+  }
+  .report-callout p{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.65;
+    margin:0 0 12px;
+  }
+  .report-callout ol{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.8;
+    margin:0 0 14px;
+    padding-left:20px;
+  }
+  a.report-link-btn{
+    display:inline-block;
+    background:var(--red);
+    color:var(--void);
+    text-decoration:none;
+    padding:9px 16px;
+    border-radius:4px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    margin-right:8px;
+    margin-top:4px;
+  }
+  a.report-link-btn:hover{opacity:0.85;}
+  a.report-link-btn.secondary{
+    background:transparent;
+    border:1px solid var(--red);
+    color:var(--red);
+  }
+
+  .lookup-disclaimer{
+    margin-top:16px;
+    padding:14px 16px;
+    border-left:2px solid var(--muted);
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--muted);
+  }
+
+  /* yt listen terminal */
+  .terminal-log{
+    background:#0A0D0A;
+    border:1px solid #1E3A2A;
+    border-radius:4px;
+    padding:14px 16px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:#3DDC71;
+    line-height:1.9;
+    min-height:90px;
+    max-height:180px;
+    overflow-y:auto;
+  }
+  .terminal-log .tl-line{opacity:0; animation:tlIn .25s ease forwards;}
+  .terminal-log .tl-cursor{display:inline-block; width:7px; height:13px; background:#3DDC71; vertical-align:text-bottom; animation:tlBlink 1s step-end infinite;}
+  @keyframes tlIn{from{opacity:0; transform:translateY(-3px);} to{opacity:1; transform:translateY(0);}}
+  @keyframes tlBlink{50%{opacity:0;}}
+
+  .listen-btn{
+    background:var(--red) !important;
+    color:var(--void) !important;
+    border:none !important;
+  }
+  .listen-btn.listening{
+    background:#0A0D0A !important;
+    color:#3DDC71 !important;
+    border:1px solid #1E3A2A !important;
+  }
+
+  /* reviews */
+  .storage-banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(232,160,44,0.08);
+    border:1px solid rgba(232,160,44,0.3);
+    border-radius:6px;
+    padding:12px 14px;
+    margin-bottom:16px;
+    font-size:12.5px;
+    color:#E8A02C;
+    line-height:1.6;
+  }
+  .storage-banner.live{
+    background:rgba(47,143,122,0.08);
+    border-color:rgba(47,143,122,0.3);
+    color:var(--teal);
+  }
+
+  .category-pills{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+  .cat-pill{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.04em;
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .cat-pill:hover{color:var(--ink);}
+  .cat-pill.active{
+    background:var(--red);
+    border-color:var(--red);
+    color:var(--void);
+    font-weight:600;
+  }
+
+  .review-toolbar{display:flex; align-items:flex-end; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .review-toolbar button{
+    background:var(--red);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:10px 18px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .review-toolbar button:hover{opacity:0.85;}
+  .review-toolbar button.secondary{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+  }
+
+  .review-form{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px;
+    margin-bottom:20px;
+    display:none;
+  }
+  .review-form.show{display:block;}
+  .review-form h3{
+    font-family:var(--font-stamp);
+    font-size:17px;
+    margin:0 0 14px;
+    color:var(--ink);
+  }
+  .rf-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+  .rf-row > *{flex:1; min-width:140px;}
+  .review-form input[type=text], .review-form select, .review-form textarea{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:13.5px;
+    outline:none;
+    box-sizing:border-box;
+  }
+  .review-form textarea{resize:vertical; min-height:80px; font-family:var(--font-body);}
+  .review-form input:focus, .review-form select:focus, .review-form textarea:focus{border-color:var(--red);}
+  .review-form label{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+
+  .star-input{display:flex; gap:4px; font-size:26px; cursor:pointer;}
+  .star-input .star{color:var(--line); transition:color .15s ease;}
+  .star-input .star.filled{color:#E8A02C;}
+
+  .price-fields{display:none;}
+  .price-fields.show{display:flex;}
+  .sport-fields{display:none;}
+  .sport-fields.show{display:flex;}
+
+  .rf-submit{
+    background:var(--red);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:11px 22px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .rf-submit:hover{opacity:0.85;}
+
+  .review-list{display:flex; flex-direction:column; gap:12px;}
+  .review-card{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 18px;
+  }
+  .review-card .rc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;}
+  .review-card .rc-subject{font-family:var(--font-body); font-weight:600; font-size:15px; color:var(--ink);}
+  .review-card .rc-badges{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+  .rc-badge{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:2px 8px;
+    border-radius:10px;
+    background:rgba(242,237,225,0.08);
+    color:var(--muted);
+  }
+  .rc-stars{color:#E8A02C; font-size:14px; white-space:nowrap;}
+  .rc-price{
+    font-family:var(--font-mono);
+    font-size:13px;
+    margin-top:8px;
+    padding:8px 10px;
+    background:var(--void);
+    border-radius:4px;
+    display:inline-block;
+  }
+  .rc-price .up{color:var(--red); font-weight:600;}
+  .rc-price .down{color:var(--teal); font-weight:600;}
+  .rc-text{font-size:13.5px; color:var(--ink-soft); line-height:1.6; margin-top:10px;}
+  .rc-meta{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .rc-actions{display:flex; gap:14px; margin-top:10px;}
+  .rc-actions button{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-family:var(--font-mono);
+    font-size:12px;
+    cursor:pointer;
+    padding:0;
+  }
+  .rc-actions button:hover{color:var(--ink);}
+  .rc-actions button.liked{color:var(--red);}
+
+  .rc-replies{margin-top:12px; padding-left:14px; border-left:2px solid var(--line); display:none;}
+  .rc-replies.show{display:block;}
+  .rc-reply{font-size:13px; color:var(--ink-soft); margin-bottom:8px; line-height:1.5;}
+  .rc-reply b{color:var(--ink);}
+  .rc-reply-form{display:flex; gap:8px; margin-top:8px;}
+  .rc-reply-form input{
+    flex:1;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:7px 10px;
+    color:var(--ink);
+    font-size:12.5px;
+  }
+  .rc-reply-form button{
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:7px 12px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  .review-empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:30px 10px;
+  }
+
+  .capture-bar{
+    margin-top:14px;
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 18px;
+  }
+
+  .capture-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,8,7,0.82);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .capture-overlay-inner{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px;
+    max-width:560px;
+    width:100%;
+  }
+  #capturePreviewVideo{
+    width:100%;
+    border-radius:4px;
+    background:#000;
+    display:block;
+    margin-top:10px;
+  }
+
+  .report-bar{
+    margin-top:14px;
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 18px;
+  }
+  .report-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .report-row{
+    display:flex;
+    gap:10px;
+  }
+  @media (max-width:520px){.report-row{flex-direction:column;}}
+  .report-row input{
+    flex:1;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:13px;
+    outline:none;
+  }
+  .report-row input:focus{border-color:var(--red);}
+  .report-row input::placeholder{color:var(--muted);}
+  .report-row button{
+    background:var(--red);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:10px 18px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    font-weight:600;
+    transition:opacity .2s ease;
+    white-space:nowrap;
+  }
+  .report-row button:hover{opacity:0.85;}
+  .report-row button:disabled{opacity:0.5; cursor:default;}
+  .url-status{
+    margin-top:10px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.6;
+    display:none;
+  }
+  .url-status.show{display:block;}
+  .url-status.error{color:var(--red);}
+  .url-status.loading{color:var(--ink-soft);}
+
+  .evidence{display:none;margin-top:32px;}
+  .evidence.show{display:block;}
+  .panel-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+  }
+  .frames{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:28px;}
+  @media (max-width:520px){.frames{grid-template-columns:1fr;}}
+  .frame{
+    background:var(--paper);
+    border-radius:3px;
+    padding:10px 10px 14px;
+    position:relative;
+  }
+  .frame canvas{width:100%;display:block;border-radius:1px;background:#000;}
+  .frame .tag{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:#3A342A;
+    margin-top:8px;
+    text-align:center;
+  }
+  .scan-line{
+    position:absolute;
+    left:10px;right:10px;top:10px;height:2px;
+    background:linear-gradient(90deg, transparent, var(--red), transparent);
+    box-shadow:0 0 8px var(--red);
+    animation:scan 1.4s ease-in-out;
+  }
+  @keyframes scan{
+    0%{top:10px; opacity:1;}
+    92%{opacity:1;}
+    100%{top:calc(100% - 12px); opacity:0;}
+  }
+
+  /* gauge */
+  .gauge-wrap{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:24px;
+    margin-bottom:24px;
+  }
+  @media (max-width:520px){.gauge-wrap{flex-direction:column;}}
+  .gauge svg{width:180px;height:110px;}
+  .needle{transform-origin:90px 90px;transition:transform 1.1s cubic-bezier(.2,.9,.2,1.2);}
+  .gauge-readout{flex:1;}
+  .score-num{font-family:var(--font-mono);font-size:38px;font-weight:600;color:var(--ink);}
+  .score-num span{font-size:16px;color:var(--muted);font-weight:400;}
+  .score-band{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    margin-top:4px;
+    padding:3px 8px;
+    display:inline-block;
+    border-radius:2px;
+  }
+  .band-low{color:var(--teal); background:rgba(47,143,122,0.14);}
+  .band-mod{color:#E8A02C; background:rgba(232,160,44,0.14);}
+  .band-high{color:var(--red); background:rgba(232,64,44,0.14);}
+
+  /* stamp */
+  .stamp-zone{
+    text-align:center;
+    padding:20px 0 8px;
+    min-height:96px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+  }
+  .stamp-zone .reset-btn{margin-top:6px;}
+  .stamp{
+    font-family:var(--font-stamp);
+    font-size:22px;
+    letter-spacing:0.06em;
+    padding:12px 22px;
+    border:3px solid var(--red);
+    color:var(--red);
+    display:inline-block;
+    transform:rotate(-4deg) scale(0);
+    animation:slam .5s cubic-bezier(.2,1.4,.5,1) forwards;
+    animation-delay:.15s;
+    border-radius:2px;
+  }
+  .stamp.ok{border-color:var(--teal); color:var(--teal);}
+  .stamp.mod{border-color:#E8A02C; color:#E8A02C;}
+  @keyframes slam{
+    0%{transform:rotate(-4deg) scale(2.4); opacity:0;}
+    60%{transform:rotate(-4deg) scale(0.92); opacity:1;}
+    100%{transform:rotate(-4deg) scale(1); opacity:1;}
+  }
+
+  /* breakdown */
+  .breakdown{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:14px;
+    margin-top:24px;
+  }
+  @media (max-width:520px){.breakdown{grid-template-columns:1fr;}}
+  .metric{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 18px;
+  }
+  .metric .m-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .metric .m-value{font-size:15px;color:var(--ink-soft);line-height:1.5;}
+  .metric .m-value b{color:var(--ink);font-weight:600;}
+
+  .c2pa-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+    padding:12px 16px;
+    border-radius:6px;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .c2pa-row.found{background:rgba(47,143,122,0.1); border:1px solid rgba(47,143,122,0.3); color:var(--ink-soft);}
+  .c2pa-row.notfound{background:var(--void-2); border:1px solid var(--line); color:var(--muted);}
+  .c2pa-row.unchecked{background:var(--void-2); border:1px solid var(--line); color:var(--muted);}
+  .c2pa-row b{color:var(--ink);}
+  .c2pa-row a{color:var(--teal);}
+
+  .disclaimer{
+    margin-top:32px;
+    padding:16px 18px;
+    border-left:2px solid var(--muted);
+    font-size:13px;
+    line-height:1.65;
+    color:var(--muted);
+  }
+  .disclaimer b{color:var(--ink-soft);}
+
+  .reset-btn{
+    margin-top:28px;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:10px 18px;
+    border-radius:4px;
+    cursor:pointer;
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .reset-btn:hover{border-color:var(--ink-soft); color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <audio id="introAudio" src="intro-drums.mp3" preload="auto"></audio>
+  <div class="auth-bar" id="authBar">
+    <button class="auth-bar-btn" id="authOpenBtn">👤 Sign In / Sign Up</button>
+    <div class="auth-bar-user" id="authBarUser" style="display:none;">
+      <span id="authBarUsername"></span>
+      <span class="auth-bar-role" id="authBarRole"></span>
+      <button class="auth-bar-signout" id="authSignOutBtn">Sign Out</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="kicker">Client-side photo forensics — v0.1 demo</div>
+    <h1>The Truth <span class="btn-word">Button</span></h1>
+    <p class="tagline" id="tagline">Drop in a photo. It checks the file for signs of AI generation or heavy editing — no upload to a server, everything runs in your browser.</p>
+  </header>
+
+  <details class="howto" id="howtoCard">
+    <summary>How to use this site <span class="chev">▾</span></summary>
+    <div class="howto-body">
+      <ol class="howto-steps">
+        <li><b>Pick a mode</b> from the tab row below — Photo, Music/Audio, Video, Flock Cameras, Data Centers, Social Listen, Reviews, or Peptide Calc.</li>
+        <li><b>Photo / Audio / Video:</b> drop a file onto the box, or tap it to choose one from your device. Everything is analyzed locally in your browser — nothing is uploaded.</li>
+        <li><b>Got a link instead of a file?</b> Paste it into the "File a report" bar and hit Analyze Link, or use "Capture From Screen" to grab what's on your screen (with your browser's normal share-screen permission).</li>
+        <li><b>Flock Cameras / Data Centers:</b> use the search fields to look up nearby surveillance cameras or data center facilities.</li>
+        <li><b>Social Listen:</b> paste a link to have it read back to you in the terminal-style log.</li>
+        <li><b>Reviews:</b> browse existing reviews by category, or sign in to leave your own.</li>
+        <li><b>Peptide Calc:</b> enter your values in the calculator fields to get dosing results.</li>
+        <li>After an analysis, check the <b>score gauge and breakdown</b> for the alteration signal and what drove it.</li>
+      </ol>
+      <div class="howto-note">This is a heuristic demo, not a certified detector — treat results as data points, not verdicts. See the full disclaimer at the bottom of the Photo panel for details.</div>
+    </div>
+  </details>
+
+  <div class="donate-card">
+    <div class="donate-copy">
+      <div class="donate-label">Keep it running</div>
+      <div class="donate-title">Support The Truth Button</div>
+      <div class="donate-text">This tool is free, runs entirely in your browser, and costs real money to build and host. If it's useful to you, a small donation helps keep it going.</div>
+    </div>
+    <a class="donate-btn" href="https://donate.stripe.com/REPLACE_WITH_YOUR_LINK" target="_blank" rel="noopener">💛 Donate</a>
+    <div class="donate-fine">Secure checkout via Stripe — one-time or monthly, your choice.</div>
+  </div>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="photo" id="tabPhoto">🖼️ Photo</div>
+    <div class="mode-tab" data-mode="audio" id="tabAudio">🎵 Music / Audio</div>
+    <div class="mode-tab" data-mode="video" id="tabVideo">🎬 Video</div>
+    <div class="mode-tab" data-mode="flock" id="tabFlock">📡 Flock Cameras</div>
+    <div class="mode-tab" data-mode="datacenter" id="tabDatacenter">🏢 Data Centers</div>
+    <div class="mode-tab" data-mode="ytlisten" id="tabYtListen">📺 Social Listen</div>
+    <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
+    <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
+    <div class="mode-tab" data-mode="admin" id="tabAdmin" style="display:none;">🛠️ Admin</div>
+  </div>
+
+  <div class="desk">
+    <div class="dropzone" id="dropzone">
+      <div class="icon" id="dzIcon">[ + ]</div>
+      <p id="dzLabel">Drop a photo here, or tap to choose one</p>
+      <div class="sub" id="dzSub">JPG or PNG · analyzed locally, never uploaded</div>
+      <input type="file" id="fileInput" accept="image/png, image/jpeg">
+    </div>
+  </div>
+
+  <div class="report-bar" id="reportBar">
+    <div class="report-label" id="reportLabel">File a report — paste a link to suspected AI content</div>
+    <div class="report-row">
+      <input type="text" id="urlInput" placeholder="https://example.com/photo.jpg" autocomplete="off">
+      <button id="urlAnalyzeBtn">Analyze Link</button>
+    </div>
+    <div class="url-status" id="urlStatus"></div>
+  </div>
+
+  <div class="capture-bar" id="captureBar">
+    <div class="report-label">Or capture a photo straight off your screen — works on Facebook, Instagram, or anywhere a link won't</div>
+    <div class="lc-sub" style="margin-bottom:12px;">This shares a tab or window with your browser's own permission dialog — the same one used for video calls. Nothing is downloaded from the source site's servers; it's a screenshot of what's already on your screen, taken with your explicit OK each time.</div>
+    <button class="reset-btn" id="startCaptureBtn" style="background:var(--red); color:var(--void); border:none;">📷 Capture From Screen</button>
+  </div>
+
+  <div class="evidence" id="evidence">
+    <div class="panel-label"><span id="exhibitALabel">Exhibit A — Source</span><span id="exhibitBLabel">Exhibit B — Error map</span></div>
+    <div class="frames">
+      <div class="frame"><canvas id="canvasOrig"></canvas><div class="tag" id="frameATag">original upload</div></div>
+      <div class="frame"><canvas id="canvasELA"></canvas><div class="tag" id="frameBTag">error level analysis</div><div class="scan-line" id="scanLine"></div></div>
+      <div class="frame" id="freqFrame" style="display:none;"><canvas id="canvasFreq"></canvas><div class="tag">frequency spectrum</div></div>
+    </div>
+
+    <div class="gauge-wrap">
+      <div class="gauge">
+        <svg viewBox="0 0 180 100">
+          <path d="M10,90 A80,80 0 0,1 170,90" fill="none" stroke="var(--teal)" stroke-width="10" stroke-dasharray="126 377" />
+          <path d="M10,90 A80,80 0 0,1 170,90" fill="none" stroke="#E8A02C" stroke-width="10" stroke-dasharray="126 377" stroke-dashoffset="-126" />
+          <path d="M10,90 A80,80 0 0,1 170,90" fill="none" stroke="var(--red)" stroke-width="10" stroke-dasharray="126 377" stroke-dashoffset="-252" />
+          <g class="needle" id="needle" style="transform:rotate(-90deg);">
+            <line x1="90" y1="90" x2="90" y2="24" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="90" cy="90" r="6" fill="var(--ink)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="gauge-readout">
+        <div class="score-num" id="scoreNum">— <span>/ 100 alteration signal</span></div>
+        <div class="score-band" id="scoreBand"></div>
+      </div>
+    </div>
+
+    <div class="stamp-zone" id="stampZone"></div>
+
+    <div class="breakdown">
+      <div class="metric">
+        <div class="m-label" id="metric1Label">Compression residue</div>
+        <div class="m-value" id="metricELA">—</div>
+      </div>
+      <div class="metric">
+        <div class="m-label" id="metric2Label">Texture uniformity</div>
+        <div class="m-value" id="metricNoise">—</div>
+      </div>
+      <div class="metric" id="metric3Card" style="display:none;">
+        <div class="m-label">Frequency fingerprint</div>
+        <div class="m-value" id="metricFreq">—</div>
+      </div>
+    </div>
+
+    <div class="c2pa-row" id="c2paRow" style="display:none;"></div>
+
+    <div class="disclaimer" id="disclaimerText">
+      <b>What this actually is:</b> a heuristic demo, not a trained detector. It runs four independent checks: error-level analysis (does this region's compression match the rest of the photo), texture uniformity (is grain suspiciously even), a 2D frequency-spectrum analysis (do GAN/diffusion upsampling artifacts show up as periodic bumps in the frequency domain), and a Content Credentials (C2PA) presence check on the original file bytes. All four also fire on ordinary things — screenshots, re-saved JPEGs, heavy filters, or repetitive real textures like fences and fabric weaves — so treat the combined score as a set of data points, not a verdict. A production version of this tool would pair these checks with a classifier trained on known generator outputs (services like Hive or Reality Defender) for real accuracy, rather than heuristics alone.
+    </div>
+
+    <button class="reset-btn" id="resetBtn">Check another photo</button>
+  </div>
+</div>
+
+  <div class="lookup-panel" id="flockPanel">
+    <div class="lookup-card">
+      <h3>Find Flock / ALPR cameras near you</h3>
+      <div class="lc-sub">There's no official public database of Flock Safety camera locations — Flock doesn't publish one, and has even sent a cease-and-desist to the main volunteer mapping project over it (EFF pushed back on First Amendment grounds). What exists is community-crowdsourced data. Pick a state to jump to real, live reporting.</div>
+      <div class="lookup-row">
+        <select id="flockState"></select>
+        <input type="text" id="flockCity" placeholder="City (optional)">
+        <button id="flockSearchBtn">Search</button>
+      </div>
+      <div class="lookup-results" id="flockResults"></div>
+    </div>
+
+    <div class="lookup-card">
+      <h3>🚗 Have I Been Flocked?</h3>
+      <p class="lc-sub">A different kind of check — this searches real FOIA-obtained Flock audit logs by license plate, to see if a search was ever run against your plate. It's independent, doesn't log what you enter, and is covered by the ACLU's "Get The Flock Out" toolkit. The dataset is incomplete (few agencies release these logs easily), and a hit doesn't necessarily mean you were stopped or investigated — just that someone with system access ran a search.</p>
+      <a class="report-link-btn" href="https://haveibeenflocked.com" target="_blank" rel="noopener">Check haveibeenflocked.com →</a>
+    </div>
+
+    <div class="lookup-card report-callout">
+      <h3>Don't see your camera documented? Report it yourself.</h3>
+      <p>If a camera in your area isn't on the map, you can add it to the real, live crowdsourced record — the same one these lookups pull from. This is exactly the kind of citizen documentation EFF defended in court as protected speech.</p>
+      <ol>
+        <li>Note the cross streets or address, and which direction the camera faces.</li>
+        <li>Submit it to DeFlock (feeds the live public map used above), or send it as a tip to DeFlock The USA for their reporting team.</li>
+        <li>If you want it in EFF's official law-enforcement-agency tracker too, submit through the Atlas of Surveillance.</li>
+      </ol>
+      <a class="report-link-btn" href="https://deflock.me" target="_blank" rel="noopener">Report to DeFlock</a>
+      <a class="report-link-btn secondary" href="https://deflocktheusa.com/submit-a-tip/" target="_blank" rel="noopener">Submit a Tip</a>
+      <a class="report-link-btn secondary" href="https://atlasofsurveillance.org" target="_blank" rel="noopener">EFF Atlas of Surveillance</a>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> The Truth Button doesn't run its own camera database or backend — this page links out to real, independently-run public-interest projects (DeFlock, DeFlock The USA, EFF's Atlas of Surveillance) rather than making up data. Their coverage is crowdsourced and incomplete, so absence from these maps doesn't mean there's no camera there — just that no one's documented it yet.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="datacenterPanel">
+    <div class="lookup-card">
+      <h3>Find data centers near you</h3>
+      <div class="lc-sub">This links to Data Center Map, an independent commercial directory of colocation and cloud facilities — it doesn't include classified, government, or many hyperscaler-owned sites that don't publicly list. Pick a state to see documented facilities.</div>
+      <div class="lookup-row">
+        <select id="dcState"></select>
+        <input type="text" id="dcCity" placeholder="City (optional)">
+        <button id="dcSearchBtn">Search</button>
+      </div>
+      <div class="lookup-results" id="dcResults"></div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> like the Flock lookup, this isn't Truth Button's own database — it's a link to a real third-party directory. Data center inventories are inherently incomplete since not every operator discloses locations, especially newer hyperscale and government-adjacent facilities.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="ytPanel">
+    <div class="lookup-card">
+      <h3 id="socialListenTitle">Check a video or photo, live</h3>
+      <div class="lc-sub" id="socialListenSub">No embedded player here — platform embeds turned out to be too unreliable across sites to depend on (YouTube's own embed API started throwing errors, and the others have similar quirks). This works more directly instead: open the post yourself in another tab, then share <b>that tab</b> when prompted. Nothing gets downloaded from the platform's servers — this only looks at what's already on your screen, with your explicit OK each time.</div>
+
+      <div class="category-pills" id="socialPlatformPills">
+        <div class="cat-pill active" data-platform="youtube">▶️ YouTube</div>
+        <div class="cat-pill" data-platform="facebook">📘 Facebook</div>
+        <div class="cat-pill" data-platform="twitter">✖️ X / Twitter</div>
+        <div class="cat-pill" data-platform="tiktok">🎵 TikTok</div>
+        <div class="cat-pill" data-platform="instagram">📷 Instagram</div>
+      </div>
+
+      <div class="lookup-disclaimer" style="margin-top:0; margin-bottom:16px;" id="socialSteps">
+        <b>How to use it:</b>
+        <ol style="margin:8px 0 0; padding-left:20px; line-height:1.8;">
+          <li>Open the video or photo on <span id="platformNameStep">YouTube</span> in a separate browser tab.</li>
+          <li>Come back to this tab and click "Listen &amp; Analyze" (for video/audio) or "Capture This Photo" (for a still image) below.</li>
+          <li>When the picker opens, choose <b>that other tab</b> — check "share tab audio" too if you're checking a video.</li>
+        </ol>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="reset-btn listen-btn" id="ytListenBtn" style="flex:1; min-width:180px;">🎧 Listen &amp; Analyze</button>
+        <button class="reset-btn" id="socialCaptureBtn" style="flex:1; min-width:180px; background:var(--red); color:var(--void); border:none;">📸 Capture This Photo</button>
+      </div>
+      <div class="url-status" id="ytStatus"></div>
+      <div class="terminal-log" id="terminalLog" style="display:none; margin-top:14px;"></div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> tab-audio capture needs Chrome or Edge on desktop — Safari and most mobile browsers don't support sharing tab audio this way, and will fail at the permission step. A short, live-captured clip also gives noisier signal than a full downloaded file, so treat the score here as a rougher read than the upload-based Audio tab.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="reviewsPanel">
+    <div class="storage-banner" id="storageBanner"></div>
+
+    <div class="qotd-card" id="qotdCard" style="display:none;">
+      <div class="qotd-label">🏆 Question of the Day</div>
+      <div class="qotd-question" id="qotdQuestion">No question set yet.</div>
+      <div class="qotd-meta" id="qotdMeta"></div>
+      <div class="leaderboard" id="leaderboardRow"></div>
+      <div class="qotd-set-row" id="qotdSetRow" style="display:none;">
+        <input type="text" id="qotdInput" placeholder="You're the top contributor — set today's question…" maxlength="300">
+        <button id="qotdSubmitBtn">Set It</button>
+      </div>
+    </div>
+
+    <div class="category-pills" id="categoryPills"></div>
+
+    <div class="review-toolbar">
+      <button id="writeReviewBtn">✍️ Write a Review</button>
+    </div>
+
+    <div class="review-form" id="reviewForm">
+      <h3>Share your experience</h3>
+      <div class="auth-gate-note" id="reviewAuthNote" style="display:none;">Posting a review requires an account — <b class="link" id="reviewSignInLink">sign in or create one</b> (free, takes a few seconds).</div>
+      <div class="rf-row" id="postingAsRow" style="display:none;">
+        <div>
+          <label>Posting as</label>
+          <input type="text" id="postingAsDisplay" disabled>
+        </div>
+      </div>
+      <div class="rf-row">
+        <div>
+          <label>State</label>
+          <select id="rfState"></select>
+        </div>
+        <div>
+          <label id="rfSubjectLabel">Subject</label>
+          <input type="text" id="rfSubject" placeholder="e.g. McDonald's on Main St, or 'warehouse job'">
+        </div>
+      </div>
+      <div class="rf-row sport-fields" id="sportFields">
+        <div>
+          <label>Which sport?</label>
+          <select id="rfSportType"></select>
+        </div>
+      </div>
+      <div class="rf-row price-fields" id="priceFields">
+        <div>
+          <label>Price a year or two ago</label>
+          <input type="text" id="rfPriceThen" placeholder="$5.99">
+        </div>
+        <div>
+          <label>Price now</label>
+          <input type="text" id="rfPriceNow" placeholder="$8.49">
+        </div>
+      </div>
+      <div class="rf-row">
+        <div>
+          <label>Rating</label>
+          <div class="star-input" id="rfStars">
+            <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span><span class="star" data-val="3">★</span><span class="star" data-val="4">★</span><span class="star" data-val="5">★</span>
+          </div>
+        </div>
+      </div>
+      <div class="rf-row">
+        <div style="flex-basis:100%;">
+          <label>Your review</label>
+          <textarea id="rfText" placeholder="What happened, what changed, what should people know…"></textarea>
+        </div>
+      </div>
+      <button class="rf-submit" id="rfSubmitBtn">Post Review</button>
+    </div>
+
+    <div class="review-list" id="reviewList"></div>
+    <div class="review-empty" id="reviewEmpty" style="display:none;">No reviews yet for this category/state — be the first to post one.</div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> reviews are unverified and self-reported by whoever posts them, same as any open review site — treat prices and claims as anecdotes, not audited data. This section doesn't moderate content automatically; use your judgment.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="peptidePanel">
+    <div class="lookup-card">
+      <h3>Reconstitution &amp; Dose Calculator</h3>
+      <div class="lc-sub">This is a math tool, not medical advice — it converts a dose you already have (from a prescription, protocol, or product label) into a volume you can measure. It doesn't tell you what dose to take. Follow your prescriber's or product's dosing instructions, and talk to a licensed healthcare provider before using any peptide — many sold as "research use only" aren't evaluated by the FDA for human use.</div>
+
+      <div class="rf-row">
+        <div>
+          <label>Peptide amount in vial</label>
+          <div class="pc-input-group">
+            <input type="number" id="pcVialAmount" placeholder="5" min="0" step="any">
+            <select id="pcVialUnit"><option value="mg">mg</option><option value="mcg">mcg</option><option value="IU">IU</option></select>
+          </div>
+        </div>
+        <div>
+          <label>Reconstitution volume added</label>
+          <div class="pc-input-group">
+            <input type="number" id="pcReconVolume" placeholder="2" min="0" step="any">
+            <span class="pc-unit-label">mL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rf-row">
+        <div>
+          <label>Your prescribed / labeled dose</label>
+          <div class="pc-input-group">
+            <input type="number" id="pcDoseAmount" placeholder="250" min="0" step="any">
+            <select id="pcDoseUnit"><option value="mcg">mcg</option><option value="mg">mg</option><option value="IU">IU</option></select>
+          </div>
+        </div>
+        <div>
+          <label>Syringe type</label>
+          <select id="pcSyringeType">
+            <option value="100">U-100 insulin syringe (100 units/mL)</option>
+            <option value="40">U-40 insulin syringe (40 units/mL)</option>
+            <option value="ml">mL-marked syringe (no "units")</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pc-results" id="pcResults">
+        <div class="pc-result-row">
+          <div class="pc-result-label">Concentration</div>
+          <div class="pc-result-value" id="pcConcentration">—</div>
+        </div>
+        <div class="pc-result-row highlight">
+          <div class="pc-result-label">Draw to</div>
+          <div class="pc-result-value" id="pcDrawTo">—</div>
+        </div>
+        <div class="pc-result-row">
+          <div class="pc-result-label">Dose volume</div>
+          <div class="pc-result-value" id="pcDoseVolume">—</div>
+        </div>
+        <div class="pc-result-row">
+          <div class="pc-result-label">Doses per vial</div>
+          <div class="pc-result-value" id="pcDosesPerVial">—</div>
+        </div>
+      </div>
+      <div class="pc-warning" id="pcWarning" style="display:none;"></div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> this calculator does simple arithmetic (concentration = amount ÷ volume; dose volume = dose ÷ concentration; syringe units = dose volume × syringe scale). It can't catch a typo, a wrong vial size, or a unit mix-up — always read the result back against your prescription or protocol before drawing anything into a syringe, and if a number looks off, don't use it. This tool has no idea what peptide you're calculating for and makes no claim about safety, efficacy, or appropriate dosing for any substance.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="adminPanel">
+    <div class="admin-card">
+      <h3>Site Stats</h3>
+      <div class="admin-stats-row" id="adminStatsRow">
+        <div class="admin-stat"><div class="num">—</div><div class="lbl">Users</div></div>
+        <div class="admin-stat"><div class="num">—</div><div class="lbl">Admins</div></div>
+        <div class="admin-stat"><div class="num">—</div><div class="lbl">Reviews</div></div>
+        <div class="admin-stat"><div class="num">—</div><div class="lbl">Replies</div></div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Members</h3>
+      <table class="admin-table" id="adminUsersTable">
+        <thead><tr><th>Username</th><th>Role</th><th>Contribution</th><th></th></tr></thead>
+        <tbody id="adminUsersBody"></tbody>
+      </table>
+    </div>
+
+    <div class="admin-card">
+      <h3>Moderate Reviews</h3>
+      <div class="lookup-row" style="margin-bottom:14px;">
+        <select id="adminReviewCategory"></select>
+      </div>
+      <div id="adminReviewsList"></div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Note:</b> this tab is only visible in your browser because your account has the admin role — the real protection happens server-side, every admin action re-checks your role against the backend on every request, so hiding or un-hiding this tab in dev tools changes nothing about what you can actually do.
+    </div>
+  </div>
+
+  <video id="hiddenVideo" style="display:none;" muted playsinline></video>
+
+  <div class="capture-overlay" id="captureOverlay" style="display:none;">
+    <div class="capture-overlay-inner">
+      <div class="report-label">Position the item on your shared screen, then capture</div>
+      <video id="capturePreviewVideo" autoplay muted playsinline></video>
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button class="reset-btn" id="snapFrameBtn" style="background:var(--teal); color:var(--void); border:none; flex:1;">📸 Capture This Frame</button>
+        <button class="reset-btn" id="cancelCaptureBtn" style="flex:1;">✕ Cancel</button>
+      </div>
+      <div class="url-status" id="captureStatus"></div>
+    </div>
+  </div>
+
+  <div class="auth-modal-overlay" id="authModalOverlay">
+    <div class="auth-modal-wrap">
+      <div class="auth-modal">
+        <button class="auth-close" id="authCloseBtn">✕</button>
+        <div class="auth-tabs">
+          <div class="auth-tab active" data-authtab="signin" id="authTabSignin">Sign In</div>
+          <div class="auth-tab" data-authtab="signup" id="authTabSignup">Sign Up</div>
+        </div>
+
+        <div class="auth-form show" id="authFormSignin">
+          <label>Email</label>
+          <input type="email" id="signinEmail" autocomplete="email">
+          <label>Password</label>
+          <input type="password" id="signinPassword" autocomplete="current-password">
+          <button class="auth-submit" id="signinSubmitBtn">Sign In</button>
+        </div>
+
+        <div class="auth-form" id="authFormSignup">
+          <label>Username</label>
+          <input type="text" id="signupUsername" autocomplete="username" placeholder="Shown on your reviews">
+          <label>Email</label>
+          <input type="email" id="signupEmail" autocomplete="email">
+          <label>Password</label>
+          <input type="password" id="signupPassword" autocomplete="new-password" placeholder="At least 8 characters">
+          <button class="auth-submit" id="signupSubmitBtn">Create Account</button>
+        </div>
+
+        <div class="auth-status" id="authStatus"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const introAudio = document.getElementById('introAudio');
+introAudio.volume = 0.55;
+let introAudioSpent = false;
+function toggleIntroAudio(){
+  if (introAudioSpent) return;
+  if (introAudio.paused) {
+    introAudio.currentTime = 0;
+    introAudio.play().catch(function(){});
+  } else {
+    introAudio.pause();
+    introAudio.currentTime = 0;
+    introAudioSpent = true;
+  }
+}
+document.addEventListener('click', function(e){
+  if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
+    toggleIntroAudio();
+  }
+});
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const evidence = document.getElementById('evidence');
+const canvasOrig = document.getElementById('canvasOrig');
+const canvasELA = document.getElementById('canvasELA');
+const canvasFreq = document.getElementById('canvasFreq');
+const freqFrame = document.getElementById('freqFrame');
+const metric3Card = document.getElementById('metric3Card');
+const metricFreq = document.getElementById('metricFreq');
+const c2paRow = document.getElementById('c2paRow');
+const needle = document.getElementById('needle');
+const scoreNum = document.getElementById('scoreNum');
+const scoreBand = document.getElementById('scoreBand');
+const stampZone = document.getElementById('stampZone');
+const metricELA = document.getElementById('metricELA');
+const metricNoise = document.getElementById('metricNoise');
+const metric1Label = document.getElementById('metric1Label');
+const metric2Label = document.getElementById('metric2Label');
+const resetBtn = document.getElementById('resetBtn');
+const scanLine = document.getElementById('scanLine');
+const tagline = document.getElementById('tagline');
+const dzIcon = document.getElementById('dzIcon');
+const dzLabel = document.getElementById('dzLabel');
+const dzSub = document.getElementById('dzSub');
+const reportBar = document.getElementById('reportBar');
+const captureBar = document.getElementById('captureBar');
+const reportLabel = document.getElementById('reportLabel');
+const exhibitALabel = document.getElementById('exhibitALabel');
+const exhibitBLabel = document.getElementById('exhibitBLabel');
+const frameATag = document.getElementById('frameATag');
+const frameBTag = document.getElementById('frameBTag');
+const disclaimerText = document.getElementById('disclaimerText');
+const hiddenVideo = document.getElementById('hiddenVideo');
+let lastScore = 0;
+let mode = 'photo';
+
+const MODE_CONFIG = {
+  photo: {
+    tagline: 'Drop in a photo. It checks the file for signs of AI generation or heavy editing — no upload to a server, everything runs in your browser.',
+    dzLabel: 'Drop a photo here, or tap to choose one',
+    dzSub: 'JPG or PNG · analyzed locally, never uploaded',
+    accept: 'image/png, image/jpeg',
+    resetLabel: 'Check another photo',
+    reportLabel: 'File a report — paste a link to suspected AI content',
+    urlPlaceholder: 'https://example.com/photo.jpg',
+    disclaimer: '<b>What this actually is:</b> a heuristic demo, not a trained detector. It runs four independent checks: error-level analysis (does this region\'s compression match the rest of the photo), texture uniformity (is grain suspiciously even), a 2D frequency-spectrum analysis (do GAN/diffusion upsampling artifacts show up as periodic bumps in the frequency domain), and a Content Credentials (C2PA) presence check on the original file bytes. All four also fire on ordinary things — screenshots, re-saved JPEGs, heavy filters, or repetitive real textures like fences and fabric weaves — so treat the combined score as a set of data points, not a verdict. A production version of this tool would pair these checks with a classifier trained on known generator outputs (services like Hive or Reality Defender) for real accuracy, rather than heuristics alone.'
+  },
+  audio: {
+    tagline: 'Drop in a song or voice clip. It looks for spectral patterns associated with AI-generated audio — everything runs locally in your browser.',
+    dzLabel: 'Drop an audio file or music video here, or tap to choose one',
+    dzSub: 'MP3, WAV, M4A, MP4, or MOV · analyzed locally, never uploaded',
+    accept: 'audio/*,video/*',
+    resetLabel: 'Check another track',
+    reportLabel: 'File a report — paste a direct audio/video file link',
+    urlPlaceholder: 'https://example.com/track.mp3 or video.mp4',
+    disclaimer: '<b>Read this before trusting the score:</b> audio deepfake/AI-music heuristics are far less mature than image forensics. This checks spectral flatness and loudness variance over time — AI vocals and generated music sometimes sound unnaturally uniform. But heavily mastered, compressed, or auto-tuned <i>real</i> music will often trigger the same signal, so a high score here is a much weaker indicator than on photos. Music videos and other video files work too — the audio track gets pulled out and analyzed the same way. One limit worth knowing: a YouTube page link (youtube.com/watch or youtu.be) won\'t work here, since that\'s a webpage, not a raw media file, and this tool won\'t download from YouTube — download the audio/video yourself first, then upload it above. Treat the score as a rough exploratory signal only, not a verdict — a production tool would need a model trained specifically on known AI-audio generators (e.g. dedicated services like Pindrop or Reality Defender audio detector).'
+  },
+  video: {
+    tagline: 'Drop in a video clip. It samples frames across the clip and runs the same photo forensics on each one — everything runs locally in your browser.',
+    dzLabel: 'Drop a video here, or tap to choose one',
+    dzSub: 'MP4 or WebM, short clips work best · analyzed locally, never uploaded',
+    accept: 'video/*',
+    resetLabel: 'Check another video',
+    reportLabel: 'File a report — paste a link to a suspected AI/deepfake video',
+    urlPlaceholder: 'https://example.com/clip.mp4',
+    disclaimer: '<b>What this actually is:</b> this samples several frames from the clip and runs the same error-level-analysis and texture-uniformity checks used for photos, plus a frame-to-frame consistency check. It does not track faces, detect blinking, or catch lip-sync mismatches, which is how most real deepfake detectors work. Compression from re-uploading or downscaling a video will also trigger false positives here. Treat this as a very rough signal — real video deepfake detection needs a dedicated trained model.'
+  }
+};
+
+const desk = document.querySelector('.desk');
+const flockPanel = document.getElementById('flockPanel');
+const datacenterPanel = document.getElementById('datacenterPanel');
+const ytPanel = document.getElementById('ytPanel');
+const reviewsPanel = document.getElementById('reviewsPanel');
+const peptidePanel = document.getElementById('peptidePanel');
+const adminPanel = document.getElementById('adminPanel');
+
+const LOOKUP_TAGLINES = {
+  flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
+  datacenter: 'Look up documented data center facilities by state — pulled from a real third-party directory, not a private database.',
+  ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
+  reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
+  peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
+  admin: 'Site administration — members, review moderation, and stats. Every action here is re-checked against your account role on the server.'
+};
+
+function setMode(newMode){
+  if (newMode === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
+    alert('Admin access required — sign in with an admin account.');
+    return;
+  }
+
+  mode = newMode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
+
+  const isLookup = (newMode === 'flock' || newMode === 'datacenter' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
+  desk.style.display = isLookup ? 'none' : '';
+  reportBar.style.display = isLookup ? 'none' : '';
+  captureBar.style.display = (newMode === 'photo') ? '' : 'none';
+  evidence.classList.remove('show');
+  flockPanel.classList.toggle('show', newMode === 'flock');
+  datacenterPanel.classList.toggle('show', newMode === 'datacenter');
+  ytPanel.classList.toggle('show', newMode === 'ytlisten');
+  reviewsPanel.classList.toggle('show', newMode === 'reviews');
+  peptidePanel.classList.toggle('show', newMode === 'peptide');
+  adminPanel.classList.toggle('show', newMode === 'admin');
+  if (newMode === 'reviews' && !reviewsInitialized) initReviews();
+  if (newMode === 'admin') initAdminPanel();
+
+  if (isLookup) {
+    tagline.textContent = LOOKUP_TAGLINES[newMode];
+  } else {
+    const cfg = MODE_CONFIG[newMode];
+    tagline.textContent = cfg.tagline;
+    dzLabel.textContent = cfg.dzLabel;
+    dzSub.textContent = cfg.dzSub;
+    fileInput.accept = cfg.accept;
+    resetBtn.textContent = cfg.resetLabel;
+    disclaimerText.innerHTML = cfg.disclaimer;
+    reportLabel.textContent = cfg.reportLabel;
+    urlInput.placeholder = cfg.urlPlaceholder;
+    fileInput.value = '';
+  }
+}
+
+document.getElementById('tabPhoto').addEventListener('click', () => setMode('photo'));
+document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
+document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
+document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
+document.getElementById('tabDatacenter').addEventListener('click', () => setMode('datacenter'));
+document.getElementById('tabYtListen').addEventListener('click', () => setMode('ytlisten'));
+document.getElementById('tabReviews').addEventListener('click', () => setMode('reviews'));
+document.getElementById('tabPeptide').addEventListener('click', () => setMode('peptide'));
+document.getElementById('tabAdmin').addEventListener('click', () => setMode('admin'));
+
+// --- state list, shared by both lookup panels (slugs confirmed against deflocktheusa.com and datacentermap.com) ---
+const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+function stateSlug(name){ return name.toLowerCase().replace(/\s+/g, '-'); }
+
+function populateStateSelect(selectEl){
+  selectEl.innerHTML = '<option value="">Select a state…</option>' +
+    US_STATES.map(s => '<option value="' + stateSlug(s) + '">' + s + '</option>').join('');
+}
+populateStateSelect(document.getElementById('flockState'));
+populateStateSelect(document.getElementById('dcState'));
+
+function makeResultLink(url, title, desc, domain){
+  return '<a class="result-link" href="' + url + '" target="_blank" rel="noopener">' +
+    '<div class="rl-title">' + title + '</div>' +
+    '<div class="rl-desc">' + desc + '</div>' +
+    '<div class="rl-domain">' + domain + '</div></a>';
+}
+
+document.getElementById('flockSearchBtn').addEventListener('click', () => {
+  const stateVal = document.getElementById('flockState').value;
+  const stateLabel = document.getElementById('flockState').selectedOptions[0]?.textContent || '';
+  const city = document.getElementById('flockCity').value.trim();
+  const results = document.getElementById('flockResults');
+  if (!stateVal) { alert('Pick a state first.'); return; }
+
+  let html = '';
+  html += makeResultLink(
+    'https://deflocktheusa.com/flock-cameras/' + stateVal + '/',
+    stateLabel + ' — camera counts & local report',
+    'Camera counts, most-surveilled cities and counties, local news, and what residents are doing about it in ' + stateLabel + '.' + (city ? ' Look for ' + city + ' in the city breakdown.' : ''),
+    'deflocktheusa.com'
+  );
+  html += makeResultLink(
+    'https://deflocktheusa.com/the-map/',
+    'Live camera map (120,000+ reported)',
+    'Interactive, hourly-updated map — use the "Find your town" search on the page to jump straight to ' + (city || stateLabel) + '.',
+    'deflocktheusa.com'
+  );
+  html += makeResultLink(
+    'https://atlasofsurveillance.org',
+    'EFF Atlas of Surveillance',
+    'Which law enforcement agencies in your area use ALPRs and other surveillance tech, documented by the Electronic Frontier Foundation.',
+    'atlasofsurveillance.org'
+  );
+  results.innerHTML = html;
+  results.classList.add('show');
+});
+
+document.getElementById('dcSearchBtn').addEventListener('click', () => {
+  const stateVal = document.getElementById('dcState').value;
+  const stateLabel = document.getElementById('dcState').selectedOptions[0]?.textContent || '';
+  const city = document.getElementById('dcCity').value.trim();
+  const results = document.getElementById('dcResults');
+  if (!stateVal) { alert('Pick a state first.'); return; }
+
+  let html = '';
+  html += makeResultLink(
+    'https://www.datacentermap.com/usa/' + stateVal + '/',
+    stateLabel + ' — data center directory',
+    'Listed colocation, cloud, and hosting facilities in ' + stateLabel + ', with operators and specs.' + (city ? ' Filter or search the page for ' + city + '.' : ''),
+    'datacentermap.com'
+  );
+  html += makeResultLink(
+    'https://dcmap.us/',
+    'National facility tracker (4,800+ sites)',
+    'Broader interactive map including build-stage, capacity, and grid-connection detail across all states.',
+    'dcmap.us'
+  );
+  results.innerHTML = html;
+  results.classList.add('show');
+});
+
+// ============ Social Listen (YouTube, Facebook, X, TikTok, Instagram) ============
+let ytCaptureStream = null;
+let ytListening = false;
+let currentSocialPlatform = 'youtube';
+
+const PLATFORM_CONFIG = {
+  youtube: { label: 'YouTube' },
+  facebook: { label: 'Facebook' },
+  twitter: { label: 'X / Twitter' },
+  tiktok: { label: 'TikTok' },
+  instagram: { label: 'Instagram' }
+};
+
+const ytListenBtn = document.getElementById('ytListenBtn');
+const ytStatus = document.getElementById('ytStatus');
+const terminalLog = document.getElementById('terminalLog');
+const platformNameStep = document.getElementById('platformNameStep');
+
+document.querySelectorAll('#socialPlatformPills .cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    currentSocialPlatform = pill.dataset.platform;
+    document.querySelectorAll('#socialPlatformPills .cat-pill').forEach(p => p.classList.toggle('active', p === pill));
+    platformNameStep.textContent = PLATFORM_CONFIG[currentSocialPlatform].label;
+  });
+});
+
+function tlLog(text){
+  const line = document.createElement('div');
+  line.className = 'tl-line';
+  line.textContent = '> ' + text;
+  terminalLog.appendChild(line);
+  terminalLog.scrollTop = terminalLog.scrollHeight;
+}
+
+const HACKER_LINES = [
+  'establishing tab-audio uplink…',
+  'sampling waveform buffer…',
+  'running FFT across capture window…',
+  'cross-referencing spectral flatness…',
+  'checking loudness envelope drift…',
+  'triangulating tonal fingerprint…',
+  'compiling exhibit data…'
+];
+
+// original ambient tension sting (not a reproduction of any copyrighted score)
+function startTensionSting(ctx){
+  const bass = ctx.createOscillator();
+  const bassGain = ctx.createGain();
+  bass.type = 'sine';
+  bass.frequency.setValueAtTime(55, ctx.currentTime);
+  bassGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  bassGain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 1.2);
+  bass.connect(bassGain);
+  bassGain.connect(ctx.destination);
+  bass.start();
+
+  let tickOn = true;
+  const tickInterval = setInterval(() => {
+    if (!tickOn) return;
+    const t = ctx.currentTime;
+    const tick = ctx.createOscillator();
+    const tickGain = ctx.createGain();
+    tick.type = 'square';
+    tick.frequency.setValueAtTime(1800, t);
+    tickGain.gain.setValueAtTime(0.0001, t);
+    tickGain.gain.exponentialRampToValueAtTime(0.025, t + 0.005);
+    tickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    tick.connect(tickGain);
+    tickGain.connect(ctx.destination);
+    tick.start(t);
+    tick.stop(t + 0.05);
+  }, 420);
+
+  return () => {
+    tickOn = false;
+    clearInterval(tickInterval);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+    bass.stop(ctx.currentTime + 0.35);
+  };
+}
+
+ytListenBtn.addEventListener('click', async () => {
+  if (ytListening) return;
+  ytStatus.className = 'url-status';
+  ytStatus.textContent = '';
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+  } catch (err) {
+    ytStatus.className = 'url-status show error';
+    ytStatus.textContent = 'Permission wasn\'t granted, or your browser doesn\'t support tab-audio sharing (try Chrome or Edge on desktop).';
+    return;
+  }
+
+  const audioTracks = stream.getAudioTracks();
+  stream.getVideoTracks().forEach(t => t.stop()); // we only need audio
+  if (audioTracks.length === 0) {
+    ytStatus.className = 'url-status show error';
+    ytStatus.textContent = 'No audio was shared — when the picker opens, make sure "Share tab audio" (or "Share system audio") is checked.';
+    return;
+  }
+
+  ytListening = true;
+  ytCaptureStream = new MediaStream(audioTracks);
+  ytListenBtn.classList.add('listening');
+  ytListenBtn.textContent = '⏹ Stop & Analyze Now';
+  terminalLog.style.display = '';
+  terminalLog.innerHTML = '';
+  tlLog('tab audio stream acquired.');
+
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  const source = ctx.createMediaStreamSource(ytCaptureStream);
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 2048;
+  source.connect(analyser);
+
+  const stopSting = startTensionSting(ctx);
+
+  const rmsVals = [];
+  const flatnessVals = [];
+  const freqData = new Float32Array(analyser.frequencyBinCount);
+  const timeData = new Float32Array(analyser.fftSize);
+
+  const CAPTURE_MS = 16000;
+  const startTime = performance.now();
+  let lineIdx = 0;
+  const lineTimer = setInterval(() => {
+    if (lineIdx < HACKER_LINES.length) tlLog(HACKER_LINES[lineIdx++]);
+  }, 1900);
+
+  let sampleTimer = setInterval(() => {
+    analyser.getFloatTimeDomainData(timeData);
+    let sumSq = 0;
+    for (let i = 0; i < timeData.length; i++) sumSq += timeData[i] * timeData[i];
+    rmsVals.push(Math.sqrt(sumSq / timeData.length));
+
+    analyser.getFloatFrequencyData(freqData); // dB scale
+    let logSum = 0, sum = 0, n = 0;
+    for (let i = 1; i < freqData.length; i++) {
+      const db = freqData[i];
+      if (db === -Infinity) continue;
+      const mag = Math.pow(10, db / 20) + 1e-9;
+      logSum += Math.log(mag);
+      sum += mag;
+      n++;
+    }
+    if (n > 0) {
+      const geoMean = Math.exp(logSum / n);
+      const arithMean = sum / n;
+      flatnessVals.push(geoMean / arithMean);
+    }
+  }, 120);
+
+  let stopBtnHandler; // declared here so finishListening can always clean it up, regardless of how the session ends
+
+  function finishListening(){
+    clearInterval(sampleTimer);
+    clearInterval(lineTimer);
+    stopSting();
+    ytCaptureStream.getTracks().forEach(t => t.stop());
+    stream.getTracks().forEach(t => t.stop());
+    ytListening = false;
+    ytListenBtn.classList.remove('listening');
+    ytListenBtn.textContent = '🎧 Listen & Analyze';
+    ytListenBtn.removeEventListener('click', stopBtnHandler);
+    tlLog('capture complete. rendering exhibit…');
+
+    if (rmsVals.length < 3 || flatnessVals.length < 3) {
+      ytStatus.className = 'url-status show error';
+      ytStatus.textContent = 'Captured too little audio to analyze — try again and let it run a bit longer.';
+      return;
+    }
+
+    evidence.classList.add('show');
+    evidence.scrollIntoView({behavior:'smooth', block:'start'});
+    setAudioLabels();
+    exhibitATag_safe('live tab-audio capture');
+
+    // build a waveform-style exhibit from the captured RMS envelope
+    const w = 640, h = 160;
+    canvasOrig.width = w; canvasOrig.height = h;
+    const ctxO = canvasOrig.getContext('2d');
+    ctxO.fillStyle = '#EDE6D6';
+    ctxO.fillRect(0, 0, w, h);
+    ctxO.strokeStyle = '#14110F';
+    ctxO.lineWidth = 1.4;
+    ctxO.beginPath();
+    rmsVals.forEach((v, i) => {
+      const x = (i / (rmsVals.length - 1)) * w;
+      const y = h - clamp(v * 6, 0, 1) * (h - 10) - 5;
+      if (i === 0) ctxO.moveTo(x, y); else ctxO.lineTo(x, y);
+    });
+    ctxO.stroke();
+
+    canvasELA.width = w; canvasELA.height = h;
+    const ctxD = canvasELA.getContext('2d');
+    ctxD.fillStyle = '#14110F';
+    ctxD.fillRect(0, 0, w, h);
+    const barW = w / flatnessVals.length;
+    flatnessVals.forEach((f, i) => {
+      const norm = clamp(f * 3, 0, 1);
+      const r = Math.round(47 + norm * (232-47));
+      const g = Math.round(143 - norm * (143-64));
+      const b = Math.round(122 - norm * (122-44));
+      ctxD.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+      const barH = norm * (h - 8);
+      ctxD.fillRect(i * barW, h - barH, Math.max(1, barW - 1), barH);
+    });
+    scanLine.style.animation = 'none';
+    void scanLine.offsetWidth;
+    scanLine.style.animation = '';
+
+    const scored = scoreFromAudioStats(rmsVals, flatnessVals);
+    renderScore(scored.overall, scored.metric1Html, scored.metric2Html);
+  }
+
+  stopBtnHandler = () => finishListening();
+  ytListenBtn.addEventListener('click', stopBtnHandler, { once: true });
+
+  setTimeout(() => {
+    if (ytListening) finishListening();
+  }, CAPTURE_MS);
+});
+
+function exhibitATag_safe(text){ frameATag.textContent = text; }
+
+// ============ Auth (sign in / sign up / admin / QOTD) ============
+// Session state lives only in memory for this page load — no localStorage/sessionStorage,
+// so refreshing the page signs you out. That's a deliberate tradeoff, not an oversight.
+let currentUser = null;
+let authToken = null;
+
+const authBar = document.getElementById('authBar');
+const authOpenBtn = document.getElementById('authOpenBtn');
+const authBarUser = document.getElementById('authBarUser');
+const authBarUsername = document.getElementById('authBarUsername');
+const authBarRole = document.getElementById('authBarRole');
+const authSignOutBtn = document.getElementById('authSignOutBtn');
+const authModalOverlay = document.getElementById('authModalOverlay');
+const authCloseBtn = document.getElementById('authCloseBtn');
+const authStatus = document.getElementById('authStatus');
+const tabAdmin = document.getElementById('tabAdmin');
+
+function apiHeaders(withAuth){
+  const h = { 'Content-Type': 'application/json' };
+  if (withAuth && authToken) h['Authorization'] = 'Bearer ' + authToken;
+  return h;
+}
+
+function updateAuthAvailability(){
+  if (reviewsBackendMode !== 'api') {
+    authOpenBtn.textContent = '👤 Accounts need the live backend';
+  }
+  renderAuthUI();
+}
+
+function openAuthModal(){
+  if (reviewsBackendMode !== 'api') {
+    alert('Accounts require the real backend to be connected (see backend/README.md) — password checking can\'t be done securely without a server.');
+    return;
+  }
+  authModalOverlay.classList.add('show');
+  authStatus.className = 'auth-status';
+  authStatus.textContent = '';
+}
+function closeAuthModal(){ authModalOverlay.classList.remove('show'); }
+
+authOpenBtn.addEventListener('click', openAuthModal);
+authCloseBtn.addEventListener('click', closeAuthModal);
+authModalOverlay.addEventListener('click', e => { if (e.target === authModalOverlay) closeAuthModal(); });
+
+document.getElementById('authTabSignin').addEventListener('click', () => switchAuthTab('signin'));
+document.getElementById('authTabSignup').addEventListener('click', () => switchAuthTab('signup'));
+function switchAuthTab(which){
+  document.getElementById('authTabSignin').classList.toggle('active', which === 'signin');
+  document.getElementById('authTabSignup').classList.toggle('active', which === 'signup');
+  document.getElementById('authFormSignin').classList.toggle('show', which === 'signin');
+  document.getElementById('authFormSignup').classList.toggle('show', which === 'signup');
+  authStatus.className = 'auth-status';
+  authStatus.textContent = '';
+}
+
+function setAuthStatus(text, cls){
+  authStatus.className = 'auth-status show' + (cls ? ' ' + cls : '');
+  authStatus.textContent = text;
+}
+
+document.getElementById('signinSubmitBtn').addEventListener('click', async () => {
+  const email = document.getElementById('signinEmail').value.trim();
+  const password = document.getElementById('signinPassword').value;
+  if (!email || !password) { setAuthStatus('Enter your email and password.', 'error'); return; }
+  setAuthStatus('Signing in…');
+  try {
+    const res = await fetch(apiUrl('/api/auth/login'), { method: 'POST', headers: apiHeaders(false), body: JSON.stringify({ email, password }) });
+    const data = await res.json();
+    if (!res.ok) { setAuthStatus(data.error || 'Could not sign in.', 'error'); return; }
+    onAuthSuccess(data.token, data.user);
+  } catch(e) { setAuthStatus('Could not reach the server.', 'error'); }
+});
+
+document.getElementById('signupSubmitBtn').addEventListener('click', async () => {
+  const username = document.getElementById('signupUsername').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  if (!username || !email || !password) { setAuthStatus('Fill in all fields.', 'error'); return; }
+  setAuthStatus('Creating your account…');
+  try {
+    const res = await fetch(apiUrl('/api/auth/signup'), { method: 'POST', headers: apiHeaders(false), body: JSON.stringify({ username, email, password }) });
+    const data = await res.json();
+    if (!res.ok) { setAuthStatus(data.error || 'Could not create account.', 'error'); return; }
+    onAuthSuccess(data.token, data.user);
+  } catch(e) { setAuthStatus('Could not reach the server.', 'error'); }
+});
+
+authSignOutBtn.addEventListener('click', async () => {
+  try { await fetch(apiUrl('/api/auth/logout'), { method: 'POST', headers: apiHeaders(true) }); } catch(e) {}
+  currentUser = null;
+  authToken = null;
+  renderAuthUI();
+  if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
+  if (mode === 'admin') setMode('reviews');
+});
+
+function onAuthSuccess(token, user){
+  authToken = token;
+  currentUser = user;
+  closeAuthModal();
+  ['signinEmail','signinPassword','signupUsername','signupEmail','signupPassword'].forEach(id => document.getElementById(id).value = '');
+  renderAuthUI();
+  if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
+}
+
+function renderAuthUI(){
+  if (currentUser) {
+    authOpenBtn.style.display = 'none';
+    authBarUser.style.display = 'flex';
+    authBarUsername.textContent = '👤 ' + currentUser.username;
+    authBarRole.textContent = currentUser.role;
+    authBarRole.style.display = currentUser.role === 'admin' ? '' : 'none';
+    tabAdmin.style.display = currentUser.role === 'admin' ? '' : 'none';
+  } else {
+    authOpenBtn.style.display = '';
+    authBarUser.style.display = 'none';
+    tabAdmin.style.display = 'none';
+  }
+
+  const postingAsRow = document.getElementById('postingAsRow');
+  const reviewAuthNote = document.getElementById('reviewAuthNote');
+  const rfSubmitBtn = document.getElementById('rfSubmitBtn');
+  if (currentUser) {
+    postingAsRow.style.display = '';
+    reviewAuthNote.style.display = 'none';
+    document.getElementById('postingAsDisplay').value = currentUser.username;
+    rfSubmitBtn.disabled = false;
+  } else {
+    postingAsRow.style.display = 'none';
+    reviewAuthNote.style.display = reviewsBackendMode === 'api' ? '' : 'none';
+    rfSubmitBtn.disabled = false; // click handler itself gates with a clear message
+  }
+}
+
+document.getElementById('reviewSignInLink').addEventListener('click', openAuthModal);
+
+// ============ Question of the Day + Leaderboard ============
+
+async function loadQotdAndLeaderboard(){
+  if (reviewsBackendMode !== 'api') return;
+  const qotdCard = document.getElementById('qotdCard');
+  try {
+    const [qotdRes, lbRes] = await Promise.all([
+      fetch(apiUrl('/api/qotd')).then(r => r.json()),
+      fetch(apiUrl('/api/leaderboard')).then(r => r.json())
+    ]);
+    qotdCard.style.display = '';
+    const qotd = qotdRes.qotd;
+    document.getElementById('qotdQuestion').textContent = qotd && qotd.question ? qotd.question : 'No question set yet — the top contributor gets to pick it.';
+    document.getElementById('qotdMeta').textContent = qotd && qotd.setBy ? ('Set by ' + qotd.setBy + ' · ' + timeAgo(qotd.setAt)) : '';
+
+    const leaderboard = lbRes.leaderboard || [];
+    const lbRow = document.getElementById('leaderboardRow');
+    lbRow.innerHTML = leaderboard.length
+      ? leaderboard.slice(0, 5).map((entry, i) => '<span class="lb-entry' + (i === 0 ? ' top' : '') + '">' + (i === 0 ? '👑 ' : '') + escapeHtml(entry.username) + ' · ' + entry.contributionScore + '</span>').join('')
+      : '<span class="lb-entry">No contributors yet — post the first review!</span>';
+
+    const setRow = document.getElementById('qotdSetRow');
+    const isTop = currentUser && leaderboard.length && leaderboard[0].username === currentUser.username;
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    setRow.style.display = (isTop || isAdmin) ? 'flex' : 'none';
+  } catch(e) {
+    qotdCard.style.display = 'none';
+  }
+}
+
+document.getElementById('qotdSubmitBtn').addEventListener('click', async () => {
+  const input = document.getElementById('qotdInput');
+  const question = input.value.trim();
+  if (!question) return;
+  try {
+    const res = await fetch(apiUrl('/api/qotd'), { method: 'POST', headers: apiHeaders(true), body: JSON.stringify({ question }) });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Could not set the question.'); return; }
+    input.value = '';
+    loadQotdAndLeaderboard();
+  } catch(e) { alert('Could not reach the server.'); }
+});
+
+// ============ Peptide Calculator ============
+// Pure unit-conversion arithmetic: concentration = vial amount / recon volume;
+// dose volume = dose / concentration; syringe units = dose volume * syringe scale.
+// Deliberately does not recommend or validate what dose to take — that's the input, not the output.
+
+function toMg(amount, unit){
+  if (unit === 'mg') return amount;
+  if (unit === 'mcg') return amount / 1000;
+  if (unit === 'IU') return amount; // IU can't be converted to mg without a substance-specific conversion factor; treated as its own unit
+  return amount;
+}
+
+function runPeptideCalc(){
+  const vialAmount = parseFloat(document.getElementById('pcVialAmount').value);
+  const vialUnit = document.getElementById('pcVialUnit').value;
+  const reconVolume = parseFloat(document.getElementById('pcReconVolume').value);
+  const doseAmount = parseFloat(document.getElementById('pcDoseAmount').value);
+  const doseUnit = document.getElementById('pcDoseUnit').value;
+  const syringeType = document.getElementById('pcSyringeType').value;
+
+  const warningEl = document.getElementById('pcWarning');
+  const outConc = document.getElementById('pcConcentration');
+  const outDraw = document.getElementById('pcDrawTo');
+  const outDoseVol = document.getElementById('pcDoseVolume');
+  const outDosesPerVial = document.getElementById('pcDosesPerVial');
+
+  if (!vialAmount || !reconVolume || !doseAmount) {
+    outConc.textContent = '—'; outDraw.textContent = '—'; outDoseVol.textContent = '—'; outDosesPerVial.textContent = '—';
+    warningEl.style.display = 'none';
+    return;
+  }
+
+  if (vialUnit === 'IU' && doseUnit !== 'IU') {
+    warningEl.style.display = '';
+    warningEl.innerHTML = '⚠ Vial amount is in IU but dose is in mg/mcg — IU doesn\'t convert to a weight without a substance-specific conversion factor. Set both to IU, or re-enter the vial amount in mg/mcg if you know it.';
+    outConc.textContent = '—'; outDraw.textContent = '—'; outDoseVol.textContent = '—'; outDosesPerVial.textContent = '—';
+    return;
+  }
+  warningEl.style.display = 'none';
+
+  const vialMg = toMg(vialAmount, vialUnit);
+  const doseMg = toMg(doseAmount, doseUnit);
+
+  const concentration = vialMg / reconVolume; // mg/mL (or IU/mL if using IU throughout)
+  const doseVolumeMl = doseMg / concentration; // mL
+
+  const concUnit = vialUnit === 'IU' ? 'IU/mL' : 'mg/mL';
+  outConc.textContent = concentration.toFixed(3) + ' ' + concUnit;
+  outDoseVol.textContent = doseVolumeMl.toFixed(3) + ' mL';
+
+  if (syringeType === 'ml') {
+    outDraw.textContent = doseVolumeMl.toFixed(3) + ' mL mark';
+  } else {
+    const scale = parseInt(syringeType, 10); // 100 or 40 units per mL
+    const units = doseVolumeMl * scale;
+    outDraw.textContent = units.toFixed(1) + ' units (U-' + scale + ')';
+    if (units > scale) {
+      warningEl.style.display = '';
+      warningEl.innerHTML = '⚠ That\'s more than one full syringe (' + scale + ' units) — double check your numbers, or you may need a larger syringe / multiple draws.';
+    }
+  }
+
+  const dosesPerVial = vialMg / doseMg;
+  outDosesPerVial.textContent = (Number.isFinite(dosesPerVial) ? dosesPerVial.toFixed(1) : '—') + ' doses';
+}
+
+['pcVialAmount','pcVialUnit','pcReconVolume','pcDoseAmount','pcDoseUnit','pcSyringeType'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', runPeptideCalc);
+  el.addEventListener('change', runPeptideCalc);
+});
+
+// ============ Admin panel ============
+
+async function initAdminPanel(){
+  const catSelect = document.getElementById('adminReviewCategory');
+  if (!catSelect.dataset.filled) {
+    catSelect.innerHTML = REVIEW_CATEGORIES.map(c => '<option value="' + c.id + '">' + c.label + '</option>').join('');
+    catSelect.dataset.filled = '1';
+    catSelect.addEventListener('change', loadAdminReviews);
+  }
+  loadAdminStats();
+  loadAdminUsers();
+  loadAdminReviews();
+}
+
+async function loadAdminStats(){
+  try {
+    const res = await fetch(apiUrl('/api/admin/stats'), { headers: apiHeaders(true) });
+    const data = await res.json();
+    if (!res.ok) return;
+    const row = document.getElementById('adminStatsRow');
+    const vals = [data.totalUsers, data.totalAdmins, data.totalReviews, data.totalReplies];
+    const labels = ['Users', 'Admins', 'Reviews', 'Replies'];
+    row.innerHTML = vals.map((v, i) => '<div class="admin-stat"><div class="num">' + v + '</div><div class="lbl">' + labels[i] + '</div></div>').join('');
+  } catch(e) {}
+}
+
+async function loadAdminUsers(){
+  try {
+    const res = await fetch(apiUrl('/api/admin/users'), { headers: apiHeaders(true) });
+    const data = await res.json();
+    if (!res.ok) return;
+    const body = document.getElementById('adminUsersBody');
+    body.innerHTML = data.users.map(u =>
+      '<tr><td>' + escapeHtml(u.username) + '</td><td>' + u.role + '</td><td>' + (u.contributionScore || 0) + '</td>' +
+      '<td>' + (u.role === 'admin'
+        ? '<button data-uid="' + u.id + '" data-role="member" class="admin-role-btn">Demote</button>'
+        : '<button data-uid="' + u.id + '" data-role="admin" class="admin-role-btn">Promote</button>') + '</td></tr>'
+    ).join('');
+    body.querySelectorAll('.admin-role-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          const res = await fetch(apiUrl('/api/admin/users/' + btn.dataset.uid + '/role'), {
+            method: 'POST', headers: apiHeaders(true), body: JSON.stringify({ role: btn.dataset.role })
+          });
+          if (!res.ok) { const d = await res.json().catch(()=>({})); alert(d.error || 'Could not update role.'); return; }
+          loadAdminUsers();
+          loadAdminStats();
+        } catch(e) { alert('Could not reach the server.'); }
+      });
+    });
+  } catch(e) {}
+}
+
+async function loadAdminReviews(){
+  const category = document.getElementById('adminReviewCategory').value;
+  try {
+    const res = await fetch(apiUrl('/api/reviews?category=' + encodeURIComponent(category)));
+    const data = await res.json();
+    const listEl = document.getElementById('adminReviewsList');
+    if (!data.reviews || data.reviews.length === 0) {
+      listEl.innerHTML = '<div class="review-empty">No reviews in this category.</div>';
+      return;
+    }
+    listEl.innerHTML = data.reviews.map(r =>
+      '<div class="admin-review-row"><div>' +
+        '<div class="arr-text">' + escapeHtml(r.subject) + ' — ' + escapeHtml(r.text.slice(0, 140)) + (r.text.length > 140 ? '…' : '') + '</div>' +
+        '<div class="arr-meta">' + escapeHtml(r.name) + ' · ' + escapeHtml(r.state) + ' · ' + timeAgo(r.timestamp) + '</div>' +
+      '</div>' +
+      '<button data-rid="' + r.id + '" class="admin-delete-btn">Delete</button></div>'
+    ).join('');
+    listEl.querySelectorAll('.admin-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this review? This cannot be undone.')) return;
+        try {
+          const res = await fetch(apiUrl('/api/admin/reviews/' + btn.dataset.rid), { method: 'DELETE', headers: apiHeaders(true) });
+          if (!res.ok) { const d = await res.json().catch(()=>({})); alert(d.error || 'Could not delete review.'); return; }
+          loadAdminReviews();
+          loadAdminStats();
+        } catch(e) { alert('Could not reach the server.'); }
+      });
+    });
+  } catch(e) {}
+}
+
+// ============ Reviews ============
+let reviewsInitialized = false;
+let currentCategory = 'work';
+let currentRfStars = 0;
+
+const REVIEW_CATEGORIES = [
+  { id: 'work', label: '💼 Work / Jobs', hasPricing: false, hasSportType: false, subjectLabel: 'Employer / job type', placeholder: "e.g. 'warehouse job', 'Amazon delivery driver'" },
+  { id: 'sports', label: '🏈 Sports', hasPricing: false, hasSportType: true, subjectLabel: 'Team, event, spot, or venue', placeholder: "e.g. 'Cowboys season tickets', 'public land WMA 12', 'local pier'" },
+  { id: 'restaurants', label: '🍔 Fast Food & Restaurants', hasPricing: true, hasSportType: false, subjectLabel: 'Restaurant name', placeholder: "e.g. \"McDonald's on Main St\"" },
+  { id: 'prices', label: '💵 Cost of Living / Price Watch', hasPricing: true, hasSportType: false, subjectLabel: 'What are you pricing?', placeholder: "e.g. 'dozen eggs', 'gallon of gas', 'rent - 1BR'" },
+  { id: 'economy', label: '📈 Economy', hasPricing: false, hasSportType: false, subjectLabel: 'What part of the economy?', placeholder: "e.g. 'local job market', 'housing costs', 'small business climate'" }
+];
+
+const SPORT_TYPES = [
+  { id: 'football', label: '🏈 Football (NFL)' },
+  { id: 'cfb', label: '🎓 College Football' },
+  { id: 'basketball', label: '🏀 Basketball (NBA)' },
+  { id: 'cbb', label: '🎓 College Basketball' },
+  { id: 'baseball', label: '⚾ Baseball (MLB)' },
+  { id: 'hockey', label: '🏒 Hockey (NHL)' },
+  { id: 'soccer', label: '⚽ Soccer (MLS/other)' },
+  { id: 'nascar', label: '🏁 NASCAR / Auto Racing' },
+  { id: 'golf', label: '⛳ Golf' },
+  { id: 'tennis', label: '🎾 Tennis' },
+  { id: 'mma', label: '🥊 MMA / Boxing / Wrestling' },
+  { id: 'hunting', label: '🦌 Hunting' },
+  { id: 'fishing', label: '🎣 Fishing' },
+  { id: 'other', label: '🏆 Other' }
+];
+
+// --- backend resolution: a real REST API (if you've deployed backend/server.js and set the
+// URL below), Claude.ai's shared artifact storage as a secondary option, or an honest
+// in-memory local fallback so the UI never silently breaks ---
+const REVIEWS_API_BASE = 'https://truth-button-backend.onrender.com';
+let reviewsBackendMode = 'local'; // resolved to 'api' | 'claude' | 'local' in initReviews()
+const localFallbackStore = {};
+
+function apiUrl(path){ return REVIEWS_API_BASE.replace(/\/$/, '') + path; }
+
+async function detectBackendMode(){
+  if (REVIEWS_API_BASE) {
+    try {
+      const res = await fetch(apiUrl('/api/health'));
+      if (res.ok) return 'api';
+    } catch(e) { /* fall through */ }
+  }
+  if (window.storage && window.storage.get && window.storage.set && window.storage.list) return 'claude';
+  return 'local';
+}
+
+// Claude-storage / local-fallback still use a simple per-category-per-state bucket model
+async function storageGetJson(key){
+  if (reviewsBackendMode === 'claude') {
+    try {
+      const r = await window.storage.get(key, true);
+      return r ? JSON.parse(r.value) : null;
+    } catch(e) { return null; }
+  }
+  return localFallbackStore[key] ? JSON.parse(localFallbackStore[key]) : null;
+}
+async function storageSetJson(key, obj){
+  const value = JSON.stringify(obj);
+  if (reviewsBackendMode === 'claude') {
+    try { await window.storage.set(key, value, true); return true; }
+    catch(e) { return false; }
+  }
+  localFallbackStore[key] = value;
+  return true;
+}
+async function storageListKeys(prefix){
+  if (reviewsBackendMode === 'claude') {
+    try { const r = await window.storage.list(prefix, true); return r ? r.keys : []; }
+    catch(e) { return []; }
+  }
+  return Object.keys(localFallbackStore).filter(k => k.startsWith(prefix));
+}
+
+function bucketKey(category, stateSlugVal){ return 'reviews:' + category + ':' + stateSlugVal; }
+
+const backendModeReady = detectBackendMode().then(mode => {
+  reviewsBackendMode = mode;
+  updateAuthAvailability();
+  return mode;
+});
+
+async function initReviews(){
+  reviewsInitialized = true;
+
+  const banner = document.getElementById('storageBanner');
+  banner.className = 'storage-banner';
+  banner.textContent = 'Checking for a live backend…';
+
+  await backendModeReady;
+
+  if (reviewsBackendMode === 'api') {
+    banner.className = 'storage-banner live';
+    banner.textContent = '● Live shared reviews — connected to your own backend API. Everyone visiting this page sees the same reviews.';
+  } else if (reviewsBackendMode === 'claude') {
+    banner.className = 'storage-banner live';
+    banner.textContent = '● Live shared reviews — using Claude.ai\'s built-in storage. Everyone viewing this page can see and reply to what\'s posted here. Note: accounts/sign-in require the real backend, so membership features are unavailable in this mode.';
+  } else {
+    banner.className = 'storage-banner';
+    banner.textContent = '⚠ Running in local-only mode: reviews you post here only exist in this browser tab and won\'t be visible to other visitors. Deploy backend/server.js and set REVIEWS_API_BASE near the top of the script to enable real shared reviews, accounts, and admin features — see backend/README.md.';
+  }
+
+  if (reviewsBackendMode === 'api') loadQotdAndLeaderboard();
+
+  const pillsEl = document.getElementById('categoryPills');
+  pillsEl.innerHTML = REVIEW_CATEGORIES.map(c =>
+    '<div class="cat-pill' + (c.id === currentCategory ? ' active' : '') + '" data-cat="' + c.id + '">' + c.label + '</div>'
+  ).join('');
+  pillsEl.querySelectorAll('.cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      currentCategory = pill.dataset.cat;
+      pillsEl.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p === pill));
+      updateFormForCategory();
+      loadAndRenderReviews();
+    });
+  });
+
+  populateStateSelect(document.getElementById('rfState'));
+
+  const sportTypeSelect = document.getElementById('rfSportType');
+  sportTypeSelect.innerHTML = SPORT_TYPES.map(s => '<option value="' + s.id + '">' + s.label + '</option>').join('');
+
+  document.getElementById('writeReviewBtn').addEventListener('click', () => {
+    const form = document.getElementById('reviewForm');
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) updateFormForCategory();
+  });
+
+  document.querySelectorAll('#rfStars .star').forEach(star => {
+    star.addEventListener('click', () => {
+      currentRfStars = parseInt(star.dataset.val, 10);
+      renderStarInput();
+    });
+  });
+
+  document.getElementById('rfSubmitBtn').addEventListener('click', submitReview);
+
+  updateFormForCategory();
+  loadAndRenderReviews();
+}
+
+function renderStarInput(){
+  document.querySelectorAll('#rfStars .star').forEach(star => {
+    star.classList.toggle('filled', parseInt(star.dataset.val, 10) <= currentRfStars);
+  });
+}
+
+function updateFormForCategory(){
+  const cat = REVIEW_CATEGORIES.find(c => c.id === currentCategory);
+  document.getElementById('rfSubjectLabel').textContent = cat.subjectLabel;
+  document.getElementById('rfSubject').placeholder = cat.placeholder;
+  document.getElementById('priceFields').classList.toggle('show', cat.hasPricing);
+  document.getElementById('sportFields').classList.toggle('show', cat.hasSportType);
+}
+
+async function submitReview(){
+  if (reviewsBackendMode === 'api' && !currentUser) {
+    closeAuthModal();
+    openAuthModal();
+    return;
+  }
+
+  const cat = REVIEW_CATEGORIES.find(c => c.id === currentCategory);
+  const stateVal = document.getElementById('rfState').value;
+  const stateLabel = document.getElementById('rfState').selectedOptions[0]?.textContent || '';
+  const subject = document.getElementById('rfSubject').value.trim();
+  const text = document.getElementById('rfText').value.trim();
+  const priceThen = document.getElementById('rfPriceThen').value.trim();
+  const priceNow = document.getElementById('rfPriceNow').value.trim();
+  const sportTypeSelect = document.getElementById('rfSportType');
+  const sportType = cat.hasSportType ? sportTypeSelect.value : '';
+  const sportTypeLabel = cat.hasSportType ? (sportTypeSelect.selectedOptions[0]?.textContent || '') : '';
+
+  if (!stateVal) { alert('Pick a state.'); return; }
+  if (!subject) { alert('Add a subject.'); return; }
+  if (!text) { alert('Add your review text.'); return; }
+  if (currentRfStars === 0) { alert('Pick a star rating.'); return; }
+
+  const submitBtn = document.getElementById('rfSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Posting…';
+
+  let ok = false;
+
+  if (reviewsBackendMode === 'api') {
+    try {
+      const res = await fetch(apiUrl('/api/reviews'), {
+        method: 'POST',
+        headers: apiHeaders(true),
+        body: JSON.stringify({
+          category: currentCategory, state: stateLabel, subject, text,
+          rating: currentRfStars,
+          priceThen: cat.hasPricing ? priceThen : '',
+          priceNow: cat.hasPricing ? priceNow : '',
+          sportType: sportTypeLabel
+        })
+      });
+      ok = res.ok;
+      if (!ok) {
+        const err = await res.json().catch(()=>({}));
+        if (res.status === 401) { openAuthModal(); } else { alert(err.error || 'Server rejected the review.'); }
+      } else {
+        currentUser.contributionScore = (currentUser.contributionScore || 0) + 3;
+      }
+    } catch(e) { ok = false; }
+  } else {
+    const key = bucketKey(currentCategory, stateVal);
+    const bucket = (await storageGetJson(key)) || [];
+    const review = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      category: currentCategory, state: stateLabel, subject, text, name: 'Anonymous',
+      rating: currentRfStars,
+      priceThen: cat.hasPricing ? priceThen : '',
+      priceNow: cat.hasPricing ? priceNow : '',
+      sportType: sportTypeLabel,
+      likes: 0, timestamp: Date.now(), replies: []
+    };
+    bucket.unshift(review);
+    ok = await storageSetJson(key, bucket);
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Post Review';
+
+  if (!ok) { if (reviewsBackendMode !== 'api') alert('Could not save the review — storage may be unavailable right now.'); return; }
+
+  document.getElementById('rfSubject').value = '';
+  document.getElementById('rfText').value = '';
+  document.getElementById('rfPriceThen').value = '';
+  document.getElementById('rfPriceNow').value = '';
+  currentRfStars = 0;
+  renderStarInput();
+  document.getElementById('reviewForm').classList.remove('show');
+
+  loadAndRenderReviews();
+  if (reviewsBackendMode === 'api') loadQotdAndLeaderboard();
+}
+
+async function loadAndRenderReviews(){
+  const listEl = document.getElementById('reviewList');
+  const emptyEl = document.getElementById('reviewEmpty');
+  listEl.innerHTML = '<div class="review-empty">Loading…</div>';
+  emptyEl.style.display = 'none';
+
+  let allReviews = [];
+
+  if (reviewsBackendMode === 'api') {
+    try {
+      const url = apiUrl('/api/reviews?category=' + encodeURIComponent(currentCategory));
+      const res = await fetch(url);
+      const data = await res.json();
+      allReviews = data.reviews || [];
+    } catch(e) {
+      listEl.innerHTML = '<div class="review-empty">Could not reach the reviews server.</div>';
+      return;
+    }
+  } else {
+    const keys = await storageListKeys('reviews:' + currentCategory + ':');
+    for (const k of keys) {
+      const bucket = (await storageGetJson(k)) || [];
+      allReviews = allReviews.concat(bucket);
+    }
+  }
+
+  allReviews.sort((a, b) => b.timestamp - a.timestamp);
+
+  if (allReviews.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+
+  listEl.innerHTML = allReviews.map(r => renderReviewCard(r)).join('');
+
+  listEl.querySelectorAll('.rc-actions button[data-action="like"]').forEach(btn => {
+    btn.addEventListener('click', () => handleLike(btn.dataset.reviewId, btn.dataset.state));
+  });
+  listEl.querySelectorAll('.rc-actions button[data-action="reply"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const repliesEl = document.getElementById('replies-' + btn.dataset.reviewId);
+      repliesEl.classList.toggle('show');
+    });
+  });
+  listEl.querySelectorAll('.rc-reply-form button').forEach(btn => {
+    btn.addEventListener('click', () => handleReply(btn.dataset.reviewId, btn.dataset.state));
+  });
+}
+
+function renderReviewCard(r){
+  const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+  const stateSlugVal = stateSlug(r.state);
+  let priceHtml = '';
+  if (r.priceThen && r.priceNow) {
+    const then = parseFloat(r.priceThen.replace(/[^0-9.]/g, ''));
+    const now = parseFloat(r.priceNow.replace(/[^0-9.]/g, ''));
+    let pctHtml = '';
+    if (then > 0 && !isNaN(now)) {
+      const pct = ((now - then) / then * 100).toFixed(1);
+      const cls = pct >= 0 ? 'up' : 'down';
+      const sign = pct >= 0 ? '+' : '';
+      pctHtml = ' — <span class="' + cls + '">' + sign + pct + '%</span>';
+    }
+    priceHtml = '<div class="rc-price">' + escapeHtml(r.priceThen) + ' → ' + escapeHtml(r.priceNow) + pctHtml + '</div>';
+  }
+
+  const repliesHtml = (r.replies || []).map(rep =>
+    '<div class="rc-reply"><b>' + escapeHtml(rep.name) + ':</b> ' + escapeHtml(rep.text) + '</div>'
+  ).join('');
+
+  return '' +
+    '<div class="review-card">' +
+      '<div class="rc-top">' +
+        '<div>' +
+          '<div class="rc-subject">' + escapeHtml(r.subject) + '</div>' +
+          '<div class="rc-badges"><span class="rc-badge">' + escapeHtml(r.state) + '</span>' +
+            (r.sportType ? '<span class="rc-badge">' + escapeHtml(r.sportType) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="rc-stars">' + stars + '</div>' +
+      '</div>' +
+      priceHtml +
+      '<div class="rc-text">' + escapeHtml(r.text) + '</div>' +
+      '<div class="rc-meta">' + escapeHtml(r.name) + ' · ' + timeAgo(r.timestamp) + '</div>' +
+      '<div class="rc-actions">' +
+        '<button data-action="like" data-review-id="' + r.id + '" data-state="' + stateSlugVal + '">👍 Helpful (' + (r.likes || 0) + ')</button>' +
+        '<button data-action="reply" data-review-id="' + r.id + '">💬 Reply (' + (r.replies ? r.replies.length : 0) + ')</button>' +
+      '</div>' +
+      '<div class="rc-replies" id="replies-' + r.id + '">' +
+        repliesHtml +
+        '<div class="rc-reply-form">' +
+          '<input type="text" placeholder="' + ((reviewsBackendMode === 'api' && !currentUser) ? 'Sign in to reply…' : 'Add a reply…') + '" id="replyInput-' + r.id + '">' +
+          '<button data-review-id="' + r.id + '" data-state="' + stateSlugVal + '">Reply</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+async function handleLike(reviewId, stateSlugVal){
+  if (reviewsBackendMode === 'api') {
+    try { await fetch(apiUrl('/api/reviews/' + encodeURIComponent(reviewId) + '/like'), { method: 'POST' }); }
+    catch(e) { /* ignore, will just not update */ }
+    loadAndRenderReviews();
+    return;
+  }
+  const key = bucketKey(currentCategory, stateSlugVal);
+  const bucket = (await storageGetJson(key)) || [];
+  const review = bucket.find(r => r.id === reviewId);
+  if (!review) return;
+  review.likes = (review.likes || 0) + 1;
+  await storageSetJson(key, bucket);
+  loadAndRenderReviews();
+}
+
+async function handleReply(reviewId, stateSlugVal){
+  const input = document.getElementById('replyInput-' + reviewId);
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (reviewsBackendMode === 'api') {
+    if (!currentUser) { openAuthModal(); return; }
+    try {
+      const res = await fetch(apiUrl('/api/reviews/' + encodeURIComponent(reviewId) + '/reply'), {
+        method: 'POST',
+        headers: apiHeaders(true),
+        body: JSON.stringify({ text })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(()=>({}));
+        if (res.status === 401) { openAuthModal(); } else { alert(err.error || 'Could not post reply.'); }
+        return;
+      }
+      currentUser.contributionScore = (currentUser.contributionScore || 0) + 1;
+    } catch(e) { /* ignore, will just not update */ }
+    loadAndRenderReviews();
+    loadQotdAndLeaderboard();
+    return;
+  }
+
+  const key = bucketKey(currentCategory, stateSlugVal);
+  const bucket = (await storageGetJson(key)) || [];
+  const review = bucket.find(r => r.id === reviewId);
+  if (!review) return;
+  if (!review.replies) review.replies = [];
+  review.replies.push({ name: 'Anonymous', text, timestamp: Date.now() });
+  await storageSetJson(key, bucket);
+  loadAndRenderReviews();
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function timeAgo(ts){
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return 'just now';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return min + 'm ago';
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return hr + 'h ago';
+  const day = Math.floor(hr / 24);
+  if (day < 30) return day + 'd ago';
+  return new Date(ts).toLocaleDateString();
+}
+
+// ============ Screen Capture (shared: used by Photo tab and Social panel) ============
+let captureStream = null;
+let captureCallback = null;
+
+const startCaptureBtn = document.getElementById('startCaptureBtn');
+const socialCaptureBtn = document.getElementById('socialCaptureBtn');
+const captureOverlay = document.getElementById('captureOverlay');
+const capturePreviewVideo = document.getElementById('capturePreviewVideo');
+const snapFrameBtn = document.getElementById('snapFrameBtn');
+const cancelCaptureBtn = document.getElementById('cancelCaptureBtn');
+const captureStatus = document.getElementById('captureStatus');
+
+function setCaptureStatus(text, cls){
+  captureStatus.className = 'url-status show' + (cls ? ' ' + cls : '');
+  captureStatus.textContent = text;
+}
+function clearCaptureStatus(){
+  captureStatus.className = 'url-status';
+  captureStatus.textContent = '';
+}
+
+function stopCaptureStream(){
+  if (captureStream) {
+    captureStream.getTracks().forEach(t => t.stop());
+    captureStream = null;
+  }
+  capturePreviewVideo.srcObject = null;
+  captureOverlay.style.display = 'none';
+}
+
+// Opens the shared screen-share overlay; calls onCapturedDataUrl(dataUrl) once the user snaps a frame.
+async function openScreenCapture(onCapturedDataUrl){
+  captureCallback = onCapturedDataUrl;
+  clearCaptureStatus();
+  captureOverlay.style.display = 'flex';
+
+  try {
+    captureStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+  } catch (err) {
+    setCaptureStatus('Permission wasn\'t granted, or your browser doesn\'t support screen sharing (try Chrome or Edge on desktop).', 'error');
+    return;
+  }
+  capturePreviewVideo.srcObject = captureStream;
+
+  captureStream.getVideoTracks()[0].addEventListener('ended', () => {
+    stopCaptureStream();
+  });
+}
+
+startCaptureBtn.addEventListener('click', () => {
+  openScreenCapture(dataUrl => {
+    const img = new Image();
+    img.onload = () => { clearCaptureStatus(); analyzeImage(img, 'screenshot'); };
+    img.src = dataUrl;
+  });
+});
+
+socialCaptureBtn.addEventListener('click', () => {
+  openScreenCapture(dataUrl => {
+    const img = new Image();
+    img.onload = () => { clearCaptureStatus(); analyzeImage(img, 'screenshot'); };
+    img.src = dataUrl;
+  });
+});
+
+cancelCaptureBtn.addEventListener('click', () => {
+  stopCaptureStream();
+  clearCaptureStatus();
+});
+
+snapFrameBtn.addEventListener('click', () => {
+  if (!captureStream) return;
+  const vw = capturePreviewVideo.videoWidth;
+  const vh = capturePreviewVideo.videoHeight;
+  if (!vw || !vh) { setCaptureStatus('Frame not ready yet — give it a second and try again.', 'error'); return; }
+
+  const snapCanvas = document.createElement('canvas');
+  snapCanvas.width = vw;
+  snapCanvas.height = vh;
+  snapCanvas.getContext('2d').drawImage(capturePreviewVideo, 0, 0, vw, vh);
+  const dataUrl = snapCanvas.toDataURL('image/png');
+  const cb = captureCallback;
+
+  stopCaptureStream();
+  setCaptureStatus('Frame captured — running analysis…', 'loading');
+  if (cb) cb(dataUrl);
+});
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+});
+resetBtn.addEventListener('click', () => {
+  evidence.classList.remove('show');
+  fileInput.value = '';
+  urlInput.value = '';
+  urlStatus.className = 'url-status';
+  urlStatus.textContent = '';
+  dropzone.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+const urlInput = document.getElementById('urlInput');
+const urlAnalyzeBtn = document.getElementById('urlAnalyzeBtn');
+const urlStatus = document.getElementById('urlStatus');
+
+urlAnalyzeBtn.addEventListener('click', () => analyzeUrl());
+urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') analyzeUrl(); });
+
+function setUrlStatus(text, mode){
+  urlStatus.textContent = text;
+  urlStatus.className = 'url-status show' + (mode ? ' ' + mode : '');
+}
+function clearUrlStatus(){
+  urlStatus.className = 'url-status';
+  urlStatus.textContent = '';
+}
+
+function isPageNotFileHost(url){
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    const blocked = ['youtube.com', 'youtu.be', 'music.youtube.com', 'tiktok.com', 'instagram.com', 'x.com', 'twitter.com', 'facebook.com', 'spotify.com', 'soundcloud.com'];
+    return blocked.some(h => host === h || host.endsWith('.' + h));
+  } catch(e) { return false; }
+}
+
+function analyzeUrl(){
+  const url = urlInput.value.trim();
+  if (!url) return;
+  try { new URL(url); } catch(e) {
+    setUrlStatus('That doesn\'t look like a valid URL.', 'error');
+    return;
+  }
+
+  urlAnalyzeBtn.disabled = true;
+
+  if (mode === 'photo') {
+    setUrlStatus('Fetching image from link…', 'loading');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    const bytesPromise = fetch(url).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
+    img.onload = () => {
+      try {
+        analyzeImage(img, bytesPromise);
+        clearUrlStatus();
+      } catch (err) {
+        setUrlStatus('This image loaded but the source site blocks pixel-level analysis from other pages (CORS). This is common on Instagram, TikTok, X, and Facebook. Save the image to your device and upload it above instead.', 'error');
+      } finally {
+        urlAnalyzeBtn.disabled = false;
+      }
+    };
+    img.onerror = () => {
+      setUrlStatus('Couldn\'t load that link — it may not be a direct image URL, or the source site is blocking the request entirely. Try saving the image and uploading it above.', 'error');
+      urlAnalyzeBtn.disabled = false;
+    };
+    img.src = url;
+
+  } else if (mode === 'audio') {
+    if (isPageNotFileHost(url)) {
+      setUrlStatus('That\'s a webpage link, not a direct audio file — this tool can\'t fetch or download from YouTube, Spotify, SoundCloud, TikTok, Instagram, X, or Facebook. Download the audio or video yourself first, then upload it above.', 'error');
+      urlAnalyzeBtn.disabled = false;
+      return;
+    }
+    setUrlStatus('Fetching audio from link…', 'loading');
+    analyzeAudioFromUrl(url)
+      .then(() => { clearUrlStatus(); urlAnalyzeBtn.disabled = false; })
+      .catch(err => {
+        setUrlStatus('Couldn\'t analyze that link — either the source site blocks cross-origin audio access (common on streaming platforms), it isn\'t a direct audio file link, or the request failed. Save the file and upload it above instead.', 'error');
+        urlAnalyzeBtn.disabled = false;
+      });
+
+  } else if (mode === 'video') {
+    if (isPageNotFileHost(url)) {
+      setUrlStatus('That\'s a webpage link, not a direct video file — this tool can\'t fetch or download from YouTube, TikTok, Instagram, X, or Facebook. Download the video yourself first, then upload it above.', 'error');
+      urlAnalyzeBtn.disabled = false;
+      return;
+    }
+    setUrlStatus('Fetching video from link…', 'loading');
+    evidence.classList.add('show');
+    evidence.scrollIntoView({behavior:'smooth', block:'start'});
+    setVideoLabels();
+    analyzeVideoFromSrc(url, {
+      revoke: false,
+      onDone: () => { clearUrlStatus(); urlAnalyzeBtn.disabled = false; },
+      onError: () => {
+        setUrlStatus('Couldn\'t load that link — it may not be a direct video file link, or the source site is blocking the request entirely. Save the file and upload it above instead.', 'error');
+        urlAnalyzeBtn.disabled = false;
+      },
+      onCorsError: () => {
+        setUrlStatus('This video loaded but the source site blocks frame-level analysis from other pages (CORS). This is common on YouTube, TikTok, Instagram, and X. Save the file and upload it above instead.', 'error');
+        urlAnalyzeBtn.disabled = false;
+      }
+    });
+  }
+}
+
+function handleFile(file){
+  if (mode === 'photo') {
+    if (!file.type.startsWith('image/')) { alert('Please choose an image file for Photo mode.'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => analyzeImage(img, file.arrayBuffer());
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else if (mode === 'audio') {
+    if (!file.type.startsWith('audio/') && !file.type.startsWith('video/')) { alert('Please choose an audio or video file for Music/Audio mode.'); return; }
+    analyzeAudio(file);
+  } else if (mode === 'video') {
+    if (!file.type.startsWith('video/')) { alert('Please choose a video file for Video mode.'); return; }
+    analyzeVideo(file);
+  }
+}
+
+function analyzeImage(img, c2paSource){
+  evidence.classList.add('show');
+  evidence.scrollIntoView({behavior:'smooth', block:'start'});
+  exhibitALabel.textContent = 'Exhibit A — Source';
+  exhibitBLabel.textContent = 'Exhibit B — Error map';
+  frameATag.textContent = 'original upload';
+  frameBTag.textContent = 'error level analysis';
+  metric1Label.textContent = 'Compression residue';
+  metric2Label.textContent = 'Texture uniformity';
+  freqFrame.style.display = '';
+  metric3Card.style.display = '';
+  c2paRow.style.display = 'flex';
+  c2paRow.className = 'c2pa-row unchecked';
+  c2paRow.innerHTML = '📜 Checking for Content Credentials (C2PA)…';
+
+  // scale down large images for speed
+  const maxDim = 640;
+  let w = img.width, h = img.height;
+  if (w > maxDim || h > maxDim) {
+    const scale = maxDim / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+
+  canvasOrig.width = w; canvasOrig.height = h;
+  const ctxO = canvasOrig.getContext('2d');
+  ctxO.drawImage(img, 0, 0, w, h);
+  const origData = ctxO.getImageData(0, 0, w, h);
+
+  // run the frequency-fingerprint check off the full-resolution source image
+  const freqResult = computeFrequencyFingerprint(img);
+
+  // run the C2PA presence check (async — updates the badge once resolved, whatever else is happening)
+  runC2paCheck(c2paSource);
+
+  // re-encode at lower quality, reload, diff
+  const reDataUrl = canvasOrig.toDataURL('image/jpeg', 0.82);
+  const reImg = new Image();
+  reImg.onload = () => {
+    const tmp = document.createElement('canvas');
+    tmp.width = w; tmp.height = h;
+    const ctxR = tmp.getContext('2d');
+    ctxR.drawImage(reImg, 0, 0, w, h);
+    const reData = ctxR.getImageData(0, 0, w, h);
+
+    canvasELA.width = w; canvasELA.height = h;
+    const ctxD = canvasELA.getContext('2d');
+    const diffData = ctxD.createImageData(w, h);
+
+    let totalDiff = 0;
+    const grid = [];
+    const gray = new Float32Array(w * h);
+
+    for (let i = 0, p = 0; i < origData.data.length; i += 4, p++) {
+      const dr = Math.abs(origData.data[i] - reData.data[i]);
+      const dg = Math.abs(origData.data[i+1] - reData.data[i+1]);
+      const db = Math.abs(origData.data[i+2] - reData.data[i+2]);
+      const mag = (dr + dg + db) / 3;
+      totalDiff += mag;
+
+      const amp = Math.min(255, mag * 14);
+      diffData.data[i]   = amp;
+      diffData.data[i+1] = amp * 0.28;
+      diffData.data[i+2] = amp * 0.55;
+      diffData.data[i+3] = 255;
+
+      gray[p] = (origData.data[i] * 0.299 + origData.data[i+1] * 0.587 + origData.data[i+2] * 0.114);
+    }
+    ctxD.putImageData(diffData, 0, 0);
+    scanLine.style.animation = 'none';
+    void scanLine.offsetWidth;
+    scanLine.style.animation = '';
+
+    const avgDiff = totalDiff / (w * h); // typically 0.5 - 6 on natural re-compression
+
+    // texture-uniformity heuristic: local stddev across blocks, then spread of those stddevs
+    const block = 12;
+    const stds = [];
+    for (let by = 0; by + block <= h; by += block) {
+      for (let bx = 0; bx + block <= w; bx += block) {
+        let sum = 0, count = 0;
+        for (let y = by; y < by + block; y++) {
+          for (let x = bx; x < bx + block; x++) {
+            sum += gray[y * w + x]; count++;
+          }
+        }
+        const mean = sum / count;
+        let sq = 0;
+        for (let y = by; y < by + block; y++) {
+          for (let x = bx; x < bx + block; x++) {
+            const d = gray[y * w + x] - mean;
+            sq += d * d;
+          }
+        }
+        stds.push(Math.sqrt(sq / count));
+      }
+    }
+    const stdMean = stds.reduce((a,b) => a+b, 0) / stds.length;
+    let spreadSq = 0;
+    stds.forEach(s => spreadSq += (s - stdMean) * (s - stdMean));
+    const spread = Math.sqrt(spreadSq / stds.length); // low spread = suspiciously uniform texture
+
+    // normalize into 0-100 contributions (empirically tuned bands for a demo, not calibrated against a labeled dataset)
+    const elaScore = clamp(mapRange(avgDiff, 0.6, 5.5, 15, 85), 0, 100);
+    const noiseScore = clamp(mapRange(spread, 24, 4, 10, 90), 0, 100);
+    const overall = Math.round(elaScore * 0.34 + noiseScore * 0.33 + freqResult.score * 0.33);
+
+    const metric1Html = 'Average residue after re-compression: <b>' + avgDiff.toFixed(2) + '</b>. Higher residue in localized regions can mean that area was edited or composited after the rest of the photo was saved.';
+    const metric2Html = 'Texture variance spread: <b>' + spread.toFixed(1) + '</b>. Very low spread means grain and micro-texture look unusually uniform across the frame — typical of AI smoothing or heavy skin retouching.';
+
+    renderScore(overall, metric1Html, metric2Html, freqResult.html);
+  };
+  reImg.src = reDataUrl;
+}
+
+// ============ Frequency-domain fingerprint (2D FFT) ============
+// GAN and diffusion upsampling layers tend to leave faint periodic patterns in an image's
+// frequency spectrum that real camera photos don't show. This runs a real 2D FFT (via the
+// same 1D radix-2 FFT used for the audio spectral-flatness check, applied across rows then
+// columns) on a 256x256 grayscale version of the image, then checks two things: how smoothly
+// the spectrum's energy falls off with frequency (real photos decay smoothly; upsampling
+// artifacts create bumps), and whether there's an isolated spectral peak far above its local
+// neighborhood (a signature of periodic/grid artifacts). Repetitive real textures — fences,
+// fabric weaves, brick — can also trigger this, so it's one more data point, not a verdict.
+function fft2D(re, im, size){
+  const rowRe = new Float64Array(size), rowIm = new Float64Array(size);
+  for (let y = 0; y < size; y++){
+    for (let x = 0; x < size; x++){ rowRe[x] = re[y*size+x]; rowIm[x] = im[y*size+x]; }
+    fft(rowRe, rowIm);
+    for (let x = 0; x < size; x++){ re[y*size+x] = rowRe[x]; im[y*size+x] = rowIm[x]; }
+  }
+  const colRe = new Float64Array(size), colIm = new Float64Array(size);
+  for (let x = 0; x < size; x++){
+    for (let y = 0; y < size; y++){ colRe[y] = re[y*size+x]; colIm[y] = im[y*size+x]; }
+    fft(colRe, colIm);
+    for (let y = 0; y < size; y++){ re[y*size+x] = colRe[y]; im[y*size+x] = colIm[y]; }
+  }
+}
+
+function computeFrequencyFingerprint(img){
+  const size = 256;
+  const off = document.createElement('canvas');
+  off.width = size; off.height = size;
+  const octx = off.getContext('2d');
+  octx.drawImage(img, 0, 0, size, size); // stretched to fill; only frequency content matters here, not aspect ratio
+  const imgData = octx.getImageData(0, 0, size, size).data;
+
+  const re = new Float64Array(size * size);
+  const im = new Float64Array(size * size);
+  for (let p = 0, i = 0; i < imgData.length; i += 4, p++) {
+    re[p] = imgData[i] * 0.299 + imgData[i+1] * 0.587 + imgData[i+2] * 0.114;
+  }
+
+  fft2D(re, im, size);
+
+  const mag = new Float64Array(size * size);
+  for (let i = 0; i < mag.length; i++) mag[i] = Math.log(1 + Math.sqrt(re[i]*re[i] + im[i]*im[i]));
+
+  // fftshift so DC sits at the center, like a standard spectrum visualization
+  const half = size / 2;
+  const shifted = new Float64Array(size * size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const sy = (y + half) % size, sx = (x + half) % size;
+      shifted[sy*size+sx] = mag[y*size+x];
+    }
+  }
+
+  // radial profile + track the brightest isolated point outside the DC disk and outer noise floor
+  const maxR = Math.floor(half * Math.SQRT2) + 1;
+  const radialSum = new Float64Array(maxR), radialCount = new Float64Array(maxR);
+  let peakVal = -Infinity, peakR = 0;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = x - half, dy = y - half;
+      const r = Math.round(Math.sqrt(dx*dx + dy*dy));
+      const v = shifted[y*size+x];
+      if (r < maxR) { radialSum[r] += v; radialCount[r]++; }
+      if (r > 12 && r < half - 8 && v > peakVal) { peakVal = v; peakR = r; }
+    }
+  }
+  const radialAvg = new Float64Array(maxR);
+  for (let r = 0; r < maxR; r++) radialAvg[r] = radialCount[r] ? radialSum[r] / radialCount[r] : 0;
+
+  // fit a line to the log-log decay curve, measure how bumpy the real curve is versus that fit
+  const rLo = 8, rHi = half - 10;
+  let n = 0, sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+  for (let r = rLo; r <= rHi; r++) {
+    if (radialAvg[r] <= 0) continue;
+    const lx = Math.log(r), ly = radialAvg[r];
+    sumX += lx; sumY += ly; sumXY += lx*ly; sumXX += lx*lx; n++;
+  }
+  const slope = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX);
+  const intercept = (sumY - slope*sumX) / n;
+  let residSq = 0, residN = 0;
+  for (let r = rLo; r <= rHi; r++) {
+    if (radialAvg[r] <= 0) continue;
+    const predicted = slope*Math.log(r) + intercept;
+    residSq += (radialAvg[r]-predicted) * (radialAvg[r]-predicted);
+    residN++;
+  }
+  const rmsResidual = Math.sqrt(residSq / residN);
+  const peakRatio = radialAvg[peakR] > 0 ? peakVal / radialAvg[peakR] : 1;
+
+  // render the spectrum as a visual exhibit
+  canvasFreq.width = size; canvasFreq.height = size;
+  const fctx = canvasFreq.getContext('2d');
+  const outImg = fctx.createImageData(size, size);
+  let minV = Infinity, maxV = -Infinity;
+  for (let i = 0; i < shifted.length; i++) { if (shifted[i] < minV) minV = shifted[i]; if (shifted[i] > maxV) maxV = shifted[i]; }
+  const range = (maxV - minV) || 1;
+  for (let i = 0, p = 0; i < shifted.length; i++, p += 4) {
+    const norm = (shifted[i] - minV) / range;
+    outImg.data[p]   = Math.round(30 + norm * 225);
+    outImg.data[p+1] = Math.round(20 + norm * 70);
+    outImg.data[p+2] = Math.round(40 + norm * 90);
+    outImg.data[p+3] = 255;
+  }
+  fctx.putImageData(outImg, 0, 0);
+
+  const bumpScore = clamp(mapRange(rmsResidual, 0.15, 0.9, 10, 80), 0, 100);
+  const peakScore = clamp(mapRange(peakRatio, 1.3, 3.5, 10, 90), 0, 100);
+  const freqScore = Math.round(bumpScore * 0.5 + peakScore * 0.5);
+
+  const html = 'Spectrum smoothness deviation: <b>' + rmsResidual.toFixed(2) + '</b>, isolated peak ratio: <b>' + peakRatio.toFixed(2) + 'x</b> local average. Real photos usually show a smooth, camera-like falloff in frequency energy; GAN/diffusion upsampling can leave faint periodic grid patterns that show up as bumps or bright spots here. Repetitive real textures (fences, fabric weaves, brick) can trigger this too — one more data point, not a verdict on its own.';
+
+  return { score: freqScore, html };
+}
+
+// ============ Content Credentials (C2PA) presence check ============
+// This is a presence check, not cryptographic verification. It scans the raw file bytes for
+// characteristic C2PA/JUMBF manifest markers. Finding one is a genuinely strong signal (it means
+// the file carries a provenance record from wherever it was made or edited) but confirming that
+// record hasn't been tampered with requires validating its signature, which needs a real C2PA
+// library and trust anchors — beyond what a hand-rolled byte scan can safely claim. Use
+// contentcredentials.org/verify for that. Not finding a marker means nothing either way, since
+// most images online don't carry one yet.
+function scanC2PA(arrayBuffer){
+  const bytes = new Uint8Array(arrayBuffer);
+  const scanLen = Math.min(bytes.length, 3 * 1024 * 1024); // manifest markers live near the top of the file structure
+  let str = '';
+  const chunk = 8192;
+  for (let i = 0; i < scanLen; i += chunk) {
+    str += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, scanLen)));
+  }
+  const markers = [];
+  if (/c2pa/i.test(str)) markers.push('c2pa');
+  if (/urn:c2pa/i.test(str)) markers.push('urn:c2pa');
+  if (/content\s*credentials/i.test(str)) markers.push('Content Credentials');
+  if (/jumbf|JUMB/.test(str)) markers.push('JUMBF container');
+  return { found: markers.length > 0, markers: [...new Set(markers)] };
+}
+
+async function runC2paCheck(source){
+  if (source === 'screenshot') {
+    c2paRow.className = 'c2pa-row unchecked';
+    c2paRow.innerHTML = '📜 <b>Content Credentials:</b> not applicable — a screen capture can\'t carry the original file\'s metadata, so there\'s nothing here to check.';
+    return;
+  }
+  let bytes = null;
+  try {
+    if (source instanceof ArrayBuffer) bytes = source;
+    else if (source && typeof source.then === 'function') bytes = await source;
+  } catch(e) { bytes = null; }
+
+  if (!bytes) {
+    c2paRow.className = 'c2pa-row unchecked';
+    c2paRow.innerHTML = '📜 <b>Content Credentials:</b> couldn\'t read the original file bytes to check (common when a link\'s host blocks direct file access).';
+    return;
+  }
+
+  const result = scanC2PA(bytes);
+  if (result.found) {
+    c2paRow.className = 'c2pa-row found';
+    c2paRow.innerHTML = '📜 <b>Content Credentials found</b> — this file carries a C2PA manifest marker (' + result.markers.map(escapeHtml).join(', ') + '). This is a presence check, not a full signature verification — confirm it at <a href="https://contentcredentials.org/verify" target="_blank" rel="noopener">contentcredentials.org/verify</a>.';
+  } else {
+    c2paRow.className = 'c2pa-row notfound';
+    c2paRow.innerHTML = '📜 <b>No Content Credentials detected.</b> Most images online still don\'t carry a C2PA manifest, so this alone isn\'t a red flag — but finding one elsewhere would have been a strong, independently verifiable signal.';
+  }
+}
+
+let audioCtx = null;
+function getAudioCtx(){
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// compact iterative radix-2 FFT, operates in place on re/im arrays (length must be a power of 2)
+function fft(re, im){
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = re[i]; re[i] = re[j]; re[j] = t;
+      t = im[i]; im[i] = im[j]; im[j] = t;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len;
+    const wr0 = Math.cos(ang), wi0 = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let curWr = 1, curWi = 0;
+      for (let j = 0; j < len / 2; j++) {
+        const ur = re[i+j], ui = im[i+j];
+        const vr = re[i+j+len/2]*curWr - im[i+j+len/2]*curWi;
+        const vi = re[i+j+len/2]*curWi + im[i+j+len/2]*curWr;
+        re[i+j] = ur + vr; im[i+j] = ui + vi;
+        re[i+j+len/2] = ur - vr; im[i+j+len/2] = ui - vi;
+        const nwr = curWr*wr0 - curWi*wi0;
+        const nwi = curWr*wi0 + curWi*wr0;
+        curWr = nwr; curWi = nwi;
+      }
+    }
+  }
+}
+
+function setAudioLabels(){
+  exhibitALabel.textContent = 'Exhibit A — Waveform';
+  exhibitBLabel.textContent = 'Exhibit B — Flatness over time';
+  frameATag.textContent = 'amplitude envelope';
+  frameBTag.textContent = 'spectral flatness map';
+  metric1Label.textContent = 'Loudness variance';
+  metric2Label.textContent = 'Spectral flatness variance';
+}
+
+function analyzeAudio(file){
+  evidence.classList.add('show');
+  evidence.scrollIntoView({behavior:'smooth', block:'start'});
+  setAudioLabels();
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    decodeAudioArrayBuffer(ev.target.result, () => {
+      alert('Could not decode the audio track from that file. Try an MP3, WAV, or a standard MP4 video.');
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function decodeAudioArrayBuffer(arrayBuffer, onError){
+  const ctx = getAudioCtx();
+  ctx.decodeAudioData(arrayBuffer.slice(0), buffer => {
+    processAudioBuffer(buffer);
+  }, () => {
+    if (onError) onError();
+  });
+}
+
+function analyzeAudioFromUrl(url){
+  return fetch(url, {mode:'cors'})
+    .then(res => {
+      if (!res.ok) throw new Error('http-' + res.status);
+      return res.arrayBuffer();
+    })
+    .then(arrayBuffer => new Promise((resolve, reject) => {
+      evidence.classList.add('show');
+      evidence.scrollIntoView({behavior:'smooth', block:'start'});
+      setAudioLabels();
+      const ctx = getAudioCtx();
+      ctx.decodeAudioData(arrayBuffer.slice(0), buffer => {
+        processAudioBuffer(buffer);
+        resolve();
+      }, () => reject(new Error('decode-failed')));
+    }));
+}
+
+function processAudioBuffer(buffer){
+  const raw = buffer.getChannelData(0);
+  const w = 640, h = 160;
+
+  // --- Exhibit A: waveform ---
+  canvasOrig.width = w; canvasOrig.height = h;
+  const ctxO = canvasOrig.getContext('2d');
+  ctxO.fillStyle = '#EDE6D6';
+  ctxO.fillRect(0, 0, w, h);
+  ctxO.strokeStyle = '#14110F';
+  ctxO.lineWidth = 1.2;
+  ctxO.beginPath();
+  const step = Math.floor(raw.length / w) || 1;
+  for (let x = 0; x < w; x++) {
+    let min = 1, max = -1;
+    const start = x * step;
+    for (let i = 0; i < step; i++) {
+      const v = raw[start + i] || 0;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    const y1 = h/2 - max * (h/2 - 4);
+    const y2 = h/2 - min * (h/2 - 4);
+    ctxO.moveTo(x, y1);
+    ctxO.lineTo(x, y2);
+  }
+  ctxO.stroke();
+
+  // --- frame-based analysis: RMS + spectral flatness per frame ---
+  const frameSize = 1024;
+  const hop = Math.max(frameSize, Math.floor(raw.length / 120));
+  const rmsVals = [];
+  const flatnessVals = [];
+  const window_ = new Float32Array(frameSize);
+  for (let i = 0; i < frameSize; i++) window_[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (frameSize - 1)); // Hann
+
+  for (let start = 0; start + frameSize <= raw.length; start += hop) {
+    const re = new Float64Array(frameSize);
+    const im = new Float64Array(frameSize);
+    let sumSq = 0;
+    for (let i = 0; i < frameSize; i++) {
+      const s = raw[start + i] * window_[i];
+      re[i] = s;
+      sumSq += s * s;
+    }
+    rmsVals.push(Math.sqrt(sumSq / frameSize));
+
+    fft(re, im);
+    const half = frameSize / 2;
+    let logSum = 0, sum = 0;
+    for (let i = 1; i < half; i++) { // skip DC
+      const mag = Math.sqrt(re[i]*re[i] + im[i]*im[i]) + 1e-9;
+      logSum += Math.log(mag);
+      sum += mag;
+    }
+    const geoMean = Math.exp(logSum / (half - 1));
+    const arithMean = sum / (half - 1);
+    flatnessVals.push(geoMean / arithMean); // 0 = tonal/peaky, 1 = flat/noise-like
+  }
+
+  // --- Exhibit B: flatness-over-time bar map ---
+  canvasELA.width = w; canvasELA.height = h;
+  const ctxD = canvasELA.getContext('2d');
+  ctxD.fillStyle = '#14110F';
+  ctxD.fillRect(0, 0, w, h);
+  const barW = w / flatnessVals.length;
+  flatnessVals.forEach((f, i) => {
+    const norm = clamp(f * 3, 0, 1); // scale for visibility
+    const r = Math.round(47 + norm * (232-47));
+    const g = Math.round(143 - norm * (143-64));
+    const b = Math.round(122 - norm * (122-44));
+    ctxD.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+    const barH = norm * (h - 8);
+    ctxD.fillRect(i * barW, h - barH, Math.max(1, barW - 1), barH);
+  });
+  scanLine.style.animation = 'none';
+  void scanLine.offsetWidth;
+  scanLine.style.animation = '';
+
+  // --- heuristics ---
+  const scored = scoreFromAudioStats(rmsVals, flatnessVals);
+  renderScore(scored.overall, scored.metric1Html, scored.metric2Html);
+}
+
+function scoreFromAudioStats(rmsVals, flatnessVals){
+  const rmsMean = rmsVals.reduce((a,b)=>a+b,0) / rmsVals.length;
+  const rmsVar = Math.sqrt(rmsVals.reduce((a,b)=>a+(b-rmsMean)*(b-rmsMean),0) / rmsVals.length);
+  const rmsCoeffVar = rmsVar / (rmsMean + 1e-9); // low = suspiciously uniform loudness
+
+  const flatMean = flatnessVals.reduce((a,b)=>a+b,0) / flatnessVals.length;
+  const flatVar = Math.sqrt(flatnessVals.reduce((a,b)=>a+(b-flatMean)*(b-flatMean),0) / flatnessVals.length);
+
+  const loudnessScore = clamp(mapRange(rmsCoeffVar, 0.9, 0.15, 15, 80), 0, 100);
+  const flatnessScore = clamp(mapRange(flatVar, 0.09, 0.015, 15, 80), 0, 100);
+  const overall = Math.round(loudnessScore * 0.5 + flatnessScore * 0.5);
+
+  const metric1Html = 'Loudness coefficient of variation: <b>' + rmsCoeffVar.toFixed(2) + '</b>. Natural recordings usually swing in volume over time; unusually flat, even loudness can suggest AI-generated or auto-leveled audio — though heavily mastered real music will also read low here.';
+  const metric2Html = 'Spectral flatness variance: <b>' + flatVar.toFixed(3) + '</b>. Low variance means the tonal texture barely changes across the clip — a pattern sometimes seen in synthetic voices and generated music, but also in simple loops or drones.';
+
+  return {overall, metric1Html, metric2Html};
+}
+
+function setVideoLabels(){
+  exhibitALabel.textContent = 'Exhibit A — Sample frame';
+  exhibitBLabel.textContent = 'Exhibit B — Error map';
+  frameATag.textContent = 'frame from clip';
+  frameBTag.textContent = 'error level analysis';
+  metric1Label.textContent = 'Compression residue (avg)';
+  metric2Label.textContent = 'Frame-to-frame consistency';
+}
+
+function analyzeVideo(file){
+  evidence.classList.add('show');
+  evidence.scrollIntoView({behavior:'smooth', block:'start'});
+  setVideoLabels();
+  const objUrl = URL.createObjectURL(file);
+  analyzeVideoFromSrc(objUrl, {
+    revoke: true,
+    onError: () => alert('Could not read that video file. Try an MP4 or WebM.'),
+    onCorsError: () => alert('Could not read that video file.')
+  });
+}
+
+function analyzeVideoFromSrc(src, opts){
+  opts = opts || {};
+  hiddenVideo.crossOrigin = 'anonymous';
+  hiddenVideo.src = src;
+
+  hiddenVideo.onloadedmetadata = () => {
+    const duration = hiddenVideo.duration;
+    const sampleCount = 6;
+    const times = [];
+    for (let i = 0; i < sampleCount; i++) times.push(duration * (0.1 + i * 0.8 / (sampleCount - 1)));
+
+    const perFrameDiff = [];
+    let frameIndex = 0;
+
+    function nextFrame(){
+      if (frameIndex >= times.length) {
+        finishVideo();
+        return;
+      }
+      hiddenVideo.currentTime = times[frameIndex];
+    }
+
+    function finishVideo(){
+      if (opts.revoke) URL.revokeObjectURL(src);
+      const avgDiff = perFrameDiff.reduce((a,b)=>a+b,0) / perFrameDiff.length;
+      const meanD = avgDiff;
+      const varD = Math.sqrt(perFrameDiff.reduce((a,b)=>a+(b-meanD)*(b-meanD),0) / perFrameDiff.length);
+
+      const elaScore = clamp(mapRange(avgDiff, 0.6, 5.5, 15, 85), 0, 100);
+      const consistencyScore = clamp(mapRange(varD, 1.6, 0.2, 15, 75), 0, 100);
+      const overall = Math.round(elaScore * 0.55 + consistencyScore * 0.45);
+
+      const metric1Html = 'Average compression residue across ' + sampleCount + ' sampled frames: <b>' + avgDiff.toFixed(2) + '</b>. Same idea as the photo check, run per frame and averaged.';
+      const metric2Html = 'Residue variance between frames: <b>' + varD.toFixed(2) + '</b>. Real footage usually varies shot to shot; very uniform residue across the whole clip is a mild synthetic-content signal, but also happens with static or heavily re-compressed video.';
+
+      renderScore(overall, metric1Html, metric2Html);
+      if (opts.onDone) opts.onDone();
+    }
+
+    hiddenVideo.onseeked = () => {
+      const w = Math.min(480, hiddenVideo.videoWidth);
+      const scale = w / hiddenVideo.videoWidth;
+      const h = Math.round(hiddenVideo.videoHeight * scale);
+
+      const frameCanvas = document.createElement('canvas');
+      frameCanvas.width = w; frameCanvas.height = h;
+      const fctx = frameCanvas.getContext('2d');
+      fctx.drawImage(hiddenVideo, 0, 0, w, h);
+
+      let origData;
+      try {
+        origData = fctx.getImageData(0, 0, w, h);
+      } catch (err) {
+        if (opts.revoke) URL.revokeObjectURL(src);
+        if (opts.onCorsError) opts.onCorsError();
+        return;
+      }
+
+      const isMiddle = frameIndex === Math.floor(times.length / 2);
+      if (isMiddle) {
+        canvasOrig.width = w; canvasOrig.height = h;
+        canvasOrig.getContext('2d').drawImage(frameCanvas, 0, 0);
+      }
+
+      const reDataUrl = frameCanvas.toDataURL('image/jpeg', 0.82);
+      const reImg = new Image();
+      reImg.onload = () => {
+        const tmp = document.createElement('canvas');
+        tmp.width = w; tmp.height = h;
+        const rctx = tmp.getContext('2d');
+        rctx.drawImage(reImg, 0, 0, w, h);
+        const reData = rctx.getImageData(0, 0, w, h);
+
+        let totalDiff = 0;
+        let diffData = null;
+        if (isMiddle) {
+          canvasELA.width = w; canvasELA.height = h;
+          diffData = canvasELA.getContext('2d').createImageData(w, h);
+        }
+        for (let i = 0; i < origData.data.length; i += 4) {
+          const dr = Math.abs(origData.data[i] - reData.data[i]);
+          const dg = Math.abs(origData.data[i+1] - reData.data[i+1]);
+          const db = Math.abs(origData.data[i+2] - reData.data[i+2]);
+          const mag = (dr + dg + db) / 3;
+          totalDiff += mag;
+          if (isMiddle) {
+            const amp = Math.min(255, mag * 14);
+            diffData.data[i] = amp; diffData.data[i+1] = amp*0.28; diffData.data[i+2] = amp*0.55; diffData.data[i+3] = 255;
+          }
+        }
+        if (isMiddle) {
+          canvasELA.getContext('2d').putImageData(diffData, 0, 0);
+          scanLine.style.animation = 'none';
+          void scanLine.offsetWidth;
+          scanLine.style.animation = '';
+        }
+        perFrameDiff.push(totalDiff / (w*h));
+        frameIndex++;
+        nextFrame();
+      };
+      reImg.src = reDataUrl;
+    };
+
+    nextFrame();
+  };
+
+  hiddenVideo.onerror = () => {
+    if (opts.onError) opts.onError();
+  };
+}
+
+function mapRange(v, inLo, inHi, outLo, outHi){
+  const t = (v - inLo) / (inHi - inLo);
+  return outLo + clamp(t, 0, 1) * (outHi - outLo);
+}
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function renderScore(score, metric1Html, metric2Html, metric3Html){
+  scoreNum.innerHTML = score + ' <span>/ 100 alteration signal</span>';
+
+  const angle = -90 + (score / 100) * 180;
+  needle.style.transform = 'rotate(' + angle + 'deg)';
+
+  let band, bandClass, stampText, stampClass;
+  if (score < 34) {
+    band = 'Low signal'; bandClass = 'band-low';
+    stampText = 'NO STRONG SIGNAL'; stampClass = 'ok';
+  } else if (score < 62) {
+    band = 'Moderate signal'; bandClass = 'band-mod';
+    stampText = 'MODERATE ALTERATION SIGNAL'; stampClass = 'mod';
+  } else {
+    band = 'High signal'; bandClass = 'band-high';
+    stampText = 'HIGH ALTERATION SIGNAL'; stampClass = '';
+  }
+  scoreBand.textContent = band;
+  scoreBand.className = 'score-band ' + bandClass;
+
+  stampZone.innerHTML = '';
+  const stamp = document.createElement('div');
+  stamp.className = 'stamp ' + stampClass;
+  stamp.textContent = stampText;
+  stampZone.appendChild(stamp);
+
+  lastScore = score;
+
+  metricELA.innerHTML = metric1Html;
+  metricNoise.innerHTML = metric2Html;
+
+  if (metric3Html) {
+    metric3Card.style.display = '';
+    metricFreq.innerHTML = metric3Html;
+  } else {
+    metric3Card.style.display = 'none';
+    freqFrame.style.display = 'none';
+    c2paRow.style.display = 'none';
+  }
+}
+
+(function(){
+  function reveal(){
+    setTimeout(function(){
+      document.querySelector('.wrap').classList.add('revealed');
+    }, 3000);
+  }
+  var bg = new Image();
+  bg.onload = reveal;
+  bg.onerror = reveal;
+  bg.src = 'washington-backdrop.png';
+  if (bg.complete) reveal();
+})();
+</script>
+</body>
+</html>
