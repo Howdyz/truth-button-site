@@ -1,0 +1,24 @@
+{
+  "name": "The Truth Button",
+  "short_name": "Truth Button",
+  "description": "Check photos, video, and audio for signs of AI generation or heavy editing — runs locally in your browser.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#14110F",
+  "theme_color": "#14110F",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "share_target": {
+    "action": "/share-target/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        { "name": "shared_media", "accept": ["image/*", "video/*", "audio/*"] }
+      ]
+    }
+  }
+}
