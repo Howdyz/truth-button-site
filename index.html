@@ -14,6 +14,8 @@
 <meta name="twitter:title" content="The Truth Button">
 <meta name="twitter:description" content="Drop in a photo, video, or audio clip and check it for signs of AI generation or heavy editing — runs locally in your browser, nothing uploaded.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14110F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -512,6 +514,90 @@
     letter-spacing:0.02em;
   }
   .donate-fine a{color:var(--teal);}
+
+  /* mobile share add-on */
+  .share-card{
+    background:linear-gradient(135deg, rgba(47,143,122,0.10), rgba(232,64,44,0.05));
+    border:1px solid rgba(47,143,122,0.3);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .share-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:6px;
+  }
+  .share-title{
+    font-family:var(--font-stamp);
+    font-size:19px;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .share-text{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    margin-bottom:14px;
+    max-width:520px;
+  }
+  .share-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .share-row input{
+    flex:1;
+    min-width:180px;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:13px;
+    text-transform:uppercase;
+  }
+  .share-row input:focus{border-color:var(--teal); outline:none;}
+  .share-row button{
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    border-radius:4px;
+    padding:10px 18px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .share-row button:hover{opacity:0.88;}
+  .share-status{
+    margin-top:10px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--muted);
+  }
+  .share-status.ok{color:var(--teal);}
+  .share-status.error{color:var(--red);}
+  .share-buy{
+    display:inline-block;
+    margin-top:10px;
+    color:var(--teal);
+    font-family:var(--font-mono);
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .share-unlocked-badge{
+    display:none;
+    align-items:center;
+    gap:8px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--teal);
+  }
 
   /* mode tabs */
   .mode-tabs{
@@ -1279,6 +1365,23 @@
     </div>
     <a class="donate-btn" href="https://donate.stripe.com/REPLACE_WITH_YOUR_LINK" target="_blank" rel="noopener">💛 Donate</a>
     <div class="donate-fine">Secure checkout via Stripe — one-time or monthly, your choice.</div>
+  </div>
+
+  <div class="share-card" id="shareCard">
+    <div class="share-label">Mobile add-on</div>
+    <div class="share-title">Share Straight From Your Phone</div>
+    <div class="share-text">Unlock the ability to share a photo, video, or audio clip from any app on your phone directly into The Truth Button — no need to save it first and come back to this page. One-time purchase, works on Android today (Apple hasn't opened this up to iPhone yet).</div>
+
+    <div id="shareLocked">
+      <a class="donate-btn" id="shareBuyBtn" href="https://buy.stripe.com/eVq3cvevifaU5Pl1SM0VO03" target="_blank" rel="noopener" style="background:var(--teal);">🔓 Unlock Mobile Share</a>
+      <div class="share-row" style="margin-top:14px;">
+        <input type="text" id="shareKeyInput" placeholder="Already bought it? Paste your license key" autocomplete="off">
+        <button id="shareKeyBtn">Unlock</button>
+      </div>
+      <div class="share-status" id="shareStatus"></div>
+    </div>
+
+    <div class="share-unlocked-badge" id="shareUnlockedBadge">✓ Mobile Share unlocked on this device</div>
   </div>
 
   <div class="mode-tabs">
@@ -3765,6 +3868,94 @@ function renderScore(score, metric1Html, metric2Html, metric3Html){
   bg.src = 'washington-backdrop.png';
   if (bg.complete) reveal();
 })();
+
+// ---------- mobile share add-on ----------
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+const shareCard = document.getElementById('shareCard');
+const shareLocked = document.getElementById('shareLocked');
+const shareUnlockedBadge = document.getElementById('shareUnlockedBadge');
+const shareKeyInput = document.getElementById('shareKeyInput');
+const shareKeyBtn = document.getElementById('shareKeyBtn');
+const shareStatus = document.getElementById('shareStatus');
+
+function isShareUnlocked(){ return localStorage.getItem('tb_unlocked') === 'true'; }
+
+function renderShareUnlockState(){
+  const unlocked = isShareUnlocked();
+  shareLocked.style.display = unlocked ? 'none' : '';
+  shareUnlockedBadge.style.display = unlocked ? 'flex' : 'none';
+}
+renderShareUnlockState();
+
+async function verifyShareKey(key){
+  const res = await fetch(apiUrl('/api/license/verify'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key })
+  });
+  const data = await res.json();
+  return !!data.valid;
+}
+
+shareKeyBtn.addEventListener('click', async () => {
+  const key = shareKeyInput.value.trim().toUpperCase();
+  if (!key) return;
+  shareStatus.textContent = 'Checking…';
+  shareStatus.className = 'share-status';
+  try {
+    const valid = await verifyShareKey(key);
+    if (valid) {
+      localStorage.setItem('tb_license_key', key);
+      localStorage.setItem('tb_unlocked', 'true');
+      renderShareUnlockState();
+      processSharedFileIfAny();
+    } else {
+      shareStatus.textContent = 'That key doesn\'t look right — double check it and try again.';
+      shareStatus.className = 'share-status error';
+    }
+  } catch (e) {
+    shareStatus.textContent = 'Could not reach the server — try again in a moment.';
+    shareStatus.className = 'share-status error';
+  }
+});
+
+// A phone's OS share sheet lands here as /?shared=1 (routed through the service
+// worker at /share-target/, since GitHub Pages can't handle POST directly). If the
+// add-on isn't unlocked yet, the file stays cached and gets picked up automatically
+// right after they unlock, instead of making them share it again.
+async function processSharedFileIfAny(){
+  const params = new URLSearchParams(location.search);
+  if (params.get('shared') !== '1') return;
+  if (!isShareUnlocked()) {
+    shareStatus.textContent = 'Unlock Mobile Share above to analyze the file you just shared.';
+    shareStatus.className = 'share-status';
+    shareCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  try {
+    const cache = await caches.open('truth-button-share-v1');
+    const cached = await cache.match('/shared-file');
+    if (!cached) return;
+    const blob = await cached.blob();
+    const contentType = cached.headers.get('Content-Type') || blob.type;
+    const nameHeader = cached.headers.get('X-File-Name');
+    const fileName = nameHeader ? decodeURIComponent(nameHeader) : 'shared-file';
+    const file = new File([blob], fileName, { type: contentType });
+    await cache.delete('/shared-file');
+
+    if (contentType.startsWith('image/')) setMode('photo');
+    else if (contentType.startsWith('video/')) setMode('video');
+    else if (contentType.startsWith('audio/')) setMode('audio');
+    else return;
+
+    handleFile(file);
+    history.replaceState(null, '', location.pathname);
+  } catch (e) { /* nothing cached, or Cache Storage unavailable — nothing to do */ }
+}
+processSharedFileIfAny();
 </script>
 </body>
 </html>
