@@ -1372,6 +1372,19 @@
     <div class="share-title">Share Straight From Your Phone</div>
     <div class="share-text">Unlock the ability to share a photo, video, or audio clip from any app on your phone directly into The Truth Button — no need to save it first and come back to this page. One-time purchase, works on Android today (Apple hasn't opened this up to iPhone yet).</div>
 
+    <details class="howto" style="margin-bottom:14px;">
+      <summary>How to set it up &amp; use it <span class="chev">▾</span></summary>
+      <div class="howto-body">
+        <ol class="howto-steps">
+          <li><b>Unlock it</b> — buy it below (one-time), or paste your license key if you already bought it.</li>
+          <li><b>Install the app</b> — open <code>projectsilverbeam.com</code> in Chrome on your Android phone, tap the <b>⋮</b> menu in the top corner, then tap <b>"Install app"</b> (may show as "Add to Home screen" first — tap it again after install to confirm it's a real app, not just a bookmark).</li>
+          <li><b>Share into it</b> — from any app with a photo, video, or audio file (Photos, Gallery, a messaging app), tap <b>Share</b>, then look for <b>"Truth Button"</b> in the list. Tap <b>"More"</b> if you don't see it in the first row.</li>
+          <li>It opens straight to the right tab with your file already loading and analyzing — no extra steps.</li>
+        </ol>
+        <div class="howto-note">Android + Chrome only for now — Apple hasn't added this capability to iPhone/Safari. Also, apps with their own custom share menu (Facebook, Instagram) won't list Truth Button as an option — save the photo to your phone's gallery first, then share from there instead.</div>
+      </div>
+    </details>
+
     <div id="shareLocked">
       <a class="donate-btn" id="shareBuyBtn" href="https://buy.stripe.com/eVq3cvevifaU5Pl1SM0VO03" target="_blank" rel="noopener" style="background:var(--teal);">🔓 Unlock Mobile Share</a>
       <div class="share-row" style="margin-top:14px;">
@@ -1418,6 +1431,19 @@
     <div class="report-label">Or capture a photo straight off your screen — works on Facebook, Instagram, or anywhere a link won't</div>
     <div class="lc-sub" style="margin-bottom:12px;">This shares a tab or window with your browser's own permission dialog — the same one used for video calls. Nothing is downloaded from the source site's servers; it's a screenshot of what's already on your screen, taken with your explicit OK each time.</div>
     <button class="reset-btn" id="startCaptureBtn" style="background:var(--red); color:var(--void); border:none;">📷 Capture From Screen</button>
+    <details class="howto" style="margin-top:12px; margin-bottom:0;">
+      <summary>Step-by-step <span class="chev">▾</span></summary>
+      <div class="howto-body">
+        <ol class="howto-steps">
+          <li>Open the photo you want to check in another tab or window first (e.g. a Facebook post) so it's visible on your screen.</li>
+          <li>Come back here and click <b>"📷 Capture From Screen."</b></li>
+          <li>Your browser will ask what to share — pick the <b>tab or window</b> with the photo in it, then click <b>Share</b>.</li>
+          <li>A live preview appears here. Make sure the photo is clearly visible in it.</li>
+          <li>Click <b>"📷 Capture This Frame"</b> — it grabs that frame and starts analyzing automatically.</li>
+        </ol>
+        <div class="howto-note">Desktop only (Chrome or Edge) — screen-sharing isn't something phone browsers support, so this button won't appear on mobile.</div>
+      </div>
+    </details>
   </div>
 
   <div class="evidence" id="evidence">
@@ -1542,10 +1568,14 @@
       <div class="lookup-disclaimer" style="margin-top:0; margin-bottom:16px;" id="socialSteps">
         <b>How to use it:</b>
         <ol style="margin:8px 0 0; padding-left:20px; line-height:1.8;">
-          <li>Open the video or photo on <span id="platformNameStep">YouTube</span> in a separate browser tab.</li>
-          <li>Come back to this tab and click "Listen &amp; Analyze" (for video/audio) or "Capture This Photo" (for a still image) below.</li>
-          <li>When the picker opens, choose <b>that other tab</b> — check "share tab audio" too if you're checking a video.</li>
+          <li>Tap the platform pill above (<span id="platformNameStep">YouTube</span>, Facebook, X, TikTok, or Instagram) to match where the content is.</li>
+          <li>Open that video or photo yourself in a <b>separate browser tab</b> — don't close this tab.</li>
+          <li>Come back here and pick a button below: <b>"🎧 Listen &amp; Analyze"</b> for video/audio, or <b>"📸 Capture This Photo"</b> for a still image.</li>
+          <li>Your browser opens a picker asking what to share — choose <b>that other tab</b>, not your whole screen.</li>
+          <li>For video/audio: check the <b>"Share tab audio"</b> box in that picker before confirming, or there'll be nothing to analyze.</li>
+          <li>Once shared, analysis starts automatically — for audio it listens live for a few seconds; for photos it captures the frame instantly.</li>
         </ol>
+        <div class="howto-note">Desktop only (Chrome or Edge) — this relies on browser tab-sharing, which phone browsers don't support.</div>
       </div>
 
       <div style="display:flex; gap:10px; flex-wrap:wrap;" id="socialListenButtons">
