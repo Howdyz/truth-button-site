@@ -1548,10 +1548,11 @@
         </ol>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;" id="socialListenButtons">
         <button class="reset-btn listen-btn" id="ytListenBtn" style="flex:1; min-width:180px;">🎧 Listen &amp; Analyze</button>
         <button class="reset-btn" id="socialCaptureBtn" style="flex:1; min-width:180px; background:var(--red); color:var(--void); border:none;">📸 Capture This Photo</button>
       </div>
+      <div class="lookup-disclaimer" style="margin-top:0; display:none;" id="socialListenMobileNote">This feature shares your screen with the site, which only works on a desktop browser — open this page on a computer to use it.</div>
       <div class="url-status" id="ytStatus"></div>
       <div class="terminal-log" id="terminalLog" style="display:none; margin-top:14px;"></div>
     </div>
@@ -1832,6 +1833,12 @@ const dzLabel = document.getElementById('dzLabel');
 const dzSub = document.getElementById('dzSub');
 const reportBar = document.getElementById('reportBar');
 const captureBar = document.getElementById('captureBar');
+const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || !navigator.mediaDevices.getDisplayMedia;
+if (isMobileDevice) {
+  document.getElementById('socialListenButtons').style.display = 'none';
+  document.getElementById('socialSteps').style.display = 'none';
+  document.getElementById('socialListenMobileNote').style.display = '';
+}
 const reportLabel = document.getElementById('reportLabel');
 const exhibitALabel = document.getElementById('exhibitALabel');
 const exhibitBLabel = document.getElementById('exhibitBLabel');
@@ -1904,7 +1911,7 @@ function setMode(newMode){
   const isLookup = (newMode === 'flock' || newMode === 'datacenter' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
-  captureBar.style.display = (newMode === 'photo') ? '' : 'none';
+  captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
   evidence.classList.remove('show');
   flockPanel.classList.toggle('show', newMode === 'flock');
   datacenterPanel.classList.toggle('show', newMode === 'datacenter');
