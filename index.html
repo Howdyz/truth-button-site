@@ -1868,6 +1868,7 @@ if (isMobileDevice) {
   document.getElementById('socialListenButtons').style.display = 'none';
   document.getElementById('socialSteps').style.display = 'none';
   document.getElementById('socialListenMobileNote').style.display = '';
+  captureBar.style.display = 'none'; // Photo is the default active tab, so setMode('photo') never fires on load to apply this — set it explicitly here too
 }
 const reportLabel = document.getElementById('reportLabel');
 const exhibitALabel = document.getElementById('exhibitALabel');
