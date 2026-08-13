@@ -1966,17 +1966,18 @@ document.getElementById('flockSearchBtn').addEventListener('click', () => {
   const results = document.getElementById('flockResults');
   if (!stateVal) { alert('Pick a state first.'); return; }
 
+  const cityEsc = escapeHtml(city);
   let html = '';
   html += makeResultLink(
     'https://deflocktheusa.com/flock-cameras/' + stateVal + '/',
     stateLabel + ' — camera counts & local report',
-    'Camera counts, most-surveilled cities and counties, local news, and what residents are doing about it in ' + stateLabel + '.' + (city ? ' Look for ' + city + ' in the city breakdown.' : ''),
+    'Camera counts, most-surveilled cities and counties, local news, and what residents are doing about it in ' + stateLabel + '.' + (cityEsc ? ' Look for ' + cityEsc + ' in the city breakdown.' : ''),
     'deflocktheusa.com'
   );
   html += makeResultLink(
     'https://deflocktheusa.com/the-map/',
     'Live camera map (120,000+ reported)',
-    'Interactive, hourly-updated map — use the "Find your town" search on the page to jump straight to ' + (city || stateLabel) + '.',
+    'Interactive, hourly-updated map — use the "Find your town" search on the page to jump straight to ' + (cityEsc || stateLabel) + '.',
     'deflocktheusa.com'
   );
   html += makeResultLink(
@@ -1996,11 +1997,12 @@ document.getElementById('dcSearchBtn').addEventListener('click', () => {
   const results = document.getElementById('dcResults');
   if (!stateVal) { alert('Pick a state first.'); return; }
 
+  const cityEsc = escapeHtml(city);
   let html = '';
   html += makeResultLink(
     'https://www.datacentermap.com/usa/' + stateVal + '/',
     stateLabel + ' — data center directory',
-    'Listed colocation, cloud, and hosting facilities in ' + stateLabel + ', with operators and specs.' + (city ? ' Filter or search the page for ' + city + '.' : ''),
+    'Listed colocation, cloud, and hosting facilities in ' + stateLabel + ', with operators and specs.' + (cityEsc ? ' Filter or search the page for ' + cityEsc + '.' : ''),
     'datacentermap.com'
   );
   html += makeResultLink(
