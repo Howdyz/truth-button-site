@@ -1433,6 +1433,7 @@
     <div class="mode-tab" data-mode="flock" id="tabFlock">📡 Flock Cameras</div>
     <div class="mode-tab" data-mode="flockupdates" id="tabFlockUpdates">📰 Flock Updates</div>
     <div class="mode-tab" data-mode="datacenter" id="tabDatacenter">🏢 Data Centers</div>
+    <div class="mode-tab" data-mode="datacenterupdates" id="tabDatacenterUpdates">📰 Data Center Updates</div>
     <div class="mode-tab" data-mode="ytlisten" id="tabYtListen">📺 Social Listen</div>
     <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
     <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
@@ -1601,6 +1602,29 @@
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> like the Flock lookup, this isn't Truth Button's own database — it's a link to a real third-party directory. Data center inventories are inherently incomplete since not every operator discloses locations, especially newer hyperscale and government-adjacent facilities.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="datacenterUpdatesPanel">
+    <div class="lookup-card">
+      <h3>How land gets bought — shell LLCs and NDAs</h3>
+      <p class="lc-sub">Data center developers, especially for AI buildouts, routinely acquire land through shell LLCs before communities know what's being proposed. The standard playbook: a shell LLC buys the land, NDAs bind local officials from disclosing details, land options lock up parcels before public review, and intermediary buyers negotiate on behalf of unnamed principals. Google has specifically used "LLCs inside LLCs" — one entity buys the land, a separate one develops it — to keep its name off public records while negotiating tax subsidies. This is legal because Delaware and Nevada both allow forming an LLC without disclosing its owners or directors.</p>
+      <a class="report-link-btn" href="https://qz.com/shell-companies-ndas-data-center-land-deals-secrecy-051326" target="_blank" rel="noopener">Shell LLCs & NDAs — Quartz →</a>
+      <a class="report-link-btn secondary" href="https://www.nbcnews.com/tech/tech-news/data-center-ai-google-amazon-nda-non-disclosure-agreement-colossus-rcna236423" target="_blank" rel="noopener">How Big Tech uses NDAs — NBC News →</a>
+      <a class="report-link-btn secondary" href="https://boingboing.net/2019/02/18/llcs-inside-llcs.html" target="_blank" rel="noopener">Google's "LLCs inside LLCs" — Boing Boing →</a>
+      <a class="report-link-btn secondary" href="https://www.citizen.org/news/the-secret-data-center-buildout-how-states-can-stop-big-techs-abuse-of-ndas/" target="_blank" rel="noopener">The Secret Data Center Buildout — Public Citizen →</a>
+    </div>
+
+    <div class="lookup-card">
+      <h3>The transparency rollback</h3>
+      <p class="lc-sub">The Corporate Transparency Act used to require companies to report their real beneficial owners to FinCEN, specifically to unmask shell companies. That requirement was suspended in 2025, and in August 2026 FinCEN finalized killing it entirely — wiping ownership-disclosure requirements for 33 million U.S. companies and committing to destroy the ownership data it had already collected. The main federal tool for tracing an LLC back to its real owner effectively no longer exists for domestic entities. Senator Warren has since opened an inquiry into major private equity firms about their data center investments and the rising utility costs communities are absorbing; FDD has separately flagged the practice as a national security risk.</p>
+      <a class="report-link-btn" href="https://www.techtimes.com/articles/324257/20260813/treasury-kills-corporate-transparency-act-erases-shell-company-database.htm" target="_blank" rel="noopener">FinCEN erases shell-company database →</a>
+      <a class="report-link-btn secondary" href="https://www.banking.senate.gov/newsroom/minority/warren-probes-major-private-equity-firms-on-investments-in-data-centers-as-utility-costs-rise" target="_blank" rel="noopener">Warren's PE inquiry →</a>
+      <a class="report-link-btn secondary" href="https://www.fdd.org/analysis/2026/04/20/the-dangerous-national-security-shell-company-game/" target="_blank" rel="noopener">National security shell company game — FDD →</a>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> we can't hand you "Company X secretly owns Data Center Y" — the entire point of this legal structure, and now the point of the federal rollback, is that ownership often isn't traceable through public records anymore. That opacity is itself the story, not a gap in our research.
     </div>
   </div>
 
@@ -1969,6 +1993,7 @@ const desk = document.querySelector('.desk');
 const flockPanel = document.getElementById('flockPanel');
 const flockUpdatesPanel = document.getElementById('flockUpdatesPanel');
 const datacenterPanel = document.getElementById('datacenterPanel');
+const datacenterUpdatesPanel = document.getElementById('datacenterUpdatesPanel');
 const ytPanel = document.getElementById('ytPanel');
 const reviewsPanel = document.getElementById('reviewsPanel');
 const peptidePanel = document.getElementById('peptidePanel');
@@ -1978,6 +2003,7 @@ const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
   flockupdates: 'Who owns Flock Safety, who backs them, and what\'s happening with their police contracts right now — sourced from independent reporting.',
   datacenter: 'Look up documented data center facilities by state — pulled from a real third-party directory, not a private database.',
+  datacenterupdates: 'How data center land gets bought through shell LLCs and NDAs, and the 2026 rollback of federal shell-company transparency rules — sourced from independent reporting.',
   ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
   peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
@@ -1993,7 +2019,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2001,6 +2027,7 @@ function setMode(newMode){
   flockPanel.classList.toggle('show', newMode === 'flock');
   flockUpdatesPanel.classList.toggle('show', newMode === 'flockupdates');
   datacenterPanel.classList.toggle('show', newMode === 'datacenter');
+  datacenterUpdatesPanel.classList.toggle('show', newMode === 'datacenterupdates');
   ytPanel.classList.toggle('show', newMode === 'ytlisten');
   reviewsPanel.classList.toggle('show', newMode === 'reviews');
   peptidePanel.classList.toggle('show', newMode === 'peptide');
@@ -2030,6 +2057,7 @@ document.getElementById('tabVideo').addEventListener('click', () => setMode('vid
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
 document.getElementById('tabFlockUpdates').addEventListener('click', () => setMode('flockupdates'));
 document.getElementById('tabDatacenter').addEventListener('click', () => setMode('datacenter'));
+document.getElementById('tabDatacenterUpdates').addEventListener('click', () => setMode('datacenterupdates'));
 document.getElementById('tabYtListen').addEventListener('click', () => setMode('ytlisten'));
 document.getElementById('tabReviews').addEventListener('click', () => setMode('reviews'));
 document.getElementById('tabPeptide').addEventListener('click', () => setMode('peptide'));
