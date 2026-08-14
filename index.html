@@ -1431,6 +1431,7 @@
     <div class="mode-tab" data-mode="audio" id="tabAudio">🎵 Music / Audio</div>
     <div class="mode-tab" data-mode="video" id="tabVideo">🎬 Video</div>
     <div class="mode-tab" data-mode="flock" id="tabFlock">📡 Flock Cameras</div>
+    <div class="mode-tab" data-mode="flockupdates" id="tabFlockUpdates">📰 Flock Updates</div>
     <div class="mode-tab" data-mode="datacenter" id="tabDatacenter">🏢 Data Centers</div>
     <div class="mode-tab" data-mode="ytlisten" id="tabYtListen">📺 Social Listen</div>
     <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
@@ -1561,6 +1562,28 @@
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> The Truth Button doesn't run its own camera database or backend — this page links out to real, independently-run public-interest projects (DeFlock, DeFlock The USA, EFF's Atlas of Surveillance) rather than making up data. Their coverage is crowdsourced and incomplete, so absence from these maps doesn't mean there's no camera there — just that no one's documented it yet.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="flockUpdatesPanel">
+    <div class="lookup-card">
+      <h3>Who owns Flock Safety</h3>
+      <p class="lc-sub">Founded by Garrett Langley (CEO) and Paige Todd (Co-Founder & CPO). The company has raised $658M across 8 rounds from 29 investors and was valued at $8.4B as of April 2026. Backers include Andreessen Horowitz, Greenoaks, Bedrock Capital, Meritech Capital, Matrix Partners, Sands Capital, Founders Fund, Kleiner Perkins, Tiger Global, and Y Combinator. Board members include Ilya Sukhar, David Ulevitch, Garrett Langley, Alex Clayton, and Matt Feury.</p>
+      <a class="report-link-btn" href="https://whoistheownerof.com/who-owns-flock-safety-complete-ownership/" target="_blank" rel="noopener">Full ownership breakdown →</a>
+      <a class="report-link-btn secondary" href="https://tracxn.com/d/companies/flock-safety/__lfRrqBoJWA2PHkk8HJ-7MN7tlihrgTa6vvlOhfrv8eg/funding-and-investors" target="_blank" rel="noopener">Funding & investors (Tracxn) →</a>
+    </div>
+
+    <div class="lookup-card">
+      <h3>Contracts &amp; controversy, as it's happening</h3>
+      <p class="lc-sub">Between August 2021 and May 2026, communities in 28 states terminated Flock contracts — 39 of those cancellations happened in just the first five months of 2026. LAPD announced it wouldn't renew, citing data-ownership concerns, before renegotiating with added privacy protections. Flock rolled out new "auditing and accountability controls" in August 2026 after a string of documented cases of officers misusing the system, including to stalk exes or romantic partners. Some cities that dropped Flock have since signed with competitor Axon instead.</p>
+      <a class="report-link-btn" href="https://fortune.com/2026/07/15/los-angeles-police-department-flock-safety-contract-immigration-privacy/" target="_blank" rel="noopener">LAPD renegotiation — Fortune →</a>
+      <a class="report-link-btn secondary" href="https://www.abc12.com/news/flock-rolls-out-new-police-auditing-and-accountability-controls-following-surveillance-concerns/article_1ff85a84-d4c1-5fff-840f-9de75763b3a6.html" target="_blank" rel="noopener">New accountability controls →</a>
+      <a class="report-link-btn secondary" href="https://stateofsurveillance.org/articles/surveillance/flock-safety-national-surveillance-database-how-it-works-2026/" target="_blank" rel="noopener">80 cities pulling out →</a>
+      <a class="report-link-btn secondary" href="https://en.wikipedia.org/wiki/Flock_Safety" target="_blank" rel="noopener">Wikipedia overview →</a>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> These are links to independent news outlets and research sites, not claims we're making ourselves. Ownership and contract status change — check the source, not just this summary, before repeating anything here as current fact.
     </div>
   </div>
 
@@ -1944,6 +1967,7 @@ const MODE_CONFIG = {
 
 const desk = document.querySelector('.desk');
 const flockPanel = document.getElementById('flockPanel');
+const flockUpdatesPanel = document.getElementById('flockUpdatesPanel');
 const datacenterPanel = document.getElementById('datacenterPanel');
 const ytPanel = document.getElementById('ytPanel');
 const reviewsPanel = document.getElementById('reviewsPanel');
@@ -1952,6 +1976,7 @@ const adminPanel = document.getElementById('adminPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
+  flockupdates: 'Who owns Flock Safety, who backs them, and what\'s happening with their police contracts right now — sourced from independent reporting.',
   datacenter: 'Look up documented data center facilities by state — pulled from a real third-party directory, not a private database.',
   ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
@@ -1968,12 +1993,13 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'datacenter' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
   evidence.classList.remove('show');
   flockPanel.classList.toggle('show', newMode === 'flock');
+  flockUpdatesPanel.classList.toggle('show', newMode === 'flockupdates');
   datacenterPanel.classList.toggle('show', newMode === 'datacenter');
   ytPanel.classList.toggle('show', newMode === 'ytlisten');
   reviewsPanel.classList.toggle('show', newMode === 'reviews');
@@ -2002,6 +2028,7 @@ document.getElementById('tabPhoto').addEventListener('click', () => setMode('pho
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
+document.getElementById('tabFlockUpdates').addEventListener('click', () => setMode('flockupdates'));
 document.getElementById('tabDatacenter').addEventListener('click', () => setMode('datacenter'));
 document.getElementById('tabYtListen').addEventListener('click', () => setMode('ytlisten'));
 document.getElementById('tabReviews').addEventListener('click', () => setMode('reviews'));
