@@ -451,6 +451,30 @@
     line-height:1.6;
   }
 
+  /* freedom intro */
+  .freedom-intro{
+    border:1px solid rgba(232,64,44,0.35);
+    background:linear-gradient(180deg, rgba(232,64,44,0.08), transparent 60%);
+    border-radius:8px;
+    padding:22px 24px;
+    margin-bottom:28px;
+  }
+  .freedom-intro .fi-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:10px;
+  }
+  .freedom-intro p{
+    font-size:14.5px;
+    line-height:1.7;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .freedom-intro p b{color:var(--ink); font-weight:600;}
+
   /* donate */
   .donate-card{
     background:linear-gradient(135deg, rgba(232,64,44,0.10), rgba(47,143,122,0.06));
@@ -1332,6 +1356,11 @@
       <span class="auth-bar-role" id="authBarRole"></span>
       <button class="auth-bar-signout" id="authSignOutBtn">Sign Out</button>
     </div>
+  </div>
+
+  <div class="freedom-intro">
+    <div class="fi-label">Why this exists</div>
+    <p>Surveillance infrastructure doesn't arrive as tyranny — it arrives as convenience. A camera for traffic safety. A database for efficiency. Every regime in modern history that consolidated total control did it gradually, and every one of them relied on the same raw material: knowing where people were, who they talked to, and what they did, all the time. Automated license plate readers — a <b>120,000+ camera network and growing</b> — and the data centers built to store everything they capture are exactly that kind of infrastructure. Not because any specific operator intends to misuse it today, but because once permanent, searchable tracking exists, <b>the only thing standing between surveillance and control is who gets to use it next</b>. History doesn't prove any one system will be abused. It proves that infrastructure like this never stays neutral for long.</p>
   </div>
 
   <header>
