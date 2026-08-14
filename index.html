@@ -512,61 +512,6 @@
     margin-bottom:14px;
     max-width:520px;
   }
-  .share-row{display:flex; gap:8px; flex-wrap:wrap;}
-  .share-row input{
-    flex:1;
-    min-width:180px;
-    background:var(--void);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:10px 12px;
-    color:var(--ink);
-    font-family:var(--font-mono);
-    font-size:13px;
-    text-transform:uppercase;
-  }
-  .share-row input:focus{border-color:var(--teal); outline:none;}
-  .share-row button{
-    background:var(--teal);
-    color:var(--void);
-    border:none;
-    border-radius:4px;
-    padding:10px 18px;
-    font-family:var(--font-mono);
-    font-size:12px;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    font-weight:600;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .share-row button:hover{opacity:0.88;}
-  .share-status{
-    margin-top:10px;
-    font-family:var(--font-mono);
-    font-size:12px;
-    color:var(--muted);
-  }
-  .share-status.ok{color:var(--teal);}
-  .share-status.error{color:var(--red);}
-  .share-buy{
-    display:inline-block;
-    margin-top:10px;
-    color:var(--teal);
-    font-family:var(--font-mono);
-    font-size:12px;
-    text-decoration:underline;
-    cursor:pointer;
-  }
-  .share-unlocked-badge{
-    display:none;
-    align-items:center;
-    gap:8px;
-    font-family:var(--font-mono);
-    font-size:13px;
-    color:var(--teal);
-  }
-
   /* mode tabs */
   .mode-tabs{
     display:flex;
@@ -1340,15 +1285,14 @@
   </div>
 
   <div class="share-card" id="shareCard">
-    <div class="share-label">Mobile add-on</div>
+    <div class="share-label">Mobile</div>
     <div class="share-title">Share Straight From Your Phone</div>
-    <div class="share-text">Unlock the ability to share a photo, video, or audio clip from any app on your phone directly into The Truth Button — no need to save it first and come back to this page. One-time purchase, works on Android today (Apple hasn't opened this up to iPhone yet).</div>
+    <div class="share-text">Free — share a photo, video, or audio clip from any app on your phone directly into The Truth Button, no need to save it first and come back to this page. Works on Android today (Apple hasn't opened this up to iPhone yet). If it's useful to you, a donation below helps keep it running.</div>
 
-    <details class="howto" style="margin-bottom:14px;">
+    <details class="howto" style="margin-bottom:0;">
       <summary>How to set it up &amp; use it <span class="chev">▾</span></summary>
       <div class="howto-body">
         <ol class="howto-steps">
-          <li><b>Unlock it</b> — buy it below (one-time), or paste your license key if you already bought it.</li>
           <li><b>Install the app</b> — open <code>projectsilverbeam.com</code> in Chrome on your Android phone, tap the <b>⋮</b> menu in the top corner, then tap <b>"Install app"</b> (may show as "Add to Home screen" first — tap it again after install to confirm it's a real app, not just a bookmark).</li>
           <li><b>Share into it</b> — from any app with a photo, video, or audio file (Photos, Gallery, a messaging app), tap <b>Share</b>, then look for <b>"Truth Button"</b> in the list. Tap <b>"More"</b> if you don't see it in the first row.</li>
           <li>It opens straight to the right tab with your file already loading and analyzing — no extra steps.</li>
@@ -1356,17 +1300,6 @@
         <div class="howto-note">Android + Chrome only for now — Apple hasn't added this capability to iPhone/Safari. Also, apps with their own custom share menu (Facebook, Instagram) won't list Truth Button as an option — save the photo to your phone's gallery first, then share from there instead.</div>
       </div>
     </details>
-
-    <div id="shareLocked">
-      <a class="donate-btn" id="shareBuyBtn" href="https://buy.stripe.com/eVq3cvevifaU5Pl1SM0VO03" target="_blank" rel="noopener" style="background:var(--teal);">🔓 Unlock Mobile Share</a>
-      <div class="share-row" style="margin-top:14px;">
-        <input type="text" id="shareKeyInput" placeholder="Already bought it? Paste your license key" autocomplete="off">
-        <button id="shareKeyBtn">Unlock</button>
-      </div>
-      <div class="share-status" id="shareStatus"></div>
-    </div>
-
-    <div class="share-unlocked-badge" id="shareUnlockedBadge">✓ Mobile Share unlocked on this device</div>
   </div>
 
   <div class="mode-tabs">
@@ -3810,67 +3743,11 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
 
-const shareCard = document.getElementById('shareCard');
-const shareLocked = document.getElementById('shareLocked');
-const shareUnlockedBadge = document.getElementById('shareUnlockedBadge');
-const shareKeyInput = document.getElementById('shareKeyInput');
-const shareKeyBtn = document.getElementById('shareKeyBtn');
-const shareStatus = document.getElementById('shareStatus');
-
-function isShareUnlocked(){ return localStorage.getItem('tb_unlocked') === 'true'; }
-
-function renderShareUnlockState(){
-  const unlocked = isShareUnlocked();
-  shareLocked.style.display = unlocked ? 'none' : '';
-  shareUnlockedBadge.style.display = unlocked ? 'flex' : 'none';
-}
-renderShareUnlockState();
-
-async function verifyShareKey(key){
-  const res = await fetch(apiUrl('/api/license/verify'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key })
-  });
-  const data = await res.json();
-  return !!data.valid;
-}
-
-shareKeyBtn.addEventListener('click', async () => {
-  const key = shareKeyInput.value.trim().toUpperCase();
-  if (!key) return;
-  shareStatus.textContent = 'Checking…';
-  shareStatus.className = 'share-status';
-  try {
-    const valid = await verifyShareKey(key);
-    if (valid) {
-      localStorage.setItem('tb_license_key', key);
-      localStorage.setItem('tb_unlocked', 'true');
-      renderShareUnlockState();
-      processSharedFileIfAny();
-    } else {
-      shareStatus.textContent = 'That key doesn\'t look right — double check it and try again.';
-      shareStatus.className = 'share-status error';
-    }
-  } catch (e) {
-    shareStatus.textContent = 'Could not reach the server — try again in a moment.';
-    shareStatus.className = 'share-status error';
-  }
-});
-
 // A phone's OS share sheet lands here as /?shared=1 (routed through the service
-// worker at /share-target/, since GitHub Pages can't handle POST directly). If the
-// add-on isn't unlocked yet, the file stays cached and gets picked up automatically
-// right after they unlock, instead of making them share it again.
+// worker at /share-target/, since GitHub Pages can't handle POST directly).
 async function processSharedFileIfAny(){
   const params = new URLSearchParams(location.search);
   if (params.get('shared') !== '1') return;
-  if (!isShareUnlocked()) {
-    shareStatus.textContent = 'Unlock Mobile Share above to analyze the file you just shared.';
-    shareStatus.className = 'share-status';
-    shareCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
   try {
     const cache = await caches.open('truth-button-share-v1');
     const cached = await cache.match('/shared-file');
