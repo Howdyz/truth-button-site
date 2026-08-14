@@ -107,15 +107,6 @@
     font-size:12.5px;
     color:var(--ink-soft);
   }
-  .auth-bar-role{
-    font-size:10px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:var(--teal);
-    border:1px solid rgba(47,143,122,0.4);
-    padding:2px 8px;
-    border-radius:10px;
-  }
   .auth-bar-signout{
     background:transparent;
     border:1px solid var(--line);
@@ -363,53 +354,6 @@
     font-size:12.5px;
     line-height:1.6;
   }
-
-  /* admin panel */
-  .admin-card{
-    background:var(--void-2);
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:18px;
-    margin-bottom:16px;
-  }
-  .admin-card h3{
-    font-family:var(--font-stamp);
-    font-size:17px;
-    margin:0 0 14px;
-    color:var(--ink);
-  }
-  .admin-stats-row{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:6px;}
-  .admin-stat{
-    background:var(--void);
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:12px 16px;
-    flex:1;
-    min-width:110px;
-    text-align:center;
-  }
-  .admin-stat .num{font-family:var(--font-mono); font-size:22px; color:var(--ink); font-weight:600;}
-  .admin-stat .lbl{font-family:var(--font-mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;}
-  .admin-table{width:100%; border-collapse:collapse; font-size:13px;}
-  .admin-table th{
-    text-align:left; font-family:var(--font-mono); font-size:10.5px;
-    letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);
-    padding:8px 10px; border-bottom:1px solid var(--line);
-  }
-  .admin-table td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink-soft);}
-  .admin-table button{
-    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
-    font-family:var(--font-mono); font-size:10.5px; padding:5px 10px;
-    border-radius:4px; cursor:pointer; margin-right:6px;
-  }
-  .admin-table button:hover{border-color:var(--red); color:var(--red);}
-  .admin-review-row{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    gap:10px; padding:12px 0; border-bottom:1px solid var(--line);
-  }
-  .admin-review-row:last-child{border-bottom:none;}
-  .admin-review-row .arr-text{font-size:13px; color:var(--ink-soft); flex:1;}
-  .admin-review-row .arr-meta{font-family:var(--font-mono); font-size:10.5px; color:var(--muted); margin-top:4px;}
 
   /* how to use */
   .howto{
@@ -1353,7 +1297,6 @@
     <button class="auth-bar-btn" id="authOpenBtn">👤 Sign In / Sign Up</button>
     <div class="auth-bar-user" id="authBarUser" style="display:none;">
       <span id="authBarUsername"></span>
-      <span class="auth-bar-role" id="authBarRole"></span>
       <button class="auth-bar-signout" id="authSignOutBtn">Sign Out</button>
     </div>
   </div>
@@ -1437,7 +1380,6 @@
     <div class="mode-tab" data-mode="ytlisten" id="tabYtListen">📺 Social Listen</div>
     <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
     <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
-    <div class="mode-tab" data-mode="admin" id="tabAdmin" style="display:none;">🛠️ Admin</div>
   </div>
 
   <div class="desk">
@@ -1818,38 +1760,6 @@
     </div>
   </div>
 
-  <div class="lookup-panel" id="adminPanel">
-    <div class="admin-card">
-      <h3>Site Stats</h3>
-      <div class="admin-stats-row" id="adminStatsRow">
-        <div class="admin-stat"><div class="num">—</div><div class="lbl">Users</div></div>
-        <div class="admin-stat"><div class="num">—</div><div class="lbl">Admins</div></div>
-        <div class="admin-stat"><div class="num">—</div><div class="lbl">Reviews</div></div>
-        <div class="admin-stat"><div class="num">—</div><div class="lbl">Replies</div></div>
-      </div>
-    </div>
-
-    <div class="admin-card">
-      <h3>Members</h3>
-      <table class="admin-table" id="adminUsersTable">
-        <thead><tr><th>Username</th><th>Role</th><th>Contribution</th><th></th></tr></thead>
-        <tbody id="adminUsersBody"></tbody>
-      </table>
-    </div>
-
-    <div class="admin-card">
-      <h3>Moderate Reviews</h3>
-      <div class="lookup-row" style="margin-bottom:14px;">
-        <select id="adminReviewCategory"></select>
-      </div>
-      <div id="adminReviewsList"></div>
-    </div>
-
-    <div class="lookup-disclaimer">
-      <b>Note:</b> this tab is only visible in your browser because your account has the admin role — the real protection happens server-side, every admin action re-checks your role against the backend on every request, so hiding or un-hiding this tab in dev tools changes nothing about what you can actually do.
-    </div>
-  </div>
-
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2001,7 +1911,6 @@ const datacenterUpdatesPanel = document.getElementById('datacenterUpdatesPanel')
 const ytPanel = document.getElementById('ytPanel');
 const reviewsPanel = document.getElementById('reviewsPanel');
 const peptidePanel = document.getElementById('peptidePanel');
-const adminPanel = document.getElementById('adminPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2010,20 +1919,14 @@ const LOOKUP_TAGLINES = {
   datacenterupdates: 'How data center land gets bought through shell LLCs and NDAs, and the 2026 rollback of federal shell-company transparency rules — sourced from independent reporting.',
   ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
-  peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
-  admin: 'Site administration — members, review moderation, and stats. Every action here is re-checked against your account role on the server.'
+  peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.'
 };
 
 function setMode(newMode){
-  if (newMode === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
-    alert('Admin access required — sign in with an admin account.');
-    return;
-  }
-
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'admin');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2035,9 +1938,7 @@ function setMode(newMode){
   ytPanel.classList.toggle('show', newMode === 'ytlisten');
   reviewsPanel.classList.toggle('show', newMode === 'reviews');
   peptidePanel.classList.toggle('show', newMode === 'peptide');
-  adminPanel.classList.toggle('show', newMode === 'admin');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
-  if (newMode === 'admin') initAdminPanel();
 
   if (isLookup) {
     tagline.textContent = LOOKUP_TAGLINES[newMode];
@@ -2065,7 +1966,6 @@ document.getElementById('tabDatacenterUpdates').addEventListener('click', () => 
 document.getElementById('tabYtListen').addEventListener('click', () => setMode('ytlisten'));
 document.getElementById('tabReviews').addEventListener('click', () => setMode('reviews'));
 document.getElementById('tabPeptide').addEventListener('click', () => setMode('peptide'));
-document.getElementById('tabAdmin').addEventListener('click', () => setMode('admin'));
 
 // --- state list, shared by both lookup panels (slugs confirmed against deflocktheusa.com and datacentermap.com) ---
 const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
@@ -2369,7 +2269,7 @@ ytListenBtn.addEventListener('click', async () => {
 
 function exhibitATag_safe(text){ frameATag.textContent = text; }
 
-// ============ Auth (sign in / sign up / admin / QOTD) ============
+// ============ Auth (sign in / sign up / QOTD) ============
 // Session state lives only in memory for this page load — no localStorage/sessionStorage,
 // so refreshing the page signs you out. That's a deliberate tradeoff, not an oversight.
 let currentUser = null;
@@ -2379,12 +2279,10 @@ const authBar = document.getElementById('authBar');
 const authOpenBtn = document.getElementById('authOpenBtn');
 const authBarUser = document.getElementById('authBarUser');
 const authBarUsername = document.getElementById('authBarUsername');
-const authBarRole = document.getElementById('authBarRole');
 const authSignOutBtn = document.getElementById('authSignOutBtn');
 const authModalOverlay = document.getElementById('authModalOverlay');
 const authCloseBtn = document.getElementById('authCloseBtn');
 const authStatus = document.getElementById('authStatus');
-const tabAdmin = document.getElementById('tabAdmin');
 
 function apiHeaders(withAuth){
   const h = { 'Content-Type': 'application/json' };
@@ -2463,7 +2361,6 @@ authSignOutBtn.addEventListener('click', async () => {
   authToken = null;
   renderAuthUI();
   if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
-  if (mode === 'admin') setMode('reviews');
 });
 
 function onAuthSuccess(token, user){
@@ -2480,13 +2377,9 @@ function renderAuthUI(){
     authOpenBtn.style.display = 'none';
     authBarUser.style.display = 'flex';
     authBarUsername.textContent = '👤 ' + currentUser.username;
-    authBarRole.textContent = currentUser.role;
-    authBarRole.style.display = currentUser.role === 'admin' ? '' : 'none';
-    tabAdmin.style.display = currentUser.role === 'admin' ? '' : 'none';
   } else {
     authOpenBtn.style.display = '';
     authBarUser.style.display = 'none';
-    tabAdmin.style.display = 'none';
   }
 
   const postingAsRow = document.getElementById('postingAsRow');
@@ -2529,8 +2422,7 @@ async function loadQotdAndLeaderboard(){
 
     const setRow = document.getElementById('qotdSetRow');
     const isTop = currentUser && leaderboard.length && leaderboard[0].username === currentUser.username;
-    const isAdmin = currentUser && currentUser.role === 'admin';
-    setRow.style.display = (isTop || isAdmin) ? 'flex' : 'none';
+    setRow.style.display = isTop ? 'flex' : 'none';
   } catch(e) {
     qotdCard.style.display = 'none';
   }
@@ -2620,90 +2512,6 @@ function runPeptideCalc(){
   el.addEventListener('input', runPeptideCalc);
   el.addEventListener('change', runPeptideCalc);
 });
-
-// ============ Admin panel ============
-
-async function initAdminPanel(){
-  const catSelect = document.getElementById('adminReviewCategory');
-  if (!catSelect.dataset.filled) {
-    catSelect.innerHTML = REVIEW_CATEGORIES.map(c => '<option value="' + c.id + '">' + c.label + '</option>').join('');
-    catSelect.dataset.filled = '1';
-    catSelect.addEventListener('change', loadAdminReviews);
-  }
-  loadAdminStats();
-  loadAdminUsers();
-  loadAdminReviews();
-}
-
-async function loadAdminStats(){
-  try {
-    const res = await fetch(apiUrl('/api/admin/stats'), { headers: apiHeaders(true) });
-    const data = await res.json();
-    if (!res.ok) return;
-    const row = document.getElementById('adminStatsRow');
-    const vals = [data.totalUsers, data.totalAdmins, data.totalReviews, data.totalReplies];
-    const labels = ['Users', 'Admins', 'Reviews', 'Replies'];
-    row.innerHTML = vals.map((v, i) => '<div class="admin-stat"><div class="num">' + v + '</div><div class="lbl">' + labels[i] + '</div></div>').join('');
-  } catch(e) {}
-}
-
-async function loadAdminUsers(){
-  try {
-    const res = await fetch(apiUrl('/api/admin/users'), { headers: apiHeaders(true) });
-    const data = await res.json();
-    if (!res.ok) return;
-    const body = document.getElementById('adminUsersBody');
-    body.innerHTML = data.users.map(u =>
-      '<tr><td>' + escapeHtml(u.username) + '</td><td>' + u.role + '</td><td>' + (u.contributionScore || 0) + '</td>' +
-      '<td>' + (u.role === 'admin'
-        ? '<button data-uid="' + u.id + '" data-role="member" class="admin-role-btn">Demote</button>'
-        : '<button data-uid="' + u.id + '" data-role="admin" class="admin-role-btn">Promote</button>') + '</td></tr>'
-    ).join('');
-    body.querySelectorAll('.admin-role-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        try {
-          const res = await fetch(apiUrl('/api/admin/users/' + btn.dataset.uid + '/role'), {
-            method: 'POST', headers: apiHeaders(true), body: JSON.stringify({ role: btn.dataset.role })
-          });
-          if (!res.ok) { const d = await res.json().catch(()=>({})); alert(d.error || 'Could not update role.'); return; }
-          loadAdminUsers();
-          loadAdminStats();
-        } catch(e) { alert('Could not reach the server.'); }
-      });
-    });
-  } catch(e) {}
-}
-
-async function loadAdminReviews(){
-  const category = document.getElementById('adminReviewCategory').value;
-  try {
-    const res = await fetch(apiUrl('/api/reviews?category=' + encodeURIComponent(category)));
-    const data = await res.json();
-    const listEl = document.getElementById('adminReviewsList');
-    if (!data.reviews || data.reviews.length === 0) {
-      listEl.innerHTML = '<div class="review-empty">No reviews in this category.</div>';
-      return;
-    }
-    listEl.innerHTML = data.reviews.map(r =>
-      '<div class="admin-review-row"><div>' +
-        '<div class="arr-text">' + escapeHtml(r.subject) + ' — ' + escapeHtml(r.text.slice(0, 140)) + (r.text.length > 140 ? '…' : '') + '</div>' +
-        '<div class="arr-meta">' + escapeHtml(r.name) + ' · ' + escapeHtml(r.state) + ' · ' + timeAgo(r.timestamp) + '</div>' +
-      '</div>' +
-      '<button data-rid="' + r.id + '" class="admin-delete-btn">Delete</button></div>'
-    ).join('');
-    listEl.querySelectorAll('.admin-delete-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Delete this review? This cannot be undone.')) return;
-        try {
-          const res = await fetch(apiUrl('/api/admin/reviews/' + btn.dataset.rid), { method: 'DELETE', headers: apiHeaders(true) });
-          if (!res.ok) { const d = await res.json().catch(()=>({})); alert(d.error || 'Could not delete review.'); return; }
-          loadAdminReviews();
-          loadAdminStats();
-        } catch(e) { alert('Could not reach the server.'); }
-      });
-    });
-  } catch(e) {}
-}
 
 // ============ Reviews ============
 let reviewsInitialized = false;
@@ -2807,7 +2615,7 @@ async function initReviews(){
     banner.textContent = '● Live shared reviews — using Claude.ai\'s built-in storage. Everyone viewing this page can see and reply to what\'s posted here. Note: accounts/sign-in require the real backend, so membership features are unavailable in this mode.';
   } else {
     banner.className = 'storage-banner';
-    banner.textContent = '⚠ Running in local-only mode: reviews you post here only exist in this browser tab and won\'t be visible to other visitors. Deploy backend/server.js and set REVIEWS_API_BASE near the top of the script to enable real shared reviews, accounts, and admin features — see backend/README.md.';
+    banner.textContent = '⚠ Running in local-only mode: reviews you post here only exist in this browser tab and won\'t be visible to other visitors. Deploy backend/server.js and set REVIEWS_API_BASE near the top of the script to enable real shared reviews and accounts — see backend/README.md.';
   }
 
   if (reviewsBackendMode === 'api') loadQotdAndLeaderboard();
