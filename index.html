@@ -483,6 +483,70 @@
   }
   .donate-fine a{color:var(--teal);}
 
+  /* spread the word */
+  .spread-card{
+    background:linear-gradient(135deg, rgba(47,143,122,0.10), rgba(232,64,44,0.05));
+    border:1px solid rgba(47,143,122,0.3);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .spread-copy{flex:1; min-width:220px;}
+  .spread-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:6px;
+  }
+  .spread-title{
+    font-family:var(--font-stamp);
+    font-size:19px;
+    color:var(--ink);
+    margin-bottom:6px;
+    letter-spacing:0.01em;
+  }
+  .spread-text{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    max-width:440px;
+  }
+  .spread-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    cursor:pointer;
+    padding:13px 22px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    white-space:nowrap;
+    transition:transform .15s ease, opacity .15s ease;
+    flex-shrink:0;
+  }
+  .spread-btn:hover{opacity:0.88; transform:translateY(-1px);}
+  .spread-btn:active{transform:translateY(0);}
+  .spread-fine{
+    width:100%;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:2px;
+    letter-spacing:0.02em;
+  }
+
   /* mobile share add-on */
   .share-card{
     background:linear-gradient(135deg, rgba(47,143,122,0.10), rgba(232,64,44,0.05));
@@ -1284,6 +1348,16 @@
     <div class="donate-fine">Secure checkout via Stripe — $5 per contribution, choose how many.</div>
   </div>
 
+  <div class="spread-card">
+    <div class="spread-copy">
+      <div class="spread-label">Spread it</div>
+      <div class="spread-title">Share This Site</div>
+      <div class="spread-text">The more people who check before they believe, the harder it gets to fool anyone. If this has been useful, pass it on to someone who'd find it useful too.</div>
+    </div>
+    <button class="spread-btn" id="spreadShareBtn" type="button">🔗 Share This Site</button>
+    <div class="spread-fine" id="spreadFine">projectsilverbeam.com</div>
+  </div>
+
   <div class="share-card" id="shareCard">
     <div class="share-label">Mobile</div>
     <div class="share-title">Share Straight From Your Phone</div>
@@ -1740,6 +1814,26 @@
   </div>
 
 <script>
+const spreadShareBtn = document.getElementById('spreadShareBtn');
+if (spreadShareBtn) {
+  spreadShareBtn.addEventListener('click', function(){
+    const shareData = {
+      title: 'The Truth Button',
+      text: 'Check things before you believe them — The Truth Button',
+      url: location.href
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(function(){});
+      return;
+    }
+    const restoreLabel = spreadShareBtn.textContent;
+    navigator.clipboard.writeText(shareData.url).then(function(){
+      spreadShareBtn.textContent = '✓ Link Copied';
+      setTimeout(function(){ spreadShareBtn.textContent = restoreLabel; }, 2000);
+    }).catch(function(){});
+  });
+}
+
 const introAudio = document.getElementById('introAudio');
 introAudio.volume = 0.55;
 let introAudioSpent = false;
