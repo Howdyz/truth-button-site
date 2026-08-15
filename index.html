@@ -547,6 +547,49 @@
     letter-spacing:0.02em;
   }
 
+  /* sponsored ad slot */
+  .ad-card{
+    display:none; /* JS reveals this only when a real ad has loaded */
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 20px;
+    margin-bottom:18px;
+    gap:14px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .ad-card.has-ad{display:flex;}
+  .ad-label{
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+  .ad-img{width:48px; height:48px; border-radius:6px; object-fit:cover; flex-shrink:0;}
+  .ad-copy{flex:1; min-width:180px;}
+  .ad-headline{font-size:13.5px; color:var(--ink); font-weight:600; margin-bottom:2px;}
+  .ad-body{font-size:12px; color:var(--ink-soft); line-height:1.5;}
+  .ad-cta{
+    display:inline-flex;
+    align-items:center;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+    flex-shrink:0;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .ad-cta:hover{border-color:var(--teal); color:var(--teal);}
+
   /* mobile share add-on */
   .share-card{
     background:linear-gradient(135deg, rgba(47,143,122,0.10), rgba(232,64,44,0.05));
@@ -1356,6 +1399,16 @@
     </div>
     <button class="spread-btn" id="spreadShareBtn" type="button">🔗 Share This Site</button>
     <div class="spread-fine" id="spreadFine">projectsilverbeam.com</div>
+  </div>
+
+  <div class="ad-card" id="adCard">
+    <img class="ad-img" id="adImg" style="display:none;" alt="">
+    <div class="ad-copy">
+      <div class="ad-label">Sponsored</div>
+      <div class="ad-headline" id="adHeadline"></div>
+      <div class="ad-body" id="adBody"></div>
+    </div>
+    <a class="ad-cta" id="adCta" href="#" target="_blank" rel="noopener sponsored">Learn more →</a>
   </div>
 
   <div class="share-card" id="shareCard">
@@ -2586,6 +2639,27 @@ if (REVIEWS_API_BASE) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: location.pathname, referrer: document.referrer }),
     keepalive: true
+  }).catch(function(){});
+}
+
+// sponsored ad slot — loads a random active ad, if any. Stays hidden entirely if none.
+if (REVIEWS_API_BASE) {
+  fetch(apiUrl('/api/ads/active')).then(function(r){ return r.json(); }).then(function(data){
+    const ads = data.ads || [];
+    if (!ads.length) return;
+    const ad = ads[Math.floor(Math.random() * ads.length)];
+    document.getElementById('adHeadline').textContent = ad.headline;
+    document.getElementById('adBody').textContent = ad.body || '';
+    const cta = document.getElementById('adCta');
+    cta.href = apiUrl('/api/ads/' + encodeURIComponent(ad.id) + '/click');
+    if (ad.imageUrl) {
+      const img = document.getElementById('adImg');
+      img.src = ad.imageUrl;
+      img.alt = ad.advertiser || '';
+      img.style.display = '';
+    }
+    document.getElementById('adCard').classList.add('has-ad');
+    fetch(apiUrl('/api/ads/' + encodeURIComponent(ad.id) + '/impression'), { method: 'POST', keepalive: true }).catch(function(){});
   }).catch(function(){});
 }
 
