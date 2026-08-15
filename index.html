@@ -2581,7 +2581,7 @@ function apiUrl(path){ return REVIEWS_API_BASE.replace(/\/$/, '') + path; }
 
 // fire-and-forget page view beacon — never blocks or breaks the page if it fails
 if (REVIEWS_API_BASE) {
-  fetch(apiUrl('/api/track'), {
+  fetch(apiUrl('/api/visit'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: location.pathname, referrer: document.referrer }),
