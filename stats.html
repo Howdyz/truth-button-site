@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitor Stats — The Truth Button</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14110F;
+    --void-2:#1C1814;
+    --red:#E8402C;
+    --teal:#2F8F7A;
+    --ink:#F2EDE1;
+    --ink-soft:#C9C0AE;
+    --muted:#8C8377;
+    --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--void);
+    color:var(--ink);
+    font-family:var(--font-mono);
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{
+    font-family:var(--font-stamp);
+    font-size:24px;
+    margin:0 0 24px;
+    color:var(--ink);
+  }
+  .gate{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:22px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .gate input{
+    flex:1;
+    min-width:200px;
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:10px 12px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:13px;
+  }
+  .gate button{
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    padding:10px 18px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .gate button:hover{opacity:0.88;}
+  .error{color:var(--red); font-size:12.5px; margin-top:10px; width:100%;}
+  .hidden{display:none;}
+  .cards{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px;}
+  .stat-card{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 20px;
+    flex:1;
+    min-width:140px;
+  }
+  .stat-label{
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .stat-value{
+    font-family:var(--font-stamp);
+    font-size:26px;
+    color:var(--ink);
+  }
+  .panel{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 20px;
+    margin-bottom:18px;
+  }
+  .panel h2{
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:12px;}
+  .bar-label{width:90px; flex-shrink:0; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bar-track{flex:1; background:rgba(242,237,225,0.06); border-radius:3px; overflow:hidden; height:16px;}
+  .bar-fill{background:var(--teal); height:100%;}
+  .bar-count{width:44px; text-align:right; color:var(--muted); flex-shrink:0;}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  td, th{padding:6px 8px; text-align:left; border-bottom:1px solid var(--line);}
+  th{color:var(--muted); font-weight:600; text-transform:uppercase; font-size:10.5px; letter-spacing:0.08em;}
+  .refresh{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:6px 12px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    cursor:pointer;
+    margin-bottom:18px;
+  }
+  .refresh:hover{border-color:var(--teal); color:var(--teal);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Visitor Stats</h1>
+
+  <div class="gate" id="gate">
+    <input type="password" id="secretInput" placeholder="Admin secret" autocomplete="off">
+    <button id="unlockBtn" type="button">View</button>
+    <div class="error hidden" id="gateError"></div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <button class="refresh" id="refreshBtn" type="button">↻ Refresh</button>
+    <div class="cards">
+      <div class="stat-card">
+        <div class="stat-label">Total Views</div>
+        <div class="stat-value" id="totalViews">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">First Seen</div>
+        <div class="stat-value" id="firstSeen" style="font-size:14px;">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Seen</div>
+        <div class="stat-value" id="lastSeen" style="font-size:14px;">—</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Last 30 Days</h2>
+      <div id="dayBars"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Top Pages</h2>
+      <table><tbody id="topPaths"></tbody></table>
+    </div>
+
+    <div class="panel">
+      <h2>Top Referrers</h2>
+      <table><tbody id="topReferrers"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://truth-button-backend.onrender.com';
+const gate = document.getElementById('gate');
+const gateError = document.getElementById('gateError');
+const dashboard = document.getElementById('dashboard');
+const secretInput = document.getElementById('secretInput');
+
+function getSecret(){ return sessionStorage.getItem('tb_admin_secret') || ''; }
+function setSecret(s){ sessionStorage.setItem('tb_admin_secret', s); }
+
+async function loadStats(){
+  gateError.classList.add('hidden');
+  const secret = getSecret();
+  if (!secret) return;
+  try {
+    const res = await fetch(API_BASE + '/api/stats', { headers: { 'x-admin-secret': secret } });
+    if (res.status === 401) {
+      sessionStorage.removeItem('tb_admin_secret');
+      gateError.textContent = 'Wrong secret.';
+      gateError.classList.remove('hidden');
+      gate.classList.remove('hidden');
+      dashboard.classList.add('hidden');
+      return;
+    }
+    if (!res.ok) throw new Error('Server error (' + res.status + ')');
+    const data = await res.json();
+    renderStats(data);
+    gate.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+  } catch (e) {
+    gateError.textContent = 'Could not load stats: ' + e.message;
+    gateError.classList.remove('hidden');
+  }
+}
+
+function renderStats(data){
+  document.getElementById('totalViews').textContent = (data.totalViews || 0).toLocaleString();
+  document.getElementById('firstSeen').textContent = data.firstSeen ? new Date(data.firstSeen).toLocaleDateString() : '—';
+  document.getElementById('lastSeen').textContent = data.lastSeen ? new Date(data.lastSeen).toLocaleDateString() : '—';
+
+  const days = Object.keys(data.byDay || {}).sort().slice(-30);
+  const maxDay = Math.max(1, ...days.map(d => data.byDay[d]));
+  const dayBars = document.getElementById('dayBars');
+  dayBars.innerHTML = days.length ? days.map(d => {
+    const count = data.byDay[d];
+    const pct = Math.round((count / maxDay) * 100);
+    return '<div class="bar-row"><div class="bar-label">' + d + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div><div class="bar-count">' + count + '</div></div>';
+  }).join('') : '<div style="color:var(--muted); font-size:12px;">No data yet.</div>';
+
+  const pathsBody = document.getElementById('topPaths');
+  pathsBody.innerHTML = (data.topPaths || []).length ? data.topPaths.map(p =>
+    '<tr><td>' + escapeHtml(p.key) + '</td><td>' + p.count.toLocaleString() + '</td></tr>'
+  ).join('') : '<tr><td style="color:var(--muted);">No data yet.</td></tr>';
+
+  const refBody = document.getElementById('topReferrers');
+  refBody.innerHTML = (data.topReferrers || []).length ? data.topReferrers.map(r =>
+    '<tr><td>' + escapeHtml(r.key) + '</td><td>' + r.count.toLocaleString() + '</td></tr>'
+  ).join('') : '<tr><td style="color:var(--muted);">No data yet.</td></tr>';
+}
+
+function escapeHtml(s){
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+document.getElementById('unlockBtn').addEventListener('click', function(){
+  const val = secretInput.value.trim();
+  if (!val) return;
+  setSecret(val);
+  loadStats();
+});
+secretInput.addEventListener('keydown', function(e){
+  if (e.key === 'Enter') document.getElementById('unlockBtn').click();
+});
+document.getElementById('refreshBtn').addEventListener('click', loadStats);
+
+if (getSecret()) loadStats();
+</script>
+</body>
+</html>
