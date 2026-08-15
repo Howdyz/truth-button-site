@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Manager — The Truth Button</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14110F;
+    --void-2:#1C1814;
+    --red:#E8402C;
+    --teal:#2F8F7A;
+    --ink:#F2EDE1;
+    --ink-soft:#C9C0AE;
+    --muted:#8C8377;
+    --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--void);
+    color:var(--ink);
+    font-family:var(--font-mono);
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{
+    font-family:var(--font-stamp);
+    font-size:24px;
+    margin:0 0 24px;
+  }
+  .gate{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:22px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .gate input{
+    flex:1;
+    min-width:200px;
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:10px 12px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:13px;
+  }
+  .gate button{
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    padding:10px 18px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .gate button:hover{opacity:0.88;}
+  .error{color:var(--red); font-size:12.5px; margin-top:10px; width:100%;}
+  .hidden{display:none;}
+  .panel{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 20px;
+    margin-bottom:18px;
+  }
+  .panel h2{
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  label{display:block; font-size:11px; color:var(--muted); margin:10px 0 4px;}
+  input[type=text], input[type=url], textarea{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:9px 11px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:13px;
+  }
+  textarea{resize:vertical; min-height:56px;}
+  .checkbox-row{display:flex; align-items:center; gap:8px; margin-top:12px;}
+  .checkbox-row input{width:auto;}
+  .submit-btn{
+    margin-top:16px;
+    background:var(--teal);
+    color:var(--void);
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .submit-btn:hover{opacity:0.88;}
+  .form-error{color:var(--red); font-size:12px; margin-top:10px;}
+  .ad-row{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .ad-row.inactive{opacity:0.5;}
+  .ad-row-top{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  .ad-row-title{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .ad-row-advertiser{font-size:11px; color:var(--muted);}
+  .ad-row-body{font-size:12px; color:var(--ink-soft); margin:6px 0;}
+  .ad-row-link{font-size:11px; color:var(--muted); word-break:break-all;}
+  .ad-row-stats{font-size:11px; color:var(--muted); margin-top:8px;}
+  .ad-row-actions{margin-top:10px; display:flex; gap:8px;}
+  .ad-row-actions button{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:6px 12px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    cursor:pointer;
+  }
+  .ad-row-actions button:hover{border-color:var(--teal); color:var(--teal);}
+  .ad-row-actions button.danger:hover{border-color:var(--red); color:var(--red);}
+  .empty-note{color:var(--muted); font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ad Manager</h1>
+
+  <div class="gate" id="gate">
+    <input type="password" id="secretInput" placeholder="Admin secret" autocomplete="off">
+    <button id="unlockBtn" type="button">View</button>
+    <div class="error hidden" id="gateError"></div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <div class="panel">
+      <h2>New Ad</h2>
+      <label for="fAdvertiser">Advertiser</label>
+      <input type="text" id="fAdvertiser" maxlength="60" placeholder="Acme Co">
+      <label for="fHeadline">Headline</label>
+      <input type="text" id="fHeadline" maxlength="100" placeholder="Check out Acme">
+      <label for="fBody">Body (optional)</label>
+      <textarea id="fBody" maxlength="200" placeholder="A short line about what they offer."></textarea>
+      <label for="fLink">Link URL</label>
+      <input type="url" id="fLink" placeholder="https://example.com">
+      <label for="fImage">Image URL (optional, square works best)</label>
+      <input type="url" id="fImage" placeholder="https://example.com/logo.png">
+      <div class="checkbox-row">
+        <input type="checkbox" id="fActive" checked>
+        <label for="fActive" style="margin:0;">Active immediately</label>
+      </div>
+      <button class="submit-btn" id="createBtn" type="button">Create Ad</button>
+      <div class="form-error hidden" id="formError"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Existing Ads</h2>
+      <div id="adsList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://truth-button-backend.onrender.com';
+const gate = document.getElementById('gate');
+const gateError = document.getElementById('gateError');
+const dashboard = document.getElementById('dashboard');
+const secretInput = document.getElementById('secretInput');
+
+function getSecret(){ return sessionStorage.getItem('tb_admin_secret') || ''; }
+function setSecret(s){ sessionStorage.setItem('tb_admin_secret', s); }
+
+function escapeHtml(s){
+  const div = document.createElement('div');
+  div.textContent = s == null ? '' : String(s);
+  return div.innerHTML;
+}
+
+async function loadAds(){
+  gateError.classList.add('hidden');
+  const secret = getSecret();
+  if (!secret) return;
+  try {
+    const res = await fetch(API_BASE + '/api/ads', { headers: { 'x-admin-secret': secret } });
+    if (res.status === 401) {
+      sessionStorage.removeItem('tb_admin_secret');
+      gateError.textContent = 'Wrong secret.';
+      gateError.classList.remove('hidden');
+      gate.classList.remove('hidden');
+      dashboard.classList.add('hidden');
+      return;
+    }
+    if (!res.ok) throw new Error('Server error (' + res.status + ')');
+    const data = await res.json();
+    renderAds(data.ads || []);
+    gate.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+  } catch (e) {
+    gateError.textContent = 'Could not load ads: ' + e.message;
+    gateError.classList.remove('hidden');
+  }
+}
+
+function renderAds(ads){
+  const list = document.getElementById('adsList');
+  if (!ads.length) {
+    list.innerHTML = '<div class="empty-note">No ads yet — create one above.</div>';
+    return;
+  }
+  list.innerHTML = ads.map(function(ad){
+    const ctr = ad.impressions ? ((ad.clicks / ad.impressions) * 100).toFixed(1) : '0.0';
+    return '' +
+      '<div class="ad-row' + (ad.active ? '' : ' inactive') + '">' +
+        '<div class="ad-row-top">' +
+          '<div class="ad-row-title">' + escapeHtml(ad.headline) + '</div>' +
+          '<div class="ad-row-advertiser">' + escapeHtml(ad.advertiser) + '</div>' +
+        '</div>' +
+        (ad.body ? '<div class="ad-row-body">' + escapeHtml(ad.body) + '</div>' : '') +
+        '<div class="ad-row-link">' + escapeHtml(ad.linkUrl) + '</div>' +
+        '<div class="ad-row-stats">' + (ad.impressions || 0) + ' impressions · ' + (ad.clicks || 0) + ' clicks · ' + ctr + '% CTR · ' + (ad.active ? 'active' : 'inactive') + '</div>' +
+        '<div class="ad-row-actions">' +
+          '<button data-action="toggle" data-id="' + ad.id + '" data-active="' + ad.active + '">' + (ad.active ? 'Deactivate' : 'Activate') + '</button>' +
+          '<button data-action="delete" data-id="' + ad.id + '" class="danger">Delete</button>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+document.getElementById('adsList').addEventListener('click', async function(e){
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const id = btn.getAttribute('data-id');
+  const secret = getSecret();
+  if (btn.getAttribute('data-action') === 'toggle') {
+    const nowActive = btn.getAttribute('data-active') === 'true';
+    await fetch(API_BASE + '/api/ads/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      body: JSON.stringify({ active: !nowActive })
+    });
+    loadAds();
+  } else if (btn.getAttribute('data-action') === 'delete') {
+    if (!confirm('Delete this ad permanently?')) return;
+    await fetch(API_BASE + '/api/ads/' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'x-admin-secret': secret }
+    });
+    loadAds();
+  }
+});
+
+document.getElementById('createBtn').addEventListener('click', async function(){
+  const formError = document.getElementById('formError');
+  formError.classList.add('hidden');
+  const advertiser = document.getElementById('fAdvertiser').value.trim();
+  const headline = document.getElementById('fHeadline').value.trim();
+  const body = document.getElementById('fBody').value.trim();
+  const linkUrl = document.getElementById('fLink').value.trim();
+  const imageUrl = document.getElementById('fImage').value.trim();
+  const active = document.getElementById('fActive').checked;
+
+  try {
+    const res = await fetch(API_BASE + '/api/ads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': getSecret() },
+      body: JSON.stringify({ advertiser, headline, body, linkUrl, imageUrl, active })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      formError.textContent = data.error || 'Could not create ad.';
+      formError.classList.remove('hidden');
+      return;
+    }
+    document.getElementById('fAdvertiser').value = '';
+    document.getElementById('fHeadline').value = '';
+    document.getElementById('fBody').value = '';
+    document.getElementById('fLink').value = '';
+    document.getElementById('fImage').value = '';
+    document.getElementById('fActive').checked = true;
+    loadAds();
+  } catch (e) {
+    formError.textContent = 'Could not reach the server.';
+    formError.classList.remove('hidden');
+  }
+});
+
+document.getElementById('unlockBtn').addEventListener('click', function(){
+  const val = secretInput.value.trim();
+  if (!val) return;
+  setSecret(val);
+  loadAds();
+});
+secretInput.addEventListener('keydown', function(e){
+  if (e.key === 'Enter') document.getElementById('unlockBtn').click();
+});
+
+if (getSecret()) loadAds();
+</script>
+</body>
+</html>
