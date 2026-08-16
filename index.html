@@ -1912,6 +1912,7 @@
         <div class="rs-status" id="rs-status"></div>
         <div class="rs-verdict" id="rs-verdict"></div>
         <div id="rs-findings"></div>
+        <button id="rs-clear-btn" type="button" style="display:none; background:none; border:1px solid var(--rs-border); color:var(--rs-text-dim);">Clear Results</button>
       </div>
     </div>
 
@@ -2775,6 +2776,7 @@ if (REVIEWS_API_BASE) {
   const statusEl = root.querySelector('#rs-status');
   const verdictEl = root.querySelector('#rs-verdict');
   const findingsEl = root.querySelector('#rs-findings');
+  const clearBtn = root.querySelector('#rs-clear-btn');
 
   root.querySelectorAll('.rs-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -2800,6 +2802,7 @@ if (REVIEWS_API_BASE) {
     verdictEl.textContent = blocking
       ? 'Needs review — high-severity findings detected'
       : findings.length ? 'No high-severity findings' : 'Clean — no suspicious patterns found';
+    clearBtn.style.display = '';
 
     if (!findings.length) {
       findingsEl.innerHTML = '<div class="rs-empty">No suspicious patterns found.</div>';
@@ -2823,9 +2826,17 @@ if (REVIEWS_API_BASE) {
     verdictEl.className = 'rs-verdict';
     verdictEl.textContent = '';
     findingsEl.innerHTML = '';
+    clearBtn.style.display = 'none';
   }
 
   function setStatus(text) { statusEl.textContent = text || ''; }
+
+  clearBtn.addEventListener('click', () => {
+    clearResults();
+    setStatus('');
+    root.querySelector('#rs-url-input').value = '';
+    root.querySelector('#rs-zip-input').value = '';
+  });
 
   root.querySelector('#rs-scan-url-btn').addEventListener('click', async () => {
     const url = root.querySelector('#rs-url-input').value.trim();
