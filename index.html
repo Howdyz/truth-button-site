@@ -1440,6 +1440,7 @@
     <div class="mode-tab" data-mode="ytlisten" id="tabYtListen">📺 Social Listen</div>
     <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
     <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
+    <div class="mode-tab" data-mode="scanner" id="tabScanner">🛡️ Repo Scanner</div>
   </div>
 
   <div class="desk">
@@ -1820,6 +1821,105 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="scannerPanel">
+    <div class="lookup-card">
+      <h3>Repo Scanner — Infostealer Pattern Check</h3>
+      <div class="lc-sub">Paste a public GitHub/GitLab/Bitbucket/Codeberg/sourcehut URL, or upload a .zip, and this checks the source for the patterns typically found in "logger" or "grabber" scripts — code that quietly collects system/browser info and phones it home. Heuristic, not exhaustive: treat findings as "review this," not a verdict.</div>
+
+      <div id="repo-scanner-widget">
+        <style>
+          #repo-scanner-widget {
+            --rs-bg: #14110F;
+            --rs-panel: #1C1814;
+            --rs-border: rgba(242,237,225,0.14);
+            --rs-text: #F2EDE1;
+            --rs-text-dim: #8C8377;
+            --rs-accent: #2F8F7A;
+            --rs-low: #6b8ecf;
+            --rs-medium: #d8a13a;
+            --rs-high: #E8402C;
+            --rs-critical: #E8402C;
+            --rs-ok: #2F8F7A;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--rs-text);
+            margin-top: 16px;
+          }
+          #repo-scanner-widget * { box-sizing: border-box; }
+          #repo-scanner-widget .rs-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+          #repo-scanner-widget .rs-tab {
+            padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12.5px;
+            background: var(--rs-panel); border: 1px solid var(--rs-border); color: var(--rs-text-dim);
+          }
+          #repo-scanner-widget .rs-tab.active { color: var(--rs-text); border-color: var(--rs-accent); }
+          #repo-scanner-widget .rs-panel { background: var(--rs-panel); border: 1px solid var(--rs-border);
+            border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+          #repo-scanner-widget input[type=text] {
+            width: 100%; padding: 9px 10px; background: var(--rs-bg); border: 1px solid var(--rs-border);
+            border-radius: 5px; color: var(--rs-text); font-size: 13px; font-family: inherit;
+          }
+          #repo-scanner-widget input[type=file] { color: var(--rs-text-dim); font-size: 12.5px; }
+          #repo-scanner-widget button {
+            margin-top: 12px; padding: 9px 14px; background: var(--rs-accent); border: none;
+            border-radius: 5px; color: var(--rs-bg); font-weight: 600; font-size: 12.5px; cursor: pointer;
+            font-family: inherit; text-transform: uppercase; letter-spacing: 0.04em;
+          }
+          #repo-scanner-widget button:hover{opacity:0.88;}
+          #repo-scanner-widget button:disabled { opacity: .5; cursor: default; }
+          #repo-scanner-widget .rs-status { font-size: 12.5px; color: var(--rs-text-dim); margin-bottom: 12px; min-height: 18px; }
+          #repo-scanner-widget .rs-verdict {
+            display: none; padding: 12px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-bottom: 14px;
+          }
+          #repo-scanner-widget .rs-verdict.show { display: block; }
+          #repo-scanner-widget .rs-verdict.pass { background: rgba(47,143,122,.12); border: 1px solid var(--rs-ok); color: var(--rs-ok); }
+          #repo-scanner-widget .rs-verdict.review { background: rgba(232,64,44,.12); border: 1px solid var(--rs-critical); color: var(--rs-critical); }
+          #repo-scanner-widget .rs-finding {
+            background: var(--rs-bg); border: 1px solid var(--rs-border); border-left: 4px solid var(--rs-border);
+            border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; font-size: 12.5px;
+          }
+          #repo-scanner-widget .rs-finding.critical { border-left-color: var(--rs-critical); }
+          #repo-scanner-widget .rs-finding.high { border-left-color: var(--rs-high); }
+          #repo-scanner-widget .rs-finding.medium { border-left-color: var(--rs-medium); }
+          #repo-scanner-widget .rs-finding.low { border-left-color: var(--rs-low); }
+          #repo-scanner-widget .rs-finding .rs-top { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size: 11px; }
+          #repo-scanner-widget .rs-finding .rs-sev { font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+          #repo-scanner-widget .rs-finding.critical .rs-sev { color: var(--rs-critical); }
+          #repo-scanner-widget .rs-finding.high .rs-sev { color: var(--rs-high); }
+          #repo-scanner-widget .rs-finding.medium .rs-sev { color: var(--rs-medium); }
+          #repo-scanner-widget .rs-finding.low .rs-sev { color: var(--rs-low); }
+          #repo-scanner-widget .rs-finding .rs-loc { color: var(--rs-text-dim); font-family: ui-monospace, monospace; }
+          #repo-scanner-widget .rs-finding .rs-desc { margin: 6px 0; color: var(--rs-text); }
+          #repo-scanner-widget .rs-finding code {
+            display: block; background: #0e0c0a; border: 1px solid var(--rs-border); border-radius: 5px;
+            padding: 6px 8px; font-size: 11.5px; overflow-x: auto; color: #c7d0e0;
+          }
+          #repo-scanner-widget .rs-empty { color: var(--rs-text-dim); font-size: 13px; }
+        </style>
+
+        <div class="rs-tabs">
+          <div class="rs-tab active" data-tab="url">Scan a Git URL</div>
+          <div class="rs-tab" data-tab="zip">Upload a .zip</div>
+        </div>
+
+        <div class="rs-panel" data-panel="url">
+          <input type="text" id="rs-url-input" placeholder="https://github.com/owner/repo">
+          <button id="rs-scan-url-btn" type="button">Scan</button>
+        </div>
+        <div class="rs-panel" data-panel="zip" style="display:none;">
+          <input type="file" id="rs-zip-input" accept=".zip">
+          <button id="rs-scan-zip-btn" type="button">Scan</button>
+        </div>
+
+        <div class="rs-status" id="rs-status"></div>
+        <div class="rs-verdict" id="rs-verdict"></div>
+        <div id="rs-findings"></div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> this is a heuristic pattern scanner, not a security audit or a guarantee of safety. It only checks source files (.py/.js/.jsx/.mjs/.cjs/.ts/.tsx) for known infostealer-style patterns — it won't catch everything, especially deliberately obfuscated code, and it can false-positive on legitimate diagnostics/analytics code. Only public GitHub, GitLab, Bitbucket, Codeberg, or sourcehut URLs are accepted (https:// only); nothing is scanned or stored beyond the scan itself — each run happens in a temporary directory that's deleted before the result comes back.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -1991,6 +2091,7 @@ const datacenterUpdatesPanel = document.getElementById('datacenterUpdatesPanel')
 const ytPanel = document.getElementById('ytPanel');
 const reviewsPanel = document.getElementById('reviewsPanel');
 const peptidePanel = document.getElementById('peptidePanel');
+const scannerPanel = document.getElementById('scannerPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -1999,14 +2100,15 @@ const LOOKUP_TAGLINES = {
   datacenterupdates: 'How data center land gets bought through shell LLCs and NDAs, and the 2026 rollback of federal shell-company transparency rules — sourced from independent reporting.',
   ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
-  peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.'
+  peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
+  scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2018,6 +2120,7 @@ function setMode(newMode){
   ytPanel.classList.toggle('show', newMode === 'ytlisten');
   reviewsPanel.classList.toggle('show', newMode === 'reviews');
   peptidePanel.classList.toggle('show', newMode === 'peptide');
+  scannerPanel.classList.toggle('show', newMode === 'scanner');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2037,6 +2140,7 @@ function setMode(newMode){
 }
 
 document.getElementById('tabPhoto').addEventListener('click', () => setMode('photo'));
+document.getElementById('tabScanner').addEventListener('click', () => setMode('scanner'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -2662,6 +2766,108 @@ if (REVIEWS_API_BASE) {
     fetch(apiUrl('/api/ads/' + encodeURIComponent(ad.id) + '/impression'), { method: 'POST', keepalive: true }).catch(function(){});
   }).catch(function(){});
 }
+
+// repo scanner widget
+(function () {
+  const root = document.getElementById('repo-scanner-widget');
+  if (!root) return;
+  const SEV_ORDER = ['critical', 'high', 'medium', 'low'];
+  const statusEl = root.querySelector('#rs-status');
+  const verdictEl = root.querySelector('#rs-verdict');
+  const findingsEl = root.querySelector('#rs-findings');
+
+  root.querySelectorAll('.rs-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      root.querySelectorAll('.rs-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      root.querySelectorAll('.rs-panel').forEach(p => {
+        p.style.display = p.dataset.panel === tab.dataset.tab ? '' : 'none';
+      });
+    });
+  });
+
+  function rsEscapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function renderResults(data) {
+    const findings = data.findings || [];
+    const blocking = findings.some(f => f.severity === 'critical' || f.severity === 'high');
+
+    verdictEl.className = 'rs-verdict show ' + (blocking ? 'review' : 'pass');
+    verdictEl.textContent = blocking
+      ? 'Needs review — high-severity findings detected'
+      : findings.length ? 'No high-severity findings' : 'Clean — no suspicious patterns found';
+
+    if (!findings.length) {
+      findingsEl.innerHTML = '<div class="rs-empty">No suspicious patterns found.</div>';
+      return;
+    }
+
+    const sorted = [...findings].sort((a, b) => SEV_ORDER.indexOf(a.severity) - SEV_ORDER.indexOf(b.severity));
+    findingsEl.innerHTML = sorted.map(f => `
+      <div class="rs-finding ${f.severity}">
+        <div class="rs-top">
+          <span class="rs-sev">${f.severity} · ${rsEscapeHtml(f.rule_id)}</span>
+          <span class="rs-loc">${rsEscapeHtml(f.file)}:${f.line}</span>
+        </div>
+        <div class="rs-desc">${rsEscapeHtml(f.description)}</div>
+        ${f.snippet ? `<code>${rsEscapeHtml(f.snippet)}</code>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function clearResults() {
+    verdictEl.className = 'rs-verdict';
+    verdictEl.textContent = '';
+    findingsEl.innerHTML = '';
+  }
+
+  function setStatus(text) { statusEl.textContent = text || ''; }
+
+  root.querySelector('#rs-scan-url-btn').addEventListener('click', async () => {
+    const url = root.querySelector('#rs-url-input').value.trim();
+    if (!url) { setStatus('Enter a Git URL first.'); return; }
+    clearResults();
+    setStatus('Cloning and scanning… this can take a moment.');
+    try {
+      const res = await fetch(apiUrl('/api/scan/url'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'scan failed');
+      setStatus(`Scanned ${data.file_count} file(s).`);
+      renderResults(data);
+    } catch (e) {
+      setStatus('Error: ' + e.message);
+    }
+  });
+
+  root.querySelector('#rs-scan-zip-btn').addEventListener('click', async () => {
+    const input = root.querySelector('#rs-zip-input');
+    const file = input.files && input.files[0];
+    if (!file) { setStatus('Choose a .zip file first.'); return; }
+    clearResults();
+    setStatus('Uploading and scanning…');
+    try {
+      const res = await fetch(apiUrl('/api/scan/zip'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/zip' },
+        body: file,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'scan failed');
+      setStatus(`Scanned ${data.file_count} file(s).`);
+      renderResults(data);
+    } catch (e) {
+      setStatus('Error: ' + e.message);
+    }
+  });
+})();
 
 async function detectBackendMode(){
   if (REVIEWS_API_BASE) {
