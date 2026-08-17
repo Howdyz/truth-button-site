@@ -1441,6 +1441,7 @@
     <div class="mode-tab" data-mode="reviews" id="tabReviews">🗣️ Reviews</div>
     <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
     <div class="mode-tab" data-mode="scanner" id="tabScanner">🛡️ Repo Scanner</div>
+    <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
   </div>
 
   <div class="desk">
@@ -1921,6 +1922,123 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="pdfPanel">
+    <div class="lookup-card">
+      <h3>PDF Editor</h3>
+      <div class="lc-sub">Merge, split, rotate, watermark, or compress a PDF — everything runs locally in your browser. Files are never uploaded anywhere.</div>
+
+      <div id="pdf-editor-widget">
+        <style>
+          #pdf-editor-widget {
+            --pe-bg: #14110F; --pe-panel: #1C1814; --pe-border: rgba(242,237,225,0.14);
+            --pe-text: #F2EDE1; --pe-text-dim: #8C8377; --pe-accent: #2F8F7A; --pe-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--pe-text); margin-top: 16px;
+          }
+          #pdf-editor-widget *{box-sizing:border-box;}
+          #pdf-editor-widget .pe-tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+          #pdf-editor-widget .pe-tab{padding:8px 14px; border-radius:6px; cursor:pointer; font-size:12.5px; background:var(--pe-panel); border:1px solid var(--pe-border); color:var(--pe-text-dim);}
+          #pdf-editor-widget .pe-tab.active{color:var(--pe-text); border-color:var(--pe-accent);}
+          #pdf-editor-widget .pe-panel{background:var(--pe-panel); border:1px solid var(--pe-border); border-radius:8px; padding:16px; margin-bottom:16px; display:none;}
+          #pdf-editor-widget .pe-panel.active{display:block;}
+          #pdf-editor-widget label{display:block; font-size:11px; color:var(--pe-text-dim); margin:10px 0 4px;}
+          #pdf-editor-widget input[type=text], #pdf-editor-widget input[type=number]{
+            width:100%; padding:9px 10px; background:var(--pe-bg); border:1px solid var(--pe-border);
+            border-radius:5px; color:var(--pe-text); font-size:13px; font-family:inherit;
+          }
+          #pdf-editor-widget input[type=file]{color:var(--pe-text-dim); font-size:12.5px;}
+          #pdf-editor-widget select{
+            padding:9px 10px; background:var(--pe-bg); border:1px solid var(--pe-border);
+            border-radius:5px; color:var(--pe-text); font-size:13px; font-family:inherit;
+          }
+          #pdf-editor-widget button.pe-action{
+            margin-top:14px; padding:10px 16px; background:var(--pe-accent); border:none;
+            border-radius:5px; color:var(--pe-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #pdf-editor-widget button.pe-action:hover{opacity:0.88;}
+          #pdf-editor-widget button.pe-action:disabled{opacity:.5; cursor:default;}
+          #pdf-editor-widget .pe-status{font-size:12.5px; color:var(--pe-text-dim); margin-top:10px; min-height:18px;}
+          #pdf-editor-widget .pe-status.error{color:var(--pe-red);}
+          #pdf-editor-widget .pe-status.ok{color:var(--pe-accent);}
+          #pdf-editor-widget .pe-filelist{list-style:none; margin:10px 0 0; padding:0; font-size:12.5px;}
+          #pdf-editor-widget .pe-filelist li{
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            background:var(--pe-bg); border:1px solid var(--pe-border); border-radius:5px;
+            padding:7px 10px; margin-bottom:6px;
+          }
+          #pdf-editor-widget .pe-filelist .pe-file-btns button{
+            background:none; border:1px solid var(--pe-border); color:var(--pe-text-dim);
+            border-radius:4px; font-size:11px; padding:3px 7px; margin-left:4px; cursor:pointer;
+          }
+          #pdf-editor-widget .pe-filelist .pe-file-btns button:hover{border-color:var(--pe-accent); color:var(--pe-accent);}
+          #pdf-editor-widget .pe-hint{font-size:11.5px; color:var(--pe-text-dim); margin-top:8px; line-height:1.5;}
+        </style>
+
+        <div class="pe-tabs">
+          <div class="pe-tab active" data-petab="merge">Merge</div>
+          <div class="pe-tab" data-petab="split">Split / Extract</div>
+          <div class="pe-tab" data-petab="rotate">Rotate</div>
+          <div class="pe-tab" data-petab="watermark">Watermark / Text</div>
+          <div class="pe-tab" data-petab="compress">Compress</div>
+        </div>
+
+        <div class="pe-panel active" data-pepanel="merge">
+          <label for="peMergeInput">Choose 2 or more PDFs, in the order you want them merged</label>
+          <input type="file" id="peMergeInput" accept="application/pdf" multiple>
+          <ul class="pe-filelist" id="peMergeList"></ul>
+          <button class="pe-action" id="peMergeBtn" type="button">Merge &amp; Download</button>
+          <div class="pe-status" id="peMergeStatus"></div>
+        </div>
+
+        <div class="pe-panel" data-pepanel="split">
+          <label for="peSplitInput">Choose a PDF</label>
+          <input type="file" id="peSplitInput" accept="application/pdf">
+          <label for="peSplitRange">Pages to extract (e.g. 1-3,5,8-9)</label>
+          <input type="text" id="peSplitRange" placeholder="1-3,5,8-9">
+          <button class="pe-action" id="peSplitBtn" type="button">Extract &amp; Download</button>
+          <div class="pe-status" id="peSplitStatus"></div>
+        </div>
+
+        <div class="pe-panel" data-pepanel="rotate">
+          <label for="peRotateInput">Choose a PDF</label>
+          <input type="file" id="peRotateInput" accept="application/pdf">
+          <label for="peRotateRange">Pages to rotate (blank = all pages)</label>
+          <input type="text" id="peRotateRange" placeholder="e.g. 1-3,5 (leave blank for all)">
+          <label for="peRotateAngle">Rotation</label>
+          <select id="peRotateAngle">
+            <option value="90">90° clockwise</option>
+            <option value="180">180°</option>
+            <option value="270">270° clockwise (90° counter-clockwise)</option>
+          </select>
+          <button class="pe-action" id="peRotateBtn" type="button">Rotate &amp; Download</button>
+          <div class="pe-status" id="peRotateStatus"></div>
+        </div>
+
+        <div class="pe-panel" data-pepanel="watermark">
+          <label for="peWatermarkInput">Choose a PDF</label>
+          <input type="file" id="peWatermarkInput" accept="application/pdf">
+          <label for="peWatermarkText">Watermark text</label>
+          <input type="text" id="peWatermarkText" placeholder="e.g. DRAFT, CONFIDENTIAL" maxlength="60">
+          <button class="pe-action" id="peWatermarkBtn" type="button">Add Watermark &amp; Download</button>
+          <div class="pe-status" id="peWatermarkStatus"></div>
+          <div class="pe-hint">Stamped diagonally, semi-transparent, across every page.</div>
+        </div>
+
+        <div class="pe-panel" data-pepanel="compress">
+          <label for="peCompressInput">Choose a PDF</label>
+          <input type="file" id="peCompressInput" accept="application/pdf">
+          <button class="pe-action" id="peCompressBtn" type="button">Compress &amp; Download</button>
+          <div class="pe-status" id="peCompressStatus"></div>
+          <div class="pe-hint">Re-packs the file's internal structure to shave off overhead. Works best on PDFs with lots of repeated fonts/objects — won't meaningfully shrink a file that's mostly large images, since that needs actual image recompression this tool doesn't do.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> every operation runs entirely in your browser using a local copy of pdf-lib — no file is ever uploaded to a server. Very large or unusual PDFs (encrypted, malformed, or with non-standard structure) may fail to process; if that happens, the error message will say so rather than silently producing a broken file.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -1967,6 +2085,7 @@
     </div>
   </div>
 
+<script src="pdf-lib.min.js"></script>
 <script>
 const spreadShareBtn = document.getElementById('spreadShareBtn');
 if (spreadShareBtn) {
@@ -2093,6 +2212,7 @@ const ytPanel = document.getElementById('ytPanel');
 const reviewsPanel = document.getElementById('reviewsPanel');
 const peptidePanel = document.getElementById('peptidePanel');
 const scannerPanel = document.getElementById('scannerPanel');
+const pdfPanel = document.getElementById('pdfPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2102,14 +2222,15 @@ const LOOKUP_TAGLINES = {
   ytlisten: 'Load a video from YouTube, Facebook, X, TikTok, or Instagram in its official embedded player, then listen live (with your permission) to check the audio for AI signatures.',
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
   peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
-  scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.'
+  scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.',
+  pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2122,6 +2243,7 @@ function setMode(newMode){
   reviewsPanel.classList.toggle('show', newMode === 'reviews');
   peptidePanel.classList.toggle('show', newMode === 'peptide');
   scannerPanel.classList.toggle('show', newMode === 'scanner');
+  pdfPanel.classList.toggle('show', newMode === 'pdf');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2142,6 +2264,7 @@ function setMode(newMode){
 
 document.getElementById('tabPhoto').addEventListener('click', () => setMode('photo'));
 document.getElementById('tabScanner').addEventListener('click', () => setMode('scanner'));
+document.getElementById('tabPdf').addEventListener('click', () => setMode('pdf'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -2876,6 +2999,228 @@ if (REVIEWS_API_BASE) {
       renderResults(data);
     } catch (e) {
       setStatus('Error: ' + e.message);
+    }
+  });
+})();
+
+// PDF editor widget
+(function () {
+  const root = document.getElementById('pdf-editor-widget');
+  if (!root || typeof PDFLib === 'undefined') return;
+
+  root.querySelectorAll('.pe-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      root.querySelectorAll('.pe-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      root.querySelectorAll('.pe-panel').forEach(p => {
+        p.classList.toggle('active', p.dataset.pepanel === tab.dataset.petab);
+      });
+    });
+  });
+
+  function peSetStatus(el, text, kind){
+    el.textContent = text || '';
+    el.className = 'pe-status' + (kind ? ' ' + kind : '');
+  }
+
+  function peEscapeHtml(s){
+    const div = document.createElement('div');
+    div.textContent = s == null ? '' : String(s);
+    return div.innerHTML;
+  }
+
+  function peDownload(bytes, filename){
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
+  // "1-3,5,8-9" -> zero-indexed page list, in the order given, validated against pageCount
+  function peParseRanges(str, pageCount){
+    const parts = str.split(',').map(s => s.trim()).filter(Boolean);
+    if (!parts.length) throw new Error('Enter at least one page or range.');
+    const indices = [];
+    for (const part of parts) {
+      const m = part.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) throw new Error(`Invalid range: "${part}"`);
+      const start = parseInt(m[1], 10);
+      const end = m[2] ? parseInt(m[2], 10) : start;
+      const hi = Math.max(start, end);
+      if (start < 1 || hi > pageCount) throw new Error(`This PDF only has ${pageCount} page(s) — "${part}" is out of range.`);
+      if (start <= end) for (let i = start; i <= end; i++) indices.push(i - 1);
+      else for (let i = start; i >= end; i--) indices.push(i - 1);
+    }
+    return indices;
+  }
+
+  // ---------- Merge ----------
+  let peMergeFiles = [];
+  const peMergeInput = root.querySelector('#peMergeInput');
+  const peMergeList = root.querySelector('#peMergeList');
+  const peMergeStatus = root.querySelector('#peMergeStatus');
+
+  function peRenderMergeList(){
+    peMergeList.innerHTML = peMergeFiles.map((f, i) => `
+      <li>
+        <span>${i + 1}. ${peEscapeHtml(f.name)}</span>
+        <span class="pe-file-btns">
+          <button type="button" data-act="up" data-i="${i}"${i === 0 ? ' disabled' : ''}>↑</button>
+          <button type="button" data-act="down" data-i="${i}"${i === peMergeFiles.length - 1 ? ' disabled' : ''}>↓</button>
+          <button type="button" data-act="remove" data-i="${i}">✕</button>
+        </span>
+      </li>
+    `).join('');
+  }
+
+  peMergeInput.addEventListener('change', () => {
+    peMergeFiles = peMergeFiles.concat(Array.from(peMergeInput.files));
+    peMergeInput.value = '';
+    peRenderMergeList();
+  });
+
+  peMergeList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    if (btn.dataset.act === 'remove') peMergeFiles.splice(i, 1);
+    else if (btn.dataset.act === 'up' && i > 0) [peMergeFiles[i - 1], peMergeFiles[i]] = [peMergeFiles[i], peMergeFiles[i - 1]];
+    else if (btn.dataset.act === 'down' && i < peMergeFiles.length - 1) [peMergeFiles[i + 1], peMergeFiles[i]] = [peMergeFiles[i], peMergeFiles[i + 1]];
+    peRenderMergeList();
+  });
+
+  root.querySelector('#peMergeBtn').addEventListener('click', async () => {
+    if (peMergeFiles.length < 2) { peSetStatus(peMergeStatus, 'Choose at least 2 PDFs.', 'error'); return; }
+    peSetStatus(peMergeStatus, 'Merging…');
+    try {
+      const merged = await PDFLib.PDFDocument.create();
+      for (const file of peMergeFiles) {
+        const bytes = await file.arrayBuffer();
+        const src = await PDFLib.PDFDocument.load(bytes);
+        const pages = await merged.copyPages(src, src.getPageIndices());
+        pages.forEach(p => merged.addPage(p));
+      }
+      const outBytes = await merged.save();
+      peDownload(outBytes, 'merged.pdf');
+      peSetStatus(peMergeStatus, `Merged ${peMergeFiles.length} files — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peMergeStatus, 'Error: ' + e.message, 'error');
+    }
+  });
+
+  // ---------- Split / Extract ----------
+  const peSplitInput = root.querySelector('#peSplitInput');
+  const peSplitRange = root.querySelector('#peSplitRange');
+  const peSplitStatus = root.querySelector('#peSplitStatus');
+  root.querySelector('#peSplitBtn').addEventListener('click', async () => {
+    const file = peSplitInput.files[0];
+    if (!file) { peSetStatus(peSplitStatus, 'Choose a PDF first.', 'error'); return; }
+    peSetStatus(peSplitStatus, 'Extracting…');
+    try {
+      const bytes = await file.arrayBuffer();
+      const src = await PDFLib.PDFDocument.load(bytes);
+      const indices = peParseRanges(peSplitRange.value, src.getPageCount());
+      const out = await PDFLib.PDFDocument.create();
+      const pages = await out.copyPages(src, indices);
+      pages.forEach(p => out.addPage(p));
+      const outBytes = await out.save();
+      peDownload(outBytes, 'extracted.pdf');
+      peSetStatus(peSplitStatus, `Extracted ${indices.length} page(s) — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peSplitStatus, 'Error: ' + e.message, 'error');
+    }
+  });
+
+  // ---------- Rotate ----------
+  const peRotateInput = root.querySelector('#peRotateInput');
+  const peRotateRange = root.querySelector('#peRotateRange');
+  const peRotateAngle = root.querySelector('#peRotateAngle');
+  const peRotateStatus = root.querySelector('#peRotateStatus');
+  root.querySelector('#peRotateBtn').addEventListener('click', async () => {
+    const file = peRotateInput.files[0];
+    if (!file) { peSetStatus(peRotateStatus, 'Choose a PDF first.', 'error'); return; }
+    peSetStatus(peRotateStatus, 'Rotating…');
+    try {
+      const bytes = await file.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(bytes);
+      const pageCount = doc.getPageCount();
+      const indices = peRotateRange.value.trim() ? peParseRanges(peRotateRange.value, pageCount) : doc.getPageIndices();
+      const angle = parseInt(peRotateAngle.value, 10);
+      const pages = doc.getPages();
+      indices.forEach(i => {
+        const page = pages[i];
+        const current = page.getRotation().angle;
+        page.setRotation(PDFLib.degrees((current + angle) % 360));
+      });
+      const outBytes = await doc.save();
+      peDownload(outBytes, 'rotated.pdf');
+      peSetStatus(peRotateStatus, `Rotated ${indices.length} page(s) — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peRotateStatus, 'Error: ' + e.message, 'error');
+    }
+  });
+
+  // ---------- Watermark ----------
+  const peWatermarkInput = root.querySelector('#peWatermarkInput');
+  const peWatermarkText = root.querySelector('#peWatermarkText');
+  const peWatermarkStatus = root.querySelector('#peWatermarkStatus');
+  root.querySelector('#peWatermarkBtn').addEventListener('click', async () => {
+    const file = peWatermarkInput.files[0];
+    const text = peWatermarkText.value.trim();
+    if (!file) { peSetStatus(peWatermarkStatus, 'Choose a PDF first.', 'error'); return; }
+    if (!text) { peSetStatus(peWatermarkStatus, 'Enter watermark text.', 'error'); return; }
+    peSetStatus(peWatermarkStatus, 'Adding watermark…');
+    try {
+      const bytes = await file.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(bytes);
+      const font = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const pages = doc.getPages();
+      pages.forEach(page => {
+        const { width, height } = page.getSize();
+        const fontSize = Math.max(24, Math.min(90, width / (text.length * 0.6 || 1)));
+        page.drawText(text, {
+          x: width / 2 - (text.length * fontSize * 0.25),
+          y: height / 2,
+          size: fontSize,
+          font,
+          color: PDFLib.rgb(0.7, 0.15, 0.1),
+          opacity: 0.25,
+          rotate: PDFLib.degrees(45)
+        });
+      });
+      const outBytes = await doc.save();
+      peDownload(outBytes, 'watermarked.pdf');
+      peSetStatus(peWatermarkStatus, `Watermarked ${pages.length} page(s) — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peWatermarkStatus, 'Error: ' + e.message, 'error');
+    }
+  });
+
+  // ---------- Compress ----------
+  const peCompressInput = root.querySelector('#peCompressInput');
+  const peCompressStatus = root.querySelector('#peCompressStatus');
+  root.querySelector('#peCompressBtn').addEventListener('click', async () => {
+    const file = peCompressInput.files[0];
+    if (!file) { peSetStatus(peCompressStatus, 'Choose a PDF first.', 'error'); return; }
+    peSetStatus(peCompressStatus, 'Compressing…');
+    try {
+      const bytes = await file.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(bytes);
+      const outBytes = await doc.save({ useObjectStreams: true });
+      const before = bytes.byteLength;
+      const after = outBytes.byteLength;
+      const pct = before > 0 ? Math.round((1 - after / before) * 100) : 0;
+      peDownload(outBytes, 'compressed.pdf');
+      peSetStatus(peCompressStatus, pct > 0
+        ? `${(before/1024).toFixed(0)}KB → ${(after/1024).toFixed(0)}KB (${pct}% smaller) — downloaded.`
+        : `${(before/1024).toFixed(0)}KB → ${(after/1024).toFixed(0)}KB (no significant reduction — this file was already efficiently packed) — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peCompressStatus, 'Error: ' + e.message, 'error');
     }
   });
 })();
