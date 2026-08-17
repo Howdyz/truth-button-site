@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free AI Photo, Video &amp; Audio Detector — Check if Content is AI-Generated | The Truth Button</title>
+<meta name="description" content="Check if a photo, video, or audio clip was AI-generated or heavily edited — free, and it runs entirely in your browser. Nothing is ever uploaded. No account needed.">
+<link rel="canonical" href="https://projectsilverbeam.com/ai-detector.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://projectsilverbeam.com/ai-detector.html">
+<meta property="og:title" content="Free AI Photo, Video &amp; Audio Detector">
+<meta property="og:description" content="Check if a photo, video, or audio clip was AI-generated or heavily edited — free, runs in your browser, nothing uploaded.">
+<meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free AI Photo, Video &amp; Audio Detector">
+<meta name="twitter:description" content="Check if a photo, video, or audio clip was AI-generated or heavily edited — free, runs in your browser, nothing uploaded.">
+<meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14110F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How can I tell if a photo is AI-generated?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Upload the photo to a detector like The Truth Button, which runs a heuristic analysis (error-level analysis, noise/texture uniformity, frequency-spectrum checks) and gives you a score plus a breakdown of what drove it. No single check is definitive, but combined signals are a strong first-pass read." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this AI detector free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, with no account required to analyze a photo, video, or audio clip." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it upload my file to a server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — analysis runs entirely client-side in your browser. Your file never leaves your device." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can it check video and audio, not just photos?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The same tool supports photo, video, and audio files, plus analyzing a link directly or capturing a frame from your screen." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it 100% accurate?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — it's a heuristic demo, not a certified forensic tool. Treat results as a data point to inform your judgment, not a final verdict." }
+    }
+  ]
+}
+</script>
+<style>
+  :root{
+    --void:#14110F;
+    --void-2:#1C1814;
+    --paper:#EDE6D6;
+    --red:#E8402C;
+    --red-dim:#7A2A20;
+    --teal:#2F8F7A;
+    --teal-dim:#1F5C4D;
+    --ink:#F2EDE1;
+    --ink-soft:#C9C0AE;
+    --muted:#8C8377;
+    --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(34,29,23,0.55) 0%, transparent 55%),
+      linear-gradient(rgba(20,17,15,0.9), rgba(20,17,15,0.94)),
+      url('washington-backdrop.png') center / cover no-repeat fixed;
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:48px 24px 80px;}
+  .kicker{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    text-align:center;
+    margin-bottom:12px;
+  }
+  h1{
+    font-family:var(--font-stamp);
+    font-size:clamp(28px, 5vw, 42px);
+    text-align:center;
+    line-height:1.2;
+    margin:0 0 18px;
+  }
+  h1 .accent{color:var(--red);}
+  .lede{
+    font-size:16px;
+    color:var(--ink-soft);
+    text-align:center;
+    line-height:1.6;
+    max-width:560px;
+    margin:0 auto 32px;
+  }
+  .cta-row{text-align:center; margin-bottom:48px;}
+  .cta-btn{
+    display:inline-block;
+    background:var(--red);
+    color:var(--void);
+    text-decoration:none;
+    padding:16px 32px;
+    border-radius:6px;
+    font-family:var(--font-mono);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .cta-btn:hover{opacity:0.9; transform:translateY(-1px);}
+  .cta-fine{font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:10px;}
+  section{margin-bottom:40px;}
+  h2{
+    font-family:var(--font-stamp);
+    font-size:22px;
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  p{line-height:1.7; color:var(--ink-soft); margin:0 0 14px;}
+  .steps{padding-left:0; list-style:none; margin:0;}
+  .steps li{
+    display:flex;
+    gap:14px;
+    margin-bottom:16px;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
+  .steps .num{
+    flex-shrink:0;
+    width:28px; height:28px;
+    border-radius:50%;
+    background:var(--teal);
+    color:var(--void);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:700; font-size:13px;
+  }
+  .faq-item{border-bottom:1px solid var(--line); padding:18px 0;}
+  .faq-item:last-child{border-bottom:none;}
+  .faq-q{font-weight:600; color:var(--ink); margin-bottom:8px; font-size:15px;}
+  .faq-a{color:var(--ink-soft); line-height:1.6; margin:0;}
+  .disclaimer{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .disclaimer b{color:var(--ink-soft);}
+  .other-tools{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+  }
+  .other-tools ul{margin:0; padding-left:20px; color:var(--ink-soft); line-height:2;}
+  .other-tools a{color:var(--teal); text-decoration:none;}
+  .other-tools a:hover{text-decoration:underline;}
+  footer{text-align:center; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:40px;}
+  footer a{color:var(--teal); text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Free · No Upload · No Account</div>
+  <h1>Is That Photo, Video, or Audio <span class="accent">AI-Generated?</span></h1>
+  <p class="lede">Drop in a file and get a heuristic breakdown of the signals that suggest AI generation or heavy editing — error-level analysis, texture uniformity, frequency-spectrum checks — all run locally in your browser. Nothing is ever uploaded to a server.</p>
+
+  <div class="cta-row">
+    <a class="cta-btn" href="index.html?mode=photo">Check a File Now →</a>
+    <div class="cta-fine">Supports photos, video, and audio · works from a link too</div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><span>Drop a photo, video, or audio file onto the tool — or paste a link, or capture your screen if the content is already open somewhere like a social media post.</span></li>
+      <li><span class="num">2</span><span>The analysis runs entirely in your browser. Nothing is uploaded to any server — your file never leaves your device.</span></li>
+      <li><span class="num">3</span><span>You get a score and a breakdown of exactly which signals drove it, so you're working from evidence, not a black-box guess.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Frequently asked questions</h2>
+    <div class="faq-item">
+      <div class="faq-q">How can I tell if a photo is AI-generated?</div>
+      <p class="faq-a">Run it through a detector like this one — it checks error-level analysis, texture uniformity, and frequency-spectrum patterns, then shows you a score and what drove it. No single check is definitive, but combined signals give a strong first-pass read.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is this AI detector free?</div>
+      <p class="faq-a">Yes — completely free, no account required to analyze a file.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it upload my file to a server?</div>
+      <p class="faq-a">No. Analysis runs entirely client-side in your browser. Your file never leaves your device.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can it check video and audio, not just photos?</div>
+      <p class="faq-a">Yes — the same tool supports photo, video, and audio, plus analyzing a link directly or capturing a frame straight off your screen.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is it 100% accurate?</div>
+      <p class="faq-a">No — it's a heuristic demo, not a certified forensic tool. Treat results as a data point that informs your judgment, not a final verdict.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="disclaimer"><b>Being straight about this:</b> this is a heuristic demo, not a certified detector. It's a genuinely useful first-pass check, but treat every result as a data point — not a verdict.</div>
+  </section>
+
+  <section>
+    <div class="other-tools">
+      <h2 style="margin-bottom:12px; font-size:18px;">Also on The Truth Button</h2>
+      <ul>
+        <li><a href="index.html?mode=flock">Find Flock Safety / ALPR surveillance cameras near you</a></li>
+        <li><a href="index.html?mode=datacenter">Look up data center facilities by state</a></li>
+        <li><a href="index.html?mode=reviews">Real reviews on prices, work, and local experiences by state</a></li>
+        <li><a href="index.html?mode=peptide">Peptide reconstitution &amp; dose calculator</a></li>
+        <li><a href="index.html?mode=scanner">Scan a GitHub repo for infostealer patterns</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <a href="index.html">← Back to The Truth Button home</a>
+  </footer>
+</div>
+</body>
+</html>
