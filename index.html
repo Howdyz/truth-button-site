@@ -1442,6 +1442,7 @@
     <div class="mode-tab" data-mode="peptide" id="tabPeptide">🧪 Peptide Calc</div>
     <div class="mode-tab" data-mode="scanner" id="tabScanner">🛡️ Repo Scanner</div>
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
+    <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
   </div>
 
   <div class="desk">
@@ -2088,6 +2089,91 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="downloaderPanel">
+    <div class="lookup-card">
+      <h3>⚡ Lightning Downloader</h3>
+      <div class="lc-sub">Record your microphone, or share a browser tab / your system audio, and save it straight to a file — no separate app, nothing uploaded.</div>
+
+      <div id="lightning-downloader-widget">
+        <style>
+          #lightning-downloader-widget {
+            --ld-bg: #14110F; --ld-panel: #1C1814; --ld-border: rgba(242,237,225,0.14);
+            --ld-text: #F2EDE1; --ld-text-dim: #8C8377; --ld-accent: #2F8F7A; --ld-red: #E8402C; --ld-bolt: #E8C23C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--ld-text); margin-top: 16px;
+          }
+          #lightning-downloader-widget *{box-sizing:border-box;}
+          #lightning-downloader-widget .ld-tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+          #lightning-downloader-widget .ld-tab{padding:8px 14px; border-radius:6px; cursor:pointer; font-size:12.5px; background:var(--ld-panel); border:1px solid var(--ld-border); color:var(--ld-text-dim);}
+          #lightning-downloader-widget .ld-tab.active{color:var(--ld-text); border-color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-panel{background:var(--ld-panel); border:1px solid var(--ld-border); border-radius:8px; padding:16px; margin-bottom:16px; display:none;}
+          #lightning-downloader-widget .ld-panel.active{display:block;}
+          #lightning-downloader-widget .ld-desc{font-size:12.5px; color:var(--ld-text-dim); line-height:1.6; margin-bottom:12px;}
+          #lightning-downloader-widget button.ld-action{
+            padding:10px 16px; background:var(--ld-accent); border:none;
+            border-radius:5px; color:var(--ld-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #lightning-downloader-widget button.ld-action:hover{opacity:0.88;}
+          #lightning-downloader-widget button.ld-action:disabled{opacity:.5; cursor:default;}
+          #lightning-downloader-widget button.ld-action.recording{background:var(--ld-red);}
+          #lightning-downloader-widget .ld-meter-wrap{background:var(--ld-bg); border:1px solid var(--ld-border); border-radius:5px; height:10px; margin:14px 0; overflow:hidden; display:none;}
+          #lightning-downloader-widget .ld-meter-wrap.show{display:block;}
+          #lightning-downloader-widget .ld-meter{height:100%; width:0%; background:linear-gradient(90deg, var(--ld-accent), var(--ld-bolt)); transition:width .05s linear;}
+          #lightning-downloader-widget .ld-timer{font-size:20px; font-weight:700; color:var(--ld-text); margin:10px 0; display:none;}
+          #lightning-downloader-widget .ld-timer.show{display:block;}
+          #lightning-downloader-widget .ld-status{font-size:12.5px; color:var(--ld-text-dim); margin-top:10px; min-height:18px;}
+          #lightning-downloader-widget .ld-status.error{color:var(--ld-red);}
+          #lightning-downloader-widget .ld-status.ok{color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-result{display:none; margin-top:16px; background:var(--ld-bg); border:1px solid var(--ld-border); border-radius:8px; padding:14px;}
+          #lightning-downloader-widget .ld-result.show{display:block;}
+          #lightning-downloader-widget .ld-result audio{width:100%; margin-bottom:10px;}
+          #lightning-downloader-widget .ld-result-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #lightning-downloader-widget a.ld-download{
+            padding:10px 16px; background:var(--ld-bolt); border:none; border-radius:5px; color:var(--ld-bg);
+            font-weight:700; font-size:12.5px; text-decoration:none; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #lightning-downloader-widget a.ld-download:hover{opacity:0.88;}
+          #lightning-downloader-widget button.ld-reset{
+            padding:10px 16px; background:none; border:1px solid var(--ld-border); color:var(--ld-text-dim);
+            border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
+          }
+          #lightning-downloader-widget button.ld-reset:hover{border-color:var(--ld-accent); color:var(--ld-accent);}
+        </style>
+
+        <div class="ld-tabs">
+          <div class="ld-tab active" data-ldtab="mic">🎙️ Microphone</div>
+          <div class="ld-tab" data-ldtab="tab">🖥️ Tab / System Audio</div>
+        </div>
+
+        <div class="ld-panel active" data-ldpanel="mic">
+          <div class="ld-desc">Records straight from your microphone. Your browser will ask for mic permission first.</div>
+          <button class="ld-action" id="ldMicBtn" type="button">🎙️ Enable Microphone</button>
+        </div>
+        <div class="ld-panel" data-ldpanel="tab">
+          <div class="ld-desc">Share a browser tab, window, or your whole screen — make sure to check "Share tab audio" / "Share system audio" in the picker, or there won't be any sound to record.</div>
+          <button class="ld-action" id="ldTabBtn" type="button">🖥️ Share Tab / System Audio</button>
+        </div>
+
+        <div class="ld-meter-wrap" id="ldMeterWrap"><div class="ld-meter" id="ldMeter"></div></div>
+        <div class="ld-timer" id="ldTimer">00:00</div>
+        <button class="ld-action" id="ldRecordBtn" type="button" style="display:none;">⏺ Start Recording</button>
+        <div class="ld-status" id="ldStatus"></div>
+
+        <div class="ld-result" id="ldResult">
+          <audio controls id="ldAudioPreview"></audio>
+          <div class="ld-result-row">
+            <a class="ld-download" id="ldDownloadLink" download="lightning-downloader-recording.webm">⬇ Download Recording</a>
+            <button class="ld-reset" id="ldResetBtn" type="button">Record Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> this records audio directly from your microphone, or from a tab/screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. Everything is captured and saved locally in your browser; nothing is ever sent to a server. You're responsible for only recording audio you actually have the right to record.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2177,6 +2263,7 @@ function toggleIntroAudio(){
 document.addEventListener('click', function(e){
   if (!introAudio.paused) { toggleIntroAudio(); return; } // already playing — any click anywhere stops it
   if (e.target.closest('#pdf-editor-widget')) return; // dense multi-button tool — normal use shouldn't start the drum gag
+  if (e.target.closest('#lightning-downloader-widget')) return; // recording controls shouldn't trigger the drum gag
   if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
     toggleIntroAudio();
   }
@@ -2268,6 +2355,7 @@ const reviewsPanel = document.getElementById('reviewsPanel');
 const peptidePanel = document.getElementById('peptidePanel');
 const scannerPanel = document.getElementById('scannerPanel');
 const pdfPanel = document.getElementById('pdfPanel');
+const downloaderPanel = document.getElementById('downloaderPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2278,14 +2366,15 @@ const LOOKUP_TAGLINES = {
   reviews: 'Real talk from real people — work, sports, hunting, fishing, restaurants, and how much prices have actually gone up, by state.',
   peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
   scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.',
-  pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.'
+  pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.',
+  downloader: 'Record your microphone, or a browser tab / your system audio, and save it straight to a file — no separate app, nothing uploaded.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2299,6 +2388,7 @@ function setMode(newMode){
   peptidePanel.classList.toggle('show', newMode === 'peptide');
   scannerPanel.classList.toggle('show', newMode === 'scanner');
   pdfPanel.classList.toggle('show', newMode === 'pdf');
+  downloaderPanel.classList.toggle('show', newMode === 'downloader');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2320,6 +2410,7 @@ function setMode(newMode){
 document.getElementById('tabPhoto').addEventListener('click', () => setMode('photo'));
 document.getElementById('tabScanner').addEventListener('click', () => setMode('scanner'));
 document.getElementById('tabPdf').addEventListener('click', () => setMode('pdf'));
+document.getElementById('tabDownloader').addEventListener('click', () => setMode('downloader'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -4811,11 +4902,201 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
   }
+})();
+
+// --- Lightning Downloader: record mic or shared tab/system audio, download the result ---
+(function(){
+  const root = document.getElementById('lightning-downloader-widget');
+  if (!root) return;
+
+  const tabs = root.querySelectorAll('.ld-tab');
+  const panels = root.querySelectorAll('.ld-panel');
+  const micBtn = document.getElementById('ldMicBtn');
+  const tabBtn = document.getElementById('ldTabBtn');
+  const recordBtn = document.getElementById('ldRecordBtn');
+  const meterWrap = document.getElementById('ldMeterWrap');
+  const meter = document.getElementById('ldMeter');
+  const timerEl = document.getElementById('ldTimer');
+  const statusEl = document.getElementById('ldStatus');
+  const resultEl = document.getElementById('ldResult');
+  const audioPreview = document.getElementById('ldAudioPreview');
+  const downloadLink = document.getElementById('ldDownloadLink');
+  const resetBtn = document.getElementById('ldResetBtn');
+
+  let ldStream = null;
+  let ldRecorder = null;
+  let ldChunks = [];
+  let ldAnalyser = null;
+  let ldAudioCtx = null;
+  let ldMeterRaf = null;
+  let ldTimerInterval = null;
+  let ldStartTime = 0;
+  let ldObjectUrl = null;
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    if (ldStream) return; // don't let source switch mid-setup
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.ldpanel === t.dataset.ldtab));
+    statusEl.className = 'ld-status';
+    statusEl.textContent = '';
+  }));
+
+  function setStatus(msg, cls){
+    statusEl.className = 'ld-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function formatTime(ms){
+    const totalSec = Math.floor(ms / 1000);
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  function startMeter(){
+    ldAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = ldAudioCtx.createMediaStreamSource(ldStream);
+    ldAnalyser = ldAudioCtx.createAnalyser();
+    ldAnalyser.fftSize = 512;
+    source.connect(ldAnalyser);
+    const data = new Uint8Array(ldAnalyser.frequencyBinCount);
+    meterWrap.classList.add('show');
+    const tick = () => {
+      ldAnalyser.getByteTimeDomainData(data);
+      let sumSq = 0;
+      for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sumSq += v * v; }
+      const rms = Math.sqrt(sumSq / data.length);
+      meter.style.width = Math.min(100, rms * 220) + '%';
+      ldMeterRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  function stopMeter(){
+    if (ldMeterRaf) cancelAnimationFrame(ldMeterRaf);
+    ldMeterRaf = null;
+    meterWrap.classList.remove('show');
+    meter.style.width = '0%';
+    if (ldAudioCtx) { ldAudioCtx.close().catch(function(){}); ldAudioCtx = null; }
+    ldAnalyser = null;
+  }
+
+  function streamReady(){
+    micBtn.disabled = true;
+    tabBtn.disabled = true;
+    recordBtn.style.display = '';
+    startMeter();
+    setStatus('Audio source ready — click "Start Recording" when you\'re set.', 'ok');
+
+    ldStream.getAudioTracks()[0].addEventListener('ended', () => {
+      if (ldRecorder && ldRecorder.state === 'recording') stopRecording();
+      teardownStream();
+      setStatus('Audio source disconnected.', 'error');
+    });
+  }
+
+  micBtn.addEventListener('click', async () => {
+    setStatus('');
+    try {
+      ldStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      setStatus('Microphone permission was denied or unavailable.', 'error');
+      return;
+    }
+    streamReady();
+  });
+
+  tabBtn.addEventListener('click', async () => {
+    setStatus('');
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    } catch (err) {
+      setStatus('Permission wasn\'t granted, or your browser doesn\'t support tab-audio sharing (try Chrome or Edge on desktop).', 'error');
+      return;
+    }
+    const audioTracks = stream.getAudioTracks();
+    stream.getVideoTracks().forEach(t => t.stop()); // video isn't needed, just the audio
+    if (audioTracks.length === 0) {
+      setStatus('No audio was shared — when the picker opens, make sure "Share tab audio" (or "Share system audio") is checked.', 'error');
+      return;
+    }
+    ldStream = new MediaStream(audioTracks);
+    streamReady();
+  });
+
+  function pickMimeType(){
+    const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+    for (const c of candidates) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c)) return c; }
+    return '';
+  }
+
+  recordBtn.addEventListener('click', () => {
+    if (ldRecorder && ldRecorder.state === 'recording') { stopRecording(); return; }
+    ldChunks = [];
+    const mimeType = pickMimeType();
+    try {
+      ldRecorder = mimeType ? new MediaRecorder(ldStream, { mimeType }) : new MediaRecorder(ldStream);
+    } catch (err) {
+      setStatus('This browser can\'t record audio (MediaRecorder unsupported).', 'error');
+      return;
+    }
+    ldRecorder.addEventListener('dataavailable', (e) => { if (e.data.size > 0) ldChunks.push(e.data); });
+    ldRecorder.addEventListener('stop', onRecordingStopped);
+    ldRecorder.start();
+    ldStartTime = Date.now();
+    timerEl.classList.add('show');
+    timerEl.textContent = '00:00';
+    ldTimerInterval = setInterval(() => { timerEl.textContent = formatTime(Date.now() - ldStartTime); }, 250);
+    recordBtn.textContent = '⏹ Stop Recording';
+    recordBtn.classList.add('recording');
+    setStatus('Recording…', 'ok');
+  });
+
+  function stopRecording(){
+    if (ldRecorder && ldRecorder.state === 'recording') ldRecorder.stop();
+    clearInterval(ldTimerInterval);
+    ldTimerInterval = null;
+  }
+
+  function onRecordingStopped(){
+    const mimeType = ldRecorder.mimeType || 'audio/webm';
+    const blob = new Blob(ldChunks, { type: mimeType });
+    const ext = mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') ? 'm4a' : 'webm');
+    if (ldObjectUrl) URL.revokeObjectURL(ldObjectUrl);
+    ldObjectUrl = URL.createObjectURL(blob);
+    audioPreview.src = ldObjectUrl;
+    downloadLink.href = ldObjectUrl;
+    downloadLink.download = 'lightning-downloader-' + Date.now() + '.' + ext;
+    resultEl.classList.add('show');
+    recordBtn.style.display = 'none';
+    timerEl.classList.remove('show');
+    setStatus('Recording saved below — preview it, then download.', 'ok');
+    teardownStream();
+  }
+
+  function teardownStream(){
+    stopMeter();
+    if (ldStream) { ldStream.getTracks().forEach(t => t.stop()); ldStream = null; }
+  }
+
+  resetBtn.addEventListener('click', () => {
+    resultEl.classList.remove('show');
+    if (ldObjectUrl) { URL.revokeObjectURL(ldObjectUrl); ldObjectUrl = null; }
+    audioPreview.removeAttribute('src');
+    micBtn.disabled = false;
+    tabBtn.disabled = false;
+    recordBtn.textContent = '⏺ Start Recording';
+    recordBtn.classList.remove('recording');
+    recordBtn.style.display = 'none';
+    timerEl.textContent = '00:00';
+    setStatus('');
+  });
 })();
 </script>
 </body>
