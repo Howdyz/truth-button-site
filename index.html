@@ -2133,7 +2133,32 @@
             border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
           }
           #lightning-downloader-widget button.ld-reset:hover{border-color:var(--ld-accent); color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-trial-note{font-size:11.5px; color:var(--ld-text-dim); margin-bottom:12px;}
+          #lightning-downloader-widget .ld-trial-note.unlocked{color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-paywall{display:none; background:var(--ld-panel); border:1px solid var(--ld-bolt); border-radius:8px; padding:16px; margin-bottom:14px;}
+          #lightning-downloader-widget .ld-paywall.show{display:block;}
+          #lightning-downloader-widget .ld-paywall h4{margin:0 0 8px; font-size:14px; color:var(--ld-bolt);}
+          #lightning-downloader-widget .ld-paywall p{margin:0 0 12px; font-size:12.5px; color:var(--ld-text-dim); line-height:1.6;}
+          #lightning-downloader-widget .ld-paywall-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #lightning-downloader-widget button.ld-unlock{
+            padding:10px 16px; background:var(--ld-bolt); border:none; border-radius:5px; color:var(--ld-bg);
+            font-weight:700; font-size:12.5px; cursor:pointer; font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #lightning-downloader-widget button.ld-unlock:hover{opacity:0.88;}
+          #lightning-downloader-widget button.ld-unlock:disabled{opacity:.5; cursor:default;}
         </style>
+
+        <div class="ld-trial-note" id="ldTrialNote"></div>
+
+        <div class="ld-paywall" id="ldPaywall">
+          <h4>⚡ Free Trial Used Up</h4>
+          <p id="ldPaywallText">You've used your 5 minutes of free recording. Unlock Lightning Downloader for a one-time $10 payment — no subscription, unlimited recording forever.</p>
+          <div class="ld-paywall-row">
+            <button class="ld-unlock" id="ldSignInPromptBtn" type="button">Sign In / Sign Up →</button>
+            <button class="ld-unlock" id="ldUnlockBtn" type="button" style="display:none;">💳 Unlock for $10 — One Time</button>
+            <button class="ld-reset" id="ldRecheckBtn" type="button" style="display:none;">✅ I've Paid — Check Now</button>
+          </div>
+        </div>
 
         <div class="ld-desc">Share a browser tab, window, or your whole screen playing music or audio — make sure to check "Share tab audio" / "Share system audio" in the picker, or there won't be any sound to record. Captured in full stereo, exported as 320kbps MP3.</div>
         <button class="ld-action" id="ldTabBtn" type="button">🖥️ Share Tab / System Audio</button>
@@ -4909,6 +4934,12 @@ processSharedFileIfAny();
   const audioPreview = document.getElementById('ldAudioPreview');
   const downloadLink = document.getElementById('ldDownloadLink');
   const resetBtn = document.getElementById('ldResetBtn');
+  const trialNote = document.getElementById('ldTrialNote');
+  const paywall = document.getElementById('ldPaywall');
+  const paywallText = document.getElementById('ldPaywallText');
+  const signInPromptBtn = document.getElementById('ldSignInPromptBtn');
+  const unlockBtn = document.getElementById('ldUnlockBtn');
+  const recheckBtn = document.getElementById('ldRecheckBtn');
 
   let ldStream = null;         // shared tab/system audio track, kept for the 'ended' listener
   let ldRecorder = null;
@@ -4919,6 +4950,104 @@ processSharedFileIfAny();
   let ldTimerInterval = null;
   let ldStartTime = 0;
   let ldObjectUrl = null;
+  let ldTrialCutoffMs = null; // set when a recording starts, if the trial will run out mid-recording
+
+  // ---- 5-minute free trial, then a one-time $10 unlock tied to the account ----
+  // Trial usage is tracked in localStorage — a determined user can clear it, but
+  // this is meant to be a normal soft gate, not DRM. The unlock itself IS real:
+  // it's verified server-side via a Stripe webhook, not just a client-side flag.
+  const LD_TRIAL_MS = 5 * 60 * 1000;
+  const LD_TRIAL_KEY = 'ldTrialMsUsed';
+
+  function getTrialMsUsed(){
+    return parseInt(localStorage.getItem(LD_TRIAL_KEY) || '0', 10) || 0;
+  }
+  function addTrialMs(ms){
+    localStorage.setItem(LD_TRIAL_KEY, String(getTrialMsUsed() + Math.max(0, ms)));
+  }
+  function isDownloaderUnlocked(){
+    return !!(typeof currentUser !== 'undefined' && currentUser && currentUser.downloaderUnlocked);
+  }
+  function trialMsRemaining(){
+    return Math.max(0, LD_TRIAL_MS - getTrialMsUsed());
+  }
+
+  function updateTrialUI(){
+    if (isDownloaderUnlocked()) {
+      trialNote.textContent = '✅ Unlocked — unlimited recording.';
+      trialNote.classList.add('unlocked');
+      paywall.classList.remove('show');
+      return;
+    }
+    trialNote.classList.remove('unlocked');
+    const remaining = trialMsRemaining();
+    if (remaining <= 0) {
+      trialNote.textContent = '';
+      showPaywall();
+    } else {
+      trialNote.textContent = formatTime(remaining) + ' of ' + formatTime(LD_TRIAL_MS) + ' free trial remaining.';
+    }
+  }
+
+  function showPaywall(){
+    paywall.classList.add('show');
+    const loggedIn = typeof currentUser !== 'undefined' && !!currentUser;
+    signInPromptBtn.style.display = loggedIn ? 'none' : '';
+    unlockBtn.style.display = loggedIn ? '' : 'none';
+    recheckBtn.style.display = loggedIn ? '' : 'none';
+    paywallText.textContent = loggedIn
+      ? 'You\'ve used your 5 minutes of free recording. Unlock Lightning Downloader for a one-time $10 payment — no subscription, unlimited recording forever.'
+      : 'You\'ve used your 5 minutes of free recording. Sign in or create a free account, then unlock for a one-time $10 payment — unlimited recording forever.';
+  }
+
+  signInPromptBtn.addEventListener('click', () => { if (typeof openAuthModal === 'function') openAuthModal(); });
+
+  unlockBtn.addEventListener('click', async () => {
+    unlockBtn.disabled = true;
+    unlockBtn.textContent = 'Opening checkout…';
+    try {
+      const res = await fetch(apiUrl('/api/downloader/checkout'), { method: 'POST', headers: apiHeaders(true) });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setStatus(data.error || 'Could not start checkout.', 'error');
+      } else {
+        window.open(data.url, '_blank', 'noopener');
+        setStatus('Checkout opened in a new tab — after paying, come back and click "I\'ve Paid — Check Now."', 'ok');
+      }
+    } catch (err) {
+      setStatus('Could not reach the server to start checkout.', 'error');
+    }
+    unlockBtn.disabled = false;
+    unlockBtn.textContent = '💳 Unlock for $10 — One Time';
+  });
+
+  recheckBtn.addEventListener('click', async () => {
+    recheckBtn.disabled = true;
+    recheckBtn.textContent = 'Checking…';
+    try {
+      const res = await fetch(apiUrl('/api/downloader/status'), { headers: apiHeaders(true) });
+      const data = await res.json();
+      if (res.ok && data.unlocked && typeof currentUser !== 'undefined' && currentUser) {
+        currentUser.downloaderUnlocked = true;
+        setStatus('Unlocked — thanks for the support!', 'ok');
+      } else {
+        setStatus('Not showing as paid yet — if you just paid, give it a few seconds and try again.', 'error');
+      }
+    } catch (err) {
+      setStatus('Could not reach the server to check payment status.', 'error');
+    }
+    recheckBtn.disabled = false;
+    recheckBtn.textContent = '✅ I\'ve Paid — Check Now';
+    updateTrialUI();
+  });
+
+  document.getElementById('tabDownloader').addEventListener('click', updateTrialUI);
+  updateTrialUI();
+
+  if (new URLSearchParams(location.search).get('paid') === '1') {
+    setStatus('Payment received! If you\'re signed in, click "I\'ve Paid — Check Now" below to unlock.', 'ok');
+    showPaywall();
+  }
 
   function setStatus(msg, cls){
     statusEl.className = 'ld-status' + (cls ? ' ' + cls : '');
@@ -5002,6 +5131,7 @@ processSharedFileIfAny();
 
   tabBtn.addEventListener('click', async () => {
     setStatus('');
+    if (!isDownloaderUnlocked() && trialMsRemaining() <= 0) { showPaywall(); return; }
     let stream;
     try {
       stream = await requestTabAudio();
@@ -5027,6 +5157,7 @@ processSharedFileIfAny();
 
   recordBtn.addEventListener('click', () => {
     if (ldRecorder && ldRecorder.state === 'recording') { stopRecording(); return; }
+    if (!isDownloaderUnlocked() && trialMsRemaining() <= 0) { teardownStream(); showPaywall(); return; }
     ldChunks = [];
     const mimeType = pickMimeType();
     try {
@@ -5039,9 +5170,17 @@ processSharedFileIfAny();
     ldRecorder.addEventListener('stop', () => { onRecordingStopped(); });
     ldRecorder.start();
     ldStartTime = Date.now();
+    ldTrialCutoffMs = isDownloaderUnlocked() ? null : trialMsRemaining();
     timerEl.classList.add('show');
     timerEl.textContent = '00:00';
-    ldTimerInterval = setInterval(() => { timerEl.textContent = formatTime(Date.now() - ldStartTime); }, 250);
+    ldTimerInterval = setInterval(() => {
+      const elapsed = Date.now() - ldStartTime;
+      timerEl.textContent = formatTime(elapsed);
+      if (ldTrialCutoffMs !== null && elapsed >= ldTrialCutoffMs) {
+        setStatus('Free trial ran out mid-recording — here\'s what got captured so far. Unlock for unlimited recording.', 'ok');
+        stopRecording();
+      }
+    }, 250);
     recordBtn.textContent = '⏹ Stop Recording';
     recordBtn.classList.add('recording');
     setStatus('Recording…', 'ok');
@@ -5101,6 +5240,12 @@ processSharedFileIfAny();
     const rawBlob = new Blob(ldChunks, { type: mimeType });
     recordBtn.style.display = 'none';
     timerEl.classList.remove('show');
+
+    if (!isDownloaderUnlocked()) {
+      addTrialMs(Date.now() - ldStartTime);
+      updateTrialUI();
+    }
+    ldTrialCutoffMs = null;
 
     let finalBlob = rawBlob;
     let ext = mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') ? 'm4a' : 'webm');
