@@ -1972,6 +1972,12 @@
           }
           #pdf-editor-widget .pe-filelist .pe-file-btns button:hover{border-color:var(--pe-accent); color:var(--pe-accent);}
           #pdf-editor-widget .pe-hint{font-size:11.5px; color:var(--pe-text-dim); margin-top:8px; line-height:1.5;}
+          #pdf-editor-widget .pe-nav-btn{
+            background:none; border:1px solid var(--pe-border); color:var(--pe-text-dim);
+            border-radius:5px; padding:6px 12px; font-family:inherit; font-size:12px; cursor:pointer;
+          }
+          #pdf-editor-widget .pe-nav-btn:hover{border-color:var(--pe-accent); color:var(--pe-accent);}
+          #pdf-editor-widget .pe-nav-btn:disabled{opacity:.4; cursor:default;}
         </style>
 
         <div class="pe-tabs">
@@ -1980,6 +1986,7 @@
           <div class="pe-tab" data-petab="rotate">Rotate</div>
           <div class="pe-tab" data-petab="watermark">Watermark / Text</div>
           <div class="pe-tab" data-petab="compress">Compress</div>
+          <div class="pe-tab" data-petab="edittext">Edit Text</div>
         </div>
 
         <div class="pe-panel active" data-pepanel="merge">
@@ -2030,6 +2037,48 @@
           <button class="pe-action" id="peCompressBtn" type="button">Compress &amp; Download</button>
           <div class="pe-status" id="peCompressStatus"></div>
           <div class="pe-hint">Re-packs the file's internal structure to shave off overhead. Works best on PDFs with lots of repeated fonts/objects — won't meaningfully shrink a file that's mostly large images, since that needs actual image recompression this tool doesn't do.</div>
+        </div>
+
+        <div class="pe-panel" data-pepanel="edittext">
+          <label for="peEditInput">Choose a PDF</label>
+          <input type="file" id="peEditInput" accept="application/pdf">
+
+          <div id="peEditPageNav" style="display:none; align-items:center; gap:10px; margin-top:10px;">
+            <button type="button" id="peEditPrevBtn" class="pe-nav-btn">← Prev</button>
+            <span id="peEditPageLabel" style="font-size:12.5px; color:var(--pe-text-dim);">Page 1 / 1</span>
+            <button type="button" id="peEditNextBtn" class="pe-nav-btn">Next →</button>
+          </div>
+
+          <div class="pe-hint" id="peEditHint" style="display:none;">Click and drag on the page below to draw a box over the text you want to replace, then type the new text.</div>
+
+          <div id="peEditCanvasWrap" style="display:none; position:relative; margin-top:12px; max-width:100%; overflow:auto; border:1px solid var(--pe-border); border-radius:6px; line-height:0;">
+            <canvas id="peEditBaseCanvas"></canvas>
+            <canvas id="peEditOverlayCanvas" style="position:absolute; top:0; left:0; cursor:crosshair;"></canvas>
+          </div>
+
+          <div id="peEditForm" style="display:none; margin-top:12px; padding:12px; background:var(--pe-bg); border:1px solid var(--pe-border); border-radius:6px;">
+            <label for="peEditText" style="margin-top:0;">Replacement text</label>
+            <input type="text" id="peEditText" placeholder="New text" maxlength="200">
+            <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:100px;">
+                <label for="peEditFontSize">Font size</label>
+                <input type="number" id="peEditFontSize" value="12" min="4" max="300">
+              </div>
+              <div style="flex:1; min-width:100px;">
+                <label for="peEditColor">Text color</label>
+                <input type="color" id="peEditColor" value="#000000" style="width:100%; height:37px; padding:2px; background:var(--pe-bg); border:1px solid var(--pe-border); border-radius:5px;">
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button class="pe-action" id="peEditConfirmBtn" type="button" style="margin-top:0;">Add This Edit</button>
+              <button type="button" id="peEditCancelBtn" style="margin-top:0; background:none; border:1px solid var(--pe-border); color:var(--pe-text-dim); border-radius:5px; padding:10px 16px; cursor:pointer; font-family:inherit; font-size:12.5px;">Cancel</button>
+            </div>
+          </div>
+
+          <ul class="pe-filelist" id="peEditList"></ul>
+          <button class="pe-action" id="peEditSaveBtn" type="button" style="display:none;">Save &amp; Download</button>
+          <div class="pe-status" id="peEditStatus"></div>
+          <div class="pe-hint">This covers the selected area with a solid box and places new text on top — it doesn't remove the underlying original text from the file's data, just visually replaces what's shown there. For sensitive redaction, keep that in mind.</div>
         </div>
       </div>
     </div>
@@ -2086,7 +2135,11 @@
   </div>
 
 <script src="pdf-lib.min.js"></script>
+<script src="pdf.min.js"></script>
 <script>
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+}
 const spreadShareBtn = document.getElementById('spreadShareBtn');
 if (spreadShareBtn) {
   spreadShareBtn.addEventListener('click', function(){
@@ -3221,6 +3274,249 @@ if (REVIEWS_API_BASE) {
         : `${(before/1024).toFixed(0)}KB → ${(after/1024).toFixed(0)}KB (no significant reduction — this file was already efficiently packed) — downloaded.`, 'ok');
     } catch (e) {
       peSetStatus(peCompressStatus, 'Error: ' + e.message, 'error');
+    }
+  });
+
+  // ---------- Edit Text (click-and-drag a box, cover it, type new text) ----------
+  const PE_EDIT_SCALE = 1.5; // render resolution multiplier — canvas pixels per PDF point
+  let peEditFile = null;          // the original File, re-read fresh at save time
+  let peEditPdfJsDoc = null;      // pdf.js document, for rendering pages
+  let peEditPageSizes = [];       // [{width,height}] in PDF points, per page, from pdf-lib
+  let peEditCurrentPage = 0;      // zero-indexed
+  let peEditEdits = {};           // { pageIndex: [ {xPdf,yPdf,wPdf,hPdf,text,fontSize,color} ] }
+  let peEditDragStart = null;     // {x,y} in canvas pixels, while dragging
+  let peEditPendingBox = null;    // finalized canvas-pixel box, awaiting the text form
+
+  const peEditInput = root.querySelector('#peEditInput');
+  const peEditPageNav = root.querySelector('#peEditPageNav');
+  const peEditPageLabel = root.querySelector('#peEditPageLabel');
+  const peEditPrevBtn = root.querySelector('#peEditPrevBtn');
+  const peEditNextBtn = root.querySelector('#peEditNextBtn');
+  const peEditHint = root.querySelector('#peEditHint');
+  const peEditCanvasWrap = root.querySelector('#peEditCanvasWrap');
+  const peEditBaseCanvas = root.querySelector('#peEditBaseCanvas');
+  const peEditOverlayCanvas = root.querySelector('#peEditOverlayCanvas');
+  const peEditForm = root.querySelector('#peEditForm');
+  const peEditTextInput = root.querySelector('#peEditText');
+  const peEditFontSizeInput = root.querySelector('#peEditFontSize');
+  const peEditColorInput = root.querySelector('#peEditColor');
+  const peEditConfirmBtn = root.querySelector('#peEditConfirmBtn');
+  const peEditCancelBtn = root.querySelector('#peEditCancelBtn');
+  const peEditList = root.querySelector('#peEditList');
+  const peEditSaveBtn = root.querySelector('#peEditSaveBtn');
+  const peEditStatus = root.querySelector('#peEditStatus');
+
+  function peEditTotalEditCount(){
+    return Object.values(peEditEdits).reduce((sum, arr) => sum + arr.length, 0);
+  }
+
+  function peHexToRgb01(hex){
+    const n = parseInt(hex.replace('#', ''), 16);
+    return PDFLib.rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+  }
+
+  async function peEditRenderPage(pageIndex){
+    const page = await peEditPdfJsDoc.getPage(pageIndex + 1); // pdf.js pages are 1-indexed
+    const viewport = page.getViewport({ scale: PE_EDIT_SCALE });
+    peEditBaseCanvas.width = viewport.width;
+    peEditBaseCanvas.height = viewport.height;
+    peEditOverlayCanvas.width = viewport.width;
+    peEditOverlayCanvas.height = viewport.height;
+    peEditOverlayCanvas.style.width = viewport.width + 'px';
+    peEditOverlayCanvas.style.height = viewport.height + 'px';
+    const ctx = peEditBaseCanvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    peEditRedrawOverlay();
+    peEditPageLabel.textContent = `Page ${pageIndex + 1} / ${peEditPdfJsDoc.numPages}`;
+    peEditPrevBtn.disabled = pageIndex === 0;
+    peEditNextBtn.disabled = pageIndex === peEditPdfJsDoc.numPages - 1;
+  }
+
+  function peEditRedrawOverlay(box){
+    const ctx = peEditOverlayCanvas.getContext('2d');
+    ctx.clearRect(0, 0, peEditOverlayCanvas.width, peEditOverlayCanvas.height);
+    // existing confirmed edits on this page, shown as a white cover + the typed text
+    const edits = peEditEdits[peEditCurrentPage] || [];
+    edits.forEach(ed => {
+      const pageH = peEditPageSizes[peEditCurrentPage].height;
+      const canvasX = ed.xPdf * PE_EDIT_SCALE;
+      const canvasY = (pageH - ed.yPdf - ed.hPdf) * PE_EDIT_SCALE;
+      const canvasW = ed.wPdf * PE_EDIT_SCALE;
+      const canvasH = ed.hPdf * PE_EDIT_SCALE;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(canvasX, canvasY, canvasW, canvasH);
+      ctx.strokeStyle = 'rgba(47,143,122,0.6)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(canvasX, canvasY, canvasW, canvasH);
+      ctx.fillStyle = ed.color;
+      ctx.font = (ed.fontSize * PE_EDIT_SCALE) + 'px sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ed.text, canvasX + 2, canvasY + canvasH / 2);
+    });
+    // the box currently being dragged, if any
+    if (box) {
+      ctx.strokeStyle = '#E8402C';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(box.x, box.y, box.w, box.h);
+      ctx.setLineDash([]);
+    }
+  }
+
+  function peEditRenderList(){
+    const rows = [];
+    Object.keys(peEditEdits).forEach(pageIdxStr => {
+      const pageIdx = parseInt(pageIdxStr, 10);
+      peEditEdits[pageIdx].forEach((ed, i) => {
+        rows.push(`
+          <li>
+            <span>Page ${pageIdx + 1}: "${peEscapeHtml(ed.text)}"</span>
+            <span class="pe-file-btns"><button type="button" data-page="${pageIdx}" data-i="${i}">✕</button></span>
+          </li>
+        `);
+      });
+    });
+    peEditList.innerHTML = rows.join('');
+    peEditSaveBtn.style.display = peEditTotalEditCount() > 0 ? '' : 'none';
+  }
+
+  peEditList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const pageIdx = parseInt(btn.dataset.page, 10);
+    const i = parseInt(btn.dataset.i, 10);
+    peEditEdits[pageIdx].splice(i, 1);
+    if (!peEditEdits[pageIdx].length) delete peEditEdits[pageIdx];
+    peEditRenderList();
+    if (pageIdx === peEditCurrentPage) peEditRedrawOverlay();
+  });
+
+  peEditInput.addEventListener('change', async () => {
+    const file = peEditInput.files[0];
+    if (!file) return;
+    peSetStatus(peEditStatus, 'Loading…');
+    try {
+      peEditFile = file;
+      peEditEdits = {};
+      peEditRenderList();
+      const bytes = await file.arrayBuffer();
+      // pdf-lib for page sizes (points), pdf.js for rendering — separate copies, since
+      // a Uint8Array handed to pdf.js can get detached/transferred
+      const libDoc = await PDFLib.PDFDocument.load(bytes.slice(0));
+      peEditPageSizes = libDoc.getPages().map(p => p.getSize());
+      peEditPdfJsDoc = await pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+      peEditCurrentPage = 0;
+      peEditPageNav.style.display = 'flex';
+      peEditHint.style.display = '';
+      peEditCanvasWrap.style.display = 'block';
+      await peEditRenderPage(0);
+      peSetStatus(peEditStatus, '');
+    } catch (e) {
+      peSetStatus(peEditStatus, 'Error loading PDF: ' + e.message, 'error');
+    }
+  });
+
+  peEditPrevBtn.addEventListener('click', () => {
+    if (peEditCurrentPage > 0) { peEditCurrentPage--; peEditRenderPage(peEditCurrentPage); }
+  });
+  peEditNextBtn.addEventListener('click', () => {
+    if (peEditCurrentPage < peEditPdfJsDoc.numPages - 1) { peEditCurrentPage++; peEditRenderPage(peEditCurrentPage); }
+  });
+
+  function peEditCanvasCoords(e){
+    const rect = peEditOverlayCanvas.getBoundingClientRect();
+    const scaleX = peEditOverlayCanvas.width / rect.width;
+    const scaleY = peEditOverlayCanvas.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  peEditOverlayCanvas.addEventListener('mousedown', (e) => {
+    peEditDragStart = peEditCanvasCoords(e);
+  });
+  peEditOverlayCanvas.addEventListener('mousemove', (e) => {
+    if (!peEditDragStart) return;
+    const cur = peEditCanvasCoords(e);
+    const box = {
+      x: Math.min(peEditDragStart.x, cur.x),
+      y: Math.min(peEditDragStart.y, cur.y),
+      w: Math.abs(cur.x - peEditDragStart.x),
+      h: Math.abs(cur.y - peEditDragStart.y)
+    };
+    peEditRedrawOverlay(box);
+  });
+  peEditOverlayCanvas.addEventListener('mouseup', (e) => {
+    if (!peEditDragStart) return;
+    const cur = peEditCanvasCoords(e);
+    const box = {
+      x: Math.min(peEditDragStart.x, cur.x),
+      y: Math.min(peEditDragStart.y, cur.y),
+      w: Math.abs(cur.x - peEditDragStart.x),
+      h: Math.abs(cur.y - peEditDragStart.y)
+    };
+    peEditDragStart = null;
+    if (box.w < 6 || box.h < 6) { peEditRedrawOverlay(); return; } // too small, ignore accidental clicks
+    peEditPendingBox = box;
+    peEditFontSizeInput.value = Math.max(6, Math.round((box.h / PE_EDIT_SCALE) * 0.7));
+    peEditTextInput.value = '';
+    peEditForm.style.display = 'block';
+    peEditTextInput.focus();
+  });
+
+  peEditCancelBtn.addEventListener('click', () => {
+    peEditPendingBox = null;
+    peEditForm.style.display = 'none';
+    peEditRedrawOverlay();
+  });
+
+  peEditConfirmBtn.addEventListener('click', () => {
+    const text = peEditTextInput.value.trim();
+    if (!text || !peEditPendingBox) return;
+    const pageH = peEditPageSizes[peEditCurrentPage].height;
+    const box = peEditPendingBox;
+    const edit = {
+      xPdf: box.x / PE_EDIT_SCALE,
+      yPdf: pageH - (box.y + box.h) / PE_EDIT_SCALE,
+      wPdf: box.w / PE_EDIT_SCALE,
+      hPdf: box.h / PE_EDIT_SCALE,
+      text,
+      fontSize: parseFloat(peEditFontSizeInput.value) || 12,
+      color: peEditColorInput.value
+    };
+    if (!peEditEdits[peEditCurrentPage]) peEditEdits[peEditCurrentPage] = [];
+    peEditEdits[peEditCurrentPage].push(edit);
+    peEditPendingBox = null;
+    peEditForm.style.display = 'none';
+    peEditRenderList();
+    peEditRedrawOverlay();
+  });
+
+  peEditSaveBtn.addEventListener('click', async () => {
+    if (!peEditFile || !peEditTotalEditCount()) return;
+    peSetStatus(peEditStatus, 'Applying edits…');
+    try {
+      const bytes = await peEditFile.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(bytes);
+      const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+      const pages = doc.getPages();
+      Object.keys(peEditEdits).forEach(pageIdxStr => {
+        const pageIdx = parseInt(pageIdxStr, 10);
+        const page = pages[pageIdx];
+        peEditEdits[pageIdx].forEach(ed => {
+          page.drawRectangle({ x: ed.xPdf, y: ed.yPdf, width: ed.wPdf, height: ed.hPdf, color: PDFLib.rgb(1, 1, 1) });
+          page.drawText(ed.text, {
+            x: ed.xPdf + 2,
+            y: ed.yPdf + Math.max(1, (ed.hPdf - ed.fontSize) / 2),
+            size: ed.fontSize,
+            font,
+            color: peHexToRgb01(ed.color)
+          });
+        });
+      });
+      const outBytes = await doc.save();
+      peDownload(outBytes, 'edited.pdf');
+      peSetStatus(peEditStatus, `Applied ${peEditTotalEditCount()} edit(s) — downloaded.`, 'ok');
+    } catch (e) {
+      peSetStatus(peEditStatus, 'Error: ' + e.message, 'error');
     }
   });
 })();
@@ -4513,7 +4809,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
