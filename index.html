@@ -2175,6 +2175,7 @@ function toggleIntroAudio(){
   }
 }
 document.addEventListener('click', function(e){
+  if (e.target.closest('#pdf-editor-widget')) return; // dense multi-button tool — the toggle-per-click drum gag doesn't fit here
   if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
     toggleIntroAudio();
   }
