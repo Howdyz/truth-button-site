@@ -2175,9 +2175,8 @@ function toggleIntroAudio(){
   }
 }
 document.addEventListener('click', function(e){
-  // dense multi-button tool — normal clicks in here shouldn't keep re-triggering the drum
-  // gag, but if it's already playing (started from the mode-tab), still let a click stop it.
-  if (e.target.closest('#pdf-editor-widget') && introAudio.paused) return;
+  if (!introAudio.paused) { toggleIntroAudio(); return; } // already playing — any click anywhere stops it
+  if (e.target.closest('#pdf-editor-widget')) return; // dense multi-button tool — normal use shouldn't start the drum gag
   if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
     toggleIntroAudio();
   }
