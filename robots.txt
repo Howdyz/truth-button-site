@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /stats.html
+Disallow: /ads-admin.html
+
+Sitemap: https://projectsilverbeam.com/sitemap.xml
