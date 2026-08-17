@@ -4986,28 +4986,32 @@ processSharedFileIfAny();
     let outputStream = stream;
 
     if (enhance) {
+      // Kept deliberately subtle — the first version boosted presence/air hard
+      // enough to amplify mic hiss, thinned the body out, and pushed a fast
+      // brickwall limiter into audible distortion. This pass favors staying
+      // clean over sounding "processed."
       const rumbleCut = ldAudioCtx.createBiquadFilter();
-      rumbleCut.type = 'highpass'; rumbleCut.frequency.value = 90; rumbleCut.Q.value = 0.7;
+      rumbleCut.type = 'highpass'; rumbleCut.frequency.value = 80; rumbleCut.Q.value = 0.7;
 
       const boxCut = ldAudioCtx.createBiquadFilter();
-      boxCut.type = 'peaking'; boxCut.frequency.value = 300; boxCut.Q.value = 1.2; boxCut.gain.value = -4;
+      boxCut.type = 'peaking'; boxCut.frequency.value = 250; boxCut.Q.value = 0.8; boxCut.gain.value = -2;
 
       const presence = ldAudioCtx.createBiquadFilter();
-      presence.type = 'peaking'; presence.frequency.value = 3200; presence.Q.value = 1.0; presence.gain.value = 5;
+      presence.type = 'peaking'; presence.frequency.value = 3000; presence.Q.value = 0.9; presence.gain.value = 2;
 
       const airShelf = ldAudioCtx.createBiquadFilter();
-      airShelf.type = 'highshelf'; airShelf.frequency.value = 8000; airShelf.gain.value = 3.5;
+      airShelf.type = 'highshelf'; airShelf.frequency.value = 10000; airShelf.gain.value = 1.5;
 
       const leveler = ldAudioCtx.createDynamicsCompressor();
-      leveler.threshold.value = -28; leveler.knee.value = 24; leveler.ratio.value = 3.5;
-      leveler.attack.value = 0.003; leveler.release.value = 0.22;
+      leveler.threshold.value = -22; leveler.knee.value = 24; leveler.ratio.value = 2.5;
+      leveler.attack.value = 0.01; leveler.release.value = 0.25;
 
       const makeupGain = ldAudioCtx.createGain();
-      makeupGain.gain.value = 1.35;
+      makeupGain.gain.value = 1.12;
 
-      const limiter = ldAudioCtx.createDynamicsCompressor(); // brickwall safety so makeup gain can't clip
-      limiter.threshold.value = -2; limiter.knee.value = 0; limiter.ratio.value = 20;
-      limiter.attack.value = 0.001; limiter.release.value = 0.1;
+      const limiter = ldAudioCtx.createDynamicsCompressor(); // gentle safety net, not a hard brickwall
+      limiter.threshold.value = -3; limiter.knee.value = 6; limiter.ratio.value = 8;
+      limiter.attack.value = 0.004; limiter.release.value = 0.15;
 
       const dest = ldAudioCtx.createMediaStreamDestination();
 
