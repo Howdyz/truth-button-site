@@ -4164,6 +4164,16 @@ async function processSharedFileIfAny(){
   } catch (e) { /* nothing cached, or Cache Storage unavailable — nothing to do */ }
 }
 processSharedFileIfAny();
+
+// deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
+// SEO page send visitors straight into the right tool instead of the default tab.
+(function(){
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner']);
+  const requestedMode = new URLSearchParams(location.search).get('mode');
+  if (requestedMode && VALID_MODES.has(requestedMode)) {
+    setMode(requestedMode);
+  }
+})();
 </script>
 </body>
 </html>
