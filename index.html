@@ -2092,7 +2092,7 @@
   <div class="lookup-panel" id="downloaderPanel">
     <div class="lookup-card">
       <h3>⚡ Lightning Downloader</h3>
-      <div class="lc-sub">Record your microphone, or share a browser tab / your system audio, and save it straight to a file — no separate app, nothing uploaded.</div>
+      <div class="lc-sub">Record music or audio playing in a browser tab, window, or your system — and save it as a high-quality MP3. No separate app, nothing uploaded.</div>
 
       <div id="lightning-downloader-widget">
         <style>
@@ -2102,11 +2102,6 @@
             font-family: 'IBM Plex Mono', monospace; color: var(--ld-text); margin-top: 16px;
           }
           #lightning-downloader-widget *{box-sizing:border-box;}
-          #lightning-downloader-widget .ld-tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
-          #lightning-downloader-widget .ld-tab{padding:8px 14px; border-radius:6px; cursor:pointer; font-size:12.5px; background:var(--ld-panel); border:1px solid var(--ld-border); color:var(--ld-text-dim);}
-          #lightning-downloader-widget .ld-tab.active{color:var(--ld-text); border-color:var(--ld-accent);}
-          #lightning-downloader-widget .ld-panel{background:var(--ld-panel); border:1px solid var(--ld-border); border-radius:8px; padding:16px; margin-bottom:16px; display:none;}
-          #lightning-downloader-widget .ld-panel.active{display:block;}
           #lightning-downloader-widget .ld-desc{font-size:12.5px; color:var(--ld-text-dim); line-height:1.6; margin-bottom:12px;}
           #lightning-downloader-widget button.ld-action{
             padding:10px 16px; background:var(--ld-accent); border:none;
@@ -2138,34 +2133,10 @@
             border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
           }
           #lightning-downloader-widget button.ld-reset:hover{border-color:var(--ld-accent); color:var(--ld-accent);}
-          #lightning-downloader-widget .ld-enhance{
-            display:flex; align-items:flex-start; gap:10px; background:var(--ld-bg); border:1px solid var(--ld-border);
-            border-radius:6px; padding:10px 12px; margin-bottom:14px; cursor:pointer;
-          }
-          #lightning-downloader-widget .ld-enhance input{margin-top:2px; accent-color:var(--ld-accent); flex-shrink:0;}
-          #lightning-downloader-widget .ld-enhance-text{font-size:12px; color:var(--ld-text-dim); line-height:1.5;}
-          #lightning-downloader-widget .ld-enhance-text b{color:var(--ld-text);}
-          #lightning-downloader-widget .ld-enhance input:disabled{opacity:.5;}
         </style>
 
-        <label class="ld-enhance">
-          <input type="checkbox" id="ldEnhanceToggle" checked>
-          <span class="ld-enhance-text"><b>✨ Clean &amp; enhance audio</b> — runs a voice EQ + leveling chain (cuts rumble and boxiness, lifts clarity, evens out volume) on the recording itself, so playback isn't muffled. Applies to mic or tab audio; recorded straight in, no separate export step.</span>
-        </label>
-
-        <div class="ld-tabs">
-          <div class="ld-tab active" data-ldtab="mic">🎙️ Microphone</div>
-          <div class="ld-tab" data-ldtab="tab">🖥️ Tab / System Audio</div>
-        </div>
-
-        <div class="ld-panel active" data-ldpanel="mic">
-          <div class="ld-desc">Records straight from your microphone. Your browser will ask for mic permission first.</div>
-          <button class="ld-action" id="ldMicBtn" type="button">🎙️ Enable Microphone</button>
-        </div>
-        <div class="ld-panel" data-ldpanel="tab">
-          <div class="ld-desc">Share a browser tab, window, or your whole screen — make sure to check "Share tab audio" / "Share system audio" in the picker, or there won't be any sound to record.</div>
-          <button class="ld-action" id="ldTabBtn" type="button">🖥️ Share Tab / System Audio</button>
-        </div>
+        <div class="ld-desc">Share a browser tab, window, or your whole screen playing music or audio — make sure to check "Share tab audio" / "Share system audio" in the picker, or there won't be any sound to record. Captured in full stereo, exported as 320kbps MP3.</div>
+        <button class="ld-action" id="ldTabBtn" type="button">🖥️ Share Tab / System Audio</button>
 
         <div class="ld-meter-wrap" id="ldMeterWrap"><div class="ld-meter" id="ldMeter"></div></div>
         <div class="ld-timer" id="ldTimer">00:00</div>
@@ -2183,7 +2154,7 @@
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> this records audio directly from your microphone, or from a tab/screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. Everything is captured and saved locally in your browser; nothing is ever sent to a server. You're responsible for only recording audio you actually have the right to record.
+      <b>Being straight about this:</b> this records audio from a tab/screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. It's built for capturing music or audio playing in your browser, not your microphone. Everything is captured and saved locally; nothing is ever sent to a server. You're responsible for only recording audio you actually have the right to record.
     </div>
   </div>
 
@@ -2381,7 +2352,7 @@ const LOOKUP_TAGLINES = {
   peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
   scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.',
   pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.',
-  downloader: 'Record your microphone, or a browser tab / your system audio, and save it straight to a file — no separate app, nothing uploaded.'
+  downloader: 'Record music or audio playing in a browser tab, window, or your system, and save it as a high-quality MP3 — no separate app, nothing uploaded.'
 };
 
 function setMode(newMode){
@@ -4923,14 +4894,11 @@ processSharedFileIfAny();
   }
 })();
 
-// --- Lightning Downloader: record mic or shared tab/system audio, download the result ---
+// --- Lightning Downloader: record shared tab/system audio (music, video, streams), download as MP3 ---
 (function(){
   const root = document.getElementById('lightning-downloader-widget');
   if (!root) return;
 
-  const tabs = root.querySelectorAll('.ld-tab');
-  const panels = root.querySelectorAll('.ld-panel');
-  const micBtn = document.getElementById('ldMicBtn');
   const tabBtn = document.getElementById('ldTabBtn');
   const recordBtn = document.getElementById('ldRecordBtn');
   const meterWrap = document.getElementById('ldMeterWrap');
@@ -4941,10 +4909,8 @@ processSharedFileIfAny();
   const audioPreview = document.getElementById('ldAudioPreview');
   const downloadLink = document.getElementById('ldDownloadLink');
   const resetBtn = document.getElementById('ldResetBtn');
-  const enhanceToggle = document.getElementById('ldEnhanceToggle');
 
-  let ldStream = null;         // raw source track (mic or shared tab), kept for the 'ended' listener
-  let ldRecordStream = null;   // what actually gets fed to MediaRecorder (raw or enhanced)
+  let ldStream = null;         // shared tab/system audio track, kept for the 'ended' listener
   let ldRecorder = null;
   let ldChunks = [];
   let ldAnalyser = null;
@@ -4953,14 +4919,6 @@ processSharedFileIfAny();
   let ldTimerInterval = null;
   let ldStartTime = 0;
   let ldObjectUrl = null;
-
-  tabs.forEach(t => t.addEventListener('click', () => {
-    if (ldStream) return; // don't let source switch mid-setup
-    tabs.forEach(x => x.classList.toggle('active', x === t));
-    panels.forEach(p => p.classList.toggle('active', p.dataset.ldpanel === t.dataset.ldtab));
-    statusEl.className = 'ld-status';
-    statusEl.textContent = '';
-  }));
 
   function setStatus(msg, cls){
     statusEl.className = 'ld-status' + (cls ? ' ' + cls : '');
@@ -4974,130 +4932,18 @@ processSharedFileIfAny();
     return m + ':' + s;
   }
 
-  // Noise gate, run as an AudioWorklet so it processes sample-by-sample
-  // ahead of the compressor — without this, the leveler pulls the mic's
-  // background noise floor up during quiet passages right along with quiet
-  // speech, which is what made pauses sound hissy/present instead of quiet.
-  const LD_GATE_WORKLET_SRC = [
-    'class LdGateProcessor extends AudioWorkletProcessor {',
-    '  constructor(options) {',
-    '    super();',
-    '    const opts = (options && options.processorOptions) || {};',
-    '    this.envelope = 0;',
-    '    this.thresholdLinear = opts.thresholdLinear || 0.02;',
-    '    this.floorGain = opts.floorGain != null ? opts.floorGain : 0.06;',
-    '  }',
-    '  process(inputs, outputs) {',
-    '    const input = inputs[0];',
-    '    const output = outputs[0];',
-    '    if (!input || input.length === 0) return true;',
-    '    const attackCoeff = 0.6;',
-    '    const releaseCoeff = 0.02;',
-    '    for (let ch = 0; ch < input.length; ch++) {',
-    '      const inCh = input[ch];',
-    '      const outCh = output[ch];',
-    '      if (!inCh) continue;',
-    '      for (let i = 0; i < inCh.length; i++) {',
-    '        const level = Math.abs(inCh[i]);',
-    '        const coeff = level > this.envelope ? attackCoeff : releaseCoeff;',
-    '        this.envelope += (level - this.envelope) * coeff;',
-    '        let gate = this.envelope / this.thresholdLinear;',
-    '        if (gate > 1) gate = 1;',
-    '        if (gate < 0) gate = 0;',
-    '        gate = gate * gate;',
-    '        outCh[i] = inCh[i] * (this.floorGain + (1 - this.floorGain) * gate);',
-    '      }',
-    '    }',
-    '    return true;',
-    '  }',
-    '}',
-    'registerProcessor(\'ld-gate-processor\', LdGateProcessor);'
-  ].join('\n');
-
-  async function createGateNode(ctx){
-    if (!ctx.audioWorklet) return null; // older browser — chain still works, just without gating
-    try {
-      if (!ctx.__ldGateModuleLoaded) {
-        const blobUrl = URL.createObjectURL(new Blob([LD_GATE_WORKLET_SRC], { type: 'application/javascript' }));
-        await ctx.audioWorklet.addModule(blobUrl);
-        URL.revokeObjectURL(blobUrl);
-        ctx.__ldGateModuleLoaded = true;
-      }
-      return new AudioWorkletNode(ctx, 'ld-gate-processor', {
-        processorOptions: { thresholdLinear: 0.02, floorGain: 0.06 }
-      });
-    } catch (err) {
-      return null; // fall back to running without the gate rather than breaking recording
-    }
-  }
-
-  // Voice-clarity chain: gates out the noise floor, cuts rumble + boxiness,
-  // lifts presence/air, evens dynamics, then limits — built entirely from
-  // native Web Audio nodes so the *recorded* file is clean, not just
-  // something faked at playback. Never routed to ldAudioCtx.destination
-  // (real speakers) — that would cause feedback on mic capture or a
-  // doubled echo on tab-audio capture.
-  async function buildAudioChain(stream, enhance){
+  // Just a meter tap — no EQ/gate/compression chain. This records music,
+  // video, and other pre-mixed/mastered audio, which doesn't need (and is
+  // actively hurt by) speech-oriented processing like a noise gate chewing
+  // into quiet passages. The stream is recorded exactly as shared.
+  function startMeter(stream){
     ldAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (ldAudioCtx.state === 'suspended') ldAudioCtx.resume();
     const source = ldAudioCtx.createMediaStreamSource(stream);
-    let tap = source;
-    let outputStream = stream;
-
-    if (enhance) {
-      // Kept deliberately subtle — the first version boosted presence/air hard
-      // enough to amplify mic hiss, thinned the body out, and pushed a fast
-      // brickwall limiter into audible distortion. This pass favors staying
-      // clean over sounding "processed."
-      const rumbleCut = ldAudioCtx.createBiquadFilter();
-      rumbleCut.type = 'highpass'; rumbleCut.frequency.value = 80; rumbleCut.Q.value = 0.7;
-
-      const boxCut = ldAudioCtx.createBiquadFilter();
-      boxCut.type = 'peaking'; boxCut.frequency.value = 250; boxCut.Q.value = 0.8; boxCut.gain.value = -2;
-
-      const presence = ldAudioCtx.createBiquadFilter();
-      presence.type = 'peaking'; presence.frequency.value = 3000; presence.Q.value = 0.9; presence.gain.value = 2;
-
-      const airShelf = ldAudioCtx.createBiquadFilter();
-      airShelf.type = 'highshelf'; airShelf.frequency.value = 10000; airShelf.gain.value = 1.5;
-
-      const gateNode = await createGateNode(ldAudioCtx);
-
-      const leveler = ldAudioCtx.createDynamicsCompressor();
-      leveler.threshold.value = -22; leveler.knee.value = 24; leveler.ratio.value = 2.5;
-      leveler.attack.value = 0.01; leveler.release.value = 0.25;
-
-      const makeupGain = ldAudioCtx.createGain();
-      makeupGain.gain.value = 1.12;
-
-      const limiter = ldAudioCtx.createDynamicsCompressor(); // gentle safety net, not a hard brickwall
-      limiter.threshold.value = -3; limiter.knee.value = 6; limiter.ratio.value = 8;
-      limiter.attack.value = 0.004; limiter.release.value = 0.15;
-
-      const dest = ldAudioCtx.createMediaStreamDestination();
-
-      source.connect(rumbleCut);
-      rumbleCut.connect(boxCut);
-      boxCut.connect(presence);
-      presence.connect(airShelf);
-      if (gateNode) { airShelf.connect(gateNode); gateNode.connect(leveler); }
-      else { airShelf.connect(leveler); }
-      leveler.connect(makeupGain);
-      makeupGain.connect(limiter);
-      limiter.connect(dest);
-
-      tap = limiter;
-      outputStream = dest.stream;
-    }
-
     ldAnalyser = ldAudioCtx.createAnalyser();
     ldAnalyser.fftSize = 512;
-    tap.connect(ldAnalyser);
+    source.connect(ldAnalyser);
 
-    return outputStream;
-  }
-
-  function startMeter(){
     const data = new Uint8Array(ldAnalyser.frequencyBinCount);
     meterWrap.classList.add('show');
     const tick = () => {
@@ -5120,17 +4966,11 @@ processSharedFileIfAny();
     ldAnalyser = null;
   }
 
-  async function streamReady(){
-    micBtn.disabled = true;
+  function streamReady(){
     tabBtn.disabled = true;
-    enhanceToggle.disabled = true;
     recordBtn.style.display = '';
-    setStatus('Setting up audio…', 'ok');
-    ldRecordStream = await buildAudioChain(ldStream, enhanceToggle.checked);
-    startMeter();
-    setStatus(enhanceToggle.checked
-      ? 'Audio source ready, enhancement on — click "Start Recording" when you\'re set.'
-      : 'Audio source ready — click "Start Recording" when you\'re set.', 'ok');
+    startMeter(ldStream);
+    setStatus('Audio source ready — click "Start Recording" when you\'re set.', 'ok');
 
     ldStream.getAudioTracks()[0].addEventListener('ended', () => {
       if (ldRecorder && ldRecorder.state === 'recording') stopRecording();
@@ -5138,17 +4978,6 @@ processSharedFileIfAny();
       setStatus('Audio source disconnected.', 'error');
     });
   }
-
-  micBtn.addEventListener('click', async () => {
-    setStatus('');
-    try {
-      ldStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      setStatus('Microphone permission was denied or unavailable.', 'error');
-      return;
-    }
-    await streamReady();
-  });
 
   tabBtn.addEventListener('click', async () => {
     setStatus('');
@@ -5166,7 +4995,7 @@ processSharedFileIfAny();
       return;
     }
     ldStream = new MediaStream(audioTracks);
-    await streamReady();
+    streamReady();
   });
 
   function pickMimeType(){
@@ -5180,7 +5009,7 @@ processSharedFileIfAny();
     ldChunks = [];
     const mimeType = pickMimeType();
     try {
-      ldRecorder = mimeType ? new MediaRecorder(ldRecordStream, { mimeType }) : new MediaRecorder(ldRecordStream);
+      ldRecorder = mimeType ? new MediaRecorder(ldStream, { mimeType }) : new MediaRecorder(ldStream);
     } catch (err) {
       setStatus('This browser can\'t record audio (MediaRecorder unsupported).', 'error');
       return;
@@ -5227,7 +5056,7 @@ processSharedFileIfAny();
     }
 
     const channels = Math.min(audioBuffer.numberOfChannels, 2);
-    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 192);
+    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 320);
     const blockSize = 1152;
     const left = floatTo16BitPCM(audioBuffer.getChannelData(0));
     const right = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
@@ -5284,8 +5113,6 @@ processSharedFileIfAny();
 
   function teardownStream(){
     stopMeter();
-    if (ldRecordStream && ldRecordStream !== ldStream) { ldRecordStream.getTracks().forEach(t => t.stop()); }
-    ldRecordStream = null;
     if (ldStream) { ldStream.getTracks().forEach(t => t.stop()); ldStream = null; }
   }
 
@@ -5293,9 +5120,7 @@ processSharedFileIfAny();
     resultEl.classList.remove('show');
     if (ldObjectUrl) { URL.revokeObjectURL(ldObjectUrl); ldObjectUrl = null; }
     audioPreview.removeAttribute('src');
-    micBtn.disabled = false;
     tabBtn.disabled = false;
-    enhanceToggle.disabled = false;
     recordBtn.textContent = '⏺ Start Recording';
     recordBtn.classList.remove('recording');
     recordBtn.style.display = 'none';
