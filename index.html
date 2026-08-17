@@ -2175,7 +2175,7 @@
         <div class="ld-result" id="ldResult">
           <audio controls id="ldAudioPreview"></audio>
           <div class="ld-result-row">
-            <a class="ld-download" id="ldDownloadLink" download="lightning-downloader-recording.webm">⬇ Download Recording</a>
+            <a class="ld-download" id="ldDownloadLink" download="lightning-downloader-recording.mp3">⬇ Download Recording</a>
             <button class="ld-reset" id="ldResetBtn" type="button">Record Another</button>
           </div>
         </div>
@@ -2235,6 +2235,7 @@
 
 <script src="pdf-lib.min.js"></script>
 <script src="pdf.min.js"></script>
+<script src="lame.min.js"></script>
 <script>
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
@@ -4973,12 +4974,70 @@ processSharedFileIfAny();
     return m + ':' + s;
   }
 
-  // Voice-clarity chain: cuts rumble + boxiness, lifts presence/air, evens
-  // dynamics, then limits — built entirely from native Web Audio nodes so
-  // the *recorded* file is clean, not just something faked at playback.
-  // Never routed to ldAudioCtx.destination (real speakers) — that would
-  // cause feedback on mic capture or a doubled echo on tab-audio capture.
-  function buildAudioChain(stream, enhance){
+  // Noise gate, run as an AudioWorklet so it processes sample-by-sample
+  // ahead of the compressor — without this, the leveler pulls the mic's
+  // background noise floor up during quiet passages right along with quiet
+  // speech, which is what made pauses sound hissy/present instead of quiet.
+  const LD_GATE_WORKLET_SRC = [
+    'class LdGateProcessor extends AudioWorkletProcessor {',
+    '  constructor(options) {',
+    '    super();',
+    '    const opts = (options && options.processorOptions) || {};',
+    '    this.envelope = 0;',
+    '    this.thresholdLinear = opts.thresholdLinear || 0.02;',
+    '    this.floorGain = opts.floorGain != null ? opts.floorGain : 0.06;',
+    '  }',
+    '  process(inputs, outputs) {',
+    '    const input = inputs[0];',
+    '    const output = outputs[0];',
+    '    if (!input || input.length === 0) return true;',
+    '    const attackCoeff = 0.6;',
+    '    const releaseCoeff = 0.02;',
+    '    for (let ch = 0; ch < input.length; ch++) {',
+    '      const inCh = input[ch];',
+    '      const outCh = output[ch];',
+    '      if (!inCh) continue;',
+    '      for (let i = 0; i < inCh.length; i++) {',
+    '        const level = Math.abs(inCh[i]);',
+    '        const coeff = level > this.envelope ? attackCoeff : releaseCoeff;',
+    '        this.envelope += (level - this.envelope) * coeff;',
+    '        let gate = this.envelope / this.thresholdLinear;',
+    '        if (gate > 1) gate = 1;',
+    '        if (gate < 0) gate = 0;',
+    '        gate = gate * gate;',
+    '        outCh[i] = inCh[i] * (this.floorGain + (1 - this.floorGain) * gate);',
+    '      }',
+    '    }',
+    '    return true;',
+    '  }',
+    '}',
+    'registerProcessor(\'ld-gate-processor\', LdGateProcessor);'
+  ].join('\n');
+
+  async function createGateNode(ctx){
+    if (!ctx.audioWorklet) return null; // older browser — chain still works, just without gating
+    try {
+      if (!ctx.__ldGateModuleLoaded) {
+        const blobUrl = URL.createObjectURL(new Blob([LD_GATE_WORKLET_SRC], { type: 'application/javascript' }));
+        await ctx.audioWorklet.addModule(blobUrl);
+        URL.revokeObjectURL(blobUrl);
+        ctx.__ldGateModuleLoaded = true;
+      }
+      return new AudioWorkletNode(ctx, 'ld-gate-processor', {
+        processorOptions: { thresholdLinear: 0.02, floorGain: 0.06 }
+      });
+    } catch (err) {
+      return null; // fall back to running without the gate rather than breaking recording
+    }
+  }
+
+  // Voice-clarity chain: gates out the noise floor, cuts rumble + boxiness,
+  // lifts presence/air, evens dynamics, then limits — built entirely from
+  // native Web Audio nodes so the *recorded* file is clean, not just
+  // something faked at playback. Never routed to ldAudioCtx.destination
+  // (real speakers) — that would cause feedback on mic capture or a
+  // doubled echo on tab-audio capture.
+  async function buildAudioChain(stream, enhance){
     ldAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (ldAudioCtx.state === 'suspended') ldAudioCtx.resume();
     const source = ldAudioCtx.createMediaStreamSource(stream);
@@ -5002,6 +5061,8 @@ processSharedFileIfAny();
       const airShelf = ldAudioCtx.createBiquadFilter();
       airShelf.type = 'highshelf'; airShelf.frequency.value = 10000; airShelf.gain.value = 1.5;
 
+      const gateNode = await createGateNode(ldAudioCtx);
+
       const leveler = ldAudioCtx.createDynamicsCompressor();
       leveler.threshold.value = -22; leveler.knee.value = 24; leveler.ratio.value = 2.5;
       leveler.attack.value = 0.01; leveler.release.value = 0.25;
@@ -5019,7 +5080,8 @@ processSharedFileIfAny();
       rumbleCut.connect(boxCut);
       boxCut.connect(presence);
       presence.connect(airShelf);
-      airShelf.connect(leveler);
+      if (gateNode) { airShelf.connect(gateNode); gateNode.connect(leveler); }
+      else { airShelf.connect(leveler); }
       leveler.connect(makeupGain);
       makeupGain.connect(limiter);
       limiter.connect(dest);
@@ -5058,12 +5120,13 @@ processSharedFileIfAny();
     ldAnalyser = null;
   }
 
-  function streamReady(){
+  async function streamReady(){
     micBtn.disabled = true;
     tabBtn.disabled = true;
     enhanceToggle.disabled = true;
     recordBtn.style.display = '';
-    ldRecordStream = buildAudioChain(ldStream, enhanceToggle.checked);
+    setStatus('Setting up audio…', 'ok');
+    ldRecordStream = await buildAudioChain(ldStream, enhanceToggle.checked);
     startMeter();
     setStatus(enhanceToggle.checked
       ? 'Audio source ready, enhancement on — click "Start Recording" when you\'re set.'
@@ -5084,7 +5147,7 @@ processSharedFileIfAny();
       setStatus('Microphone permission was denied or unavailable.', 'error');
       return;
     }
-    streamReady();
+    await streamReady();
   });
 
   tabBtn.addEventListener('click', async () => {
@@ -5103,7 +5166,7 @@ processSharedFileIfAny();
       return;
     }
     ldStream = new MediaStream(audioTracks);
-    streamReady();
+    await streamReady();
   });
 
   function pickMimeType(){
@@ -5123,7 +5186,7 @@ processSharedFileIfAny();
       return;
     }
     ldRecorder.addEventListener('dataavailable', (e) => { if (e.data.size > 0) ldChunks.push(e.data); });
-    ldRecorder.addEventListener('stop', onRecordingStopped);
+    ldRecorder.addEventListener('stop', () => { onRecordingStopped(); });
     ldRecorder.start();
     ldStartTime = Date.now();
     timerEl.classList.add('show');
@@ -5140,19 +5203,77 @@ processSharedFileIfAny();
     ldTimerInterval = null;
   }
 
-  function onRecordingStopped(){
+  function floatTo16BitPCM(float32Array){
+    const out = new Int16Array(float32Array.length);
+    for (let i = 0; i < float32Array.length; i++) {
+      const s = Math.max(-1, Math.min(1, float32Array[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return out;
+  }
+
+  // Decodes the recorded webm/opus blob back to PCM, then encodes that PCM
+  // to MP3 with lamejs (self-hosted, lame.min.js) — browsers' MediaRecorder
+  // has no MP3 output option, so this transcode step is the only way to get
+  // an actual .mp3 file without sending audio to a server.
+  async function encodeToMp3(sourceBlob){
+    const arrayBuffer = await sourceBlob.arrayBuffer();
+    const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioBuffer;
+    try {
+      audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+    } finally {
+      decodeCtx.close().catch(function(){});
+    }
+
+    const channels = Math.min(audioBuffer.numberOfChannels, 2);
+    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 192);
+    const blockSize = 1152;
+    const left = floatTo16BitPCM(audioBuffer.getChannelData(0));
+    const right = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
+    const mp3Chunks = [];
+
+    for (let i = 0; i < left.length; i += blockSize) {
+      const leftChunk = left.subarray(i, i + blockSize);
+      const buf = right
+        ? encoder.encodeBuffer(leftChunk, right.subarray(i, i + blockSize))
+        : encoder.encodeBuffer(leftChunk);
+      if (buf.length > 0) mp3Chunks.push(buf);
+    }
+    const endBuf = encoder.flush();
+    if (endBuf.length > 0) mp3Chunks.push(endBuf);
+
+    return new Blob(mp3Chunks, { type: 'audio/mpeg' });
+  }
+
+  async function onRecordingStopped(){
     const mimeType = ldRecorder.mimeType || 'audio/webm';
-    const blob = new Blob(ldChunks, { type: mimeType });
-    const ext = mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') ? 'm4a' : 'webm');
+    const rawBlob = new Blob(ldChunks, { type: mimeType });
+    recordBtn.style.display = 'none';
+    timerEl.classList.remove('show');
+
+    let finalBlob = rawBlob;
+    let ext = mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') ? 'm4a' : 'webm');
+
+    if (window.lamejs) {
+      setStatus('Encoding to MP3…', 'ok');
+      try {
+        finalBlob = await encodeToMp3(rawBlob);
+        ext = 'mp3';
+      } catch (err) {
+        finalBlob = rawBlob; // fall back to the original recording rather than losing the take
+      }
+    }
+
     if (ldObjectUrl) URL.revokeObjectURL(ldObjectUrl);
-    ldObjectUrl = URL.createObjectURL(blob);
+    ldObjectUrl = URL.createObjectURL(finalBlob);
     audioPreview.src = ldObjectUrl;
     downloadLink.href = ldObjectUrl;
     downloadLink.download = 'lightning-downloader-' + Date.now() + '.' + ext;
     resultEl.classList.add('show');
-    recordBtn.style.display = 'none';
-    timerEl.classList.remove('show');
-    setStatus('Recording saved below — preview it, then download.', 'ok');
+    setStatus(ext === 'mp3'
+      ? 'Recording saved as MP3 below — preview it, then download.'
+      : 'Recording saved below — preview it, then download.', 'ok');
     teardownStream();
   }
 
