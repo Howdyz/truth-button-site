@@ -5254,6 +5254,7 @@ processSharedFileIfAny();
 
     let finalBlob = rawBlob;
     let ext = mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') ? 'm4a' : 'webm');
+    let mp3Error = null;
 
     if (window.lamejs) {
       setStatus('Encoding to MP3…', 'ok');
@@ -5262,7 +5263,11 @@ processSharedFileIfAny();
         ext = 'mp3';
       } catch (err) {
         finalBlob = rawBlob; // fall back to the original recording rather than losing the take
+        mp3Error = (err && err.message) ? err.message : String(err);
+        console.error('Lightning Downloader MP3 encode failed:', err);
       }
+    } else {
+      mp3Error = 'lame.min.js did not load';
     }
 
     if (ldObjectUrl) URL.revokeObjectURL(ldObjectUrl);
@@ -5273,7 +5278,7 @@ processSharedFileIfAny();
     resultEl.classList.add('show');
     setStatus(ext === 'mp3'
       ? 'Recording saved as MP3 below — preview it, then download.'
-      : 'Recording saved below — preview it, then download.', 'ok');
+      : 'Saved as .' + ext + ' — MP3 conversion failed (' + mp3Error + ').', ext === 'mp3' ? 'ok' : 'error');
     teardownStream();
   }
 
