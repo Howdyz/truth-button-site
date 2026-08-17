@@ -2138,7 +2138,20 @@
             border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
           }
           #lightning-downloader-widget button.ld-reset:hover{border-color:var(--ld-accent); color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-enhance{
+            display:flex; align-items:flex-start; gap:10px; background:var(--ld-bg); border:1px solid var(--ld-border);
+            border-radius:6px; padding:10px 12px; margin-bottom:14px; cursor:pointer;
+          }
+          #lightning-downloader-widget .ld-enhance input{margin-top:2px; accent-color:var(--ld-accent); flex-shrink:0;}
+          #lightning-downloader-widget .ld-enhance-text{font-size:12px; color:var(--ld-text-dim); line-height:1.5;}
+          #lightning-downloader-widget .ld-enhance-text b{color:var(--ld-text);}
+          #lightning-downloader-widget .ld-enhance input:disabled{opacity:.5;}
         </style>
+
+        <label class="ld-enhance">
+          <input type="checkbox" id="ldEnhanceToggle" checked>
+          <span class="ld-enhance-text"><b>✨ Clean &amp; enhance audio</b> — runs a voice EQ + leveling chain (cuts rumble and boxiness, lifts clarity, evens out volume) on the recording itself, so playback isn't muffled. Applies to mic or tab audio; recorded straight in, no separate export step.</span>
+        </label>
 
         <div class="ld-tabs">
           <div class="ld-tab active" data-ldtab="mic">🎙️ Microphone</div>
@@ -4927,8 +4940,10 @@ processSharedFileIfAny();
   const audioPreview = document.getElementById('ldAudioPreview');
   const downloadLink = document.getElementById('ldDownloadLink');
   const resetBtn = document.getElementById('ldResetBtn');
+  const enhanceToggle = document.getElementById('ldEnhanceToggle');
 
-  let ldStream = null;
+  let ldStream = null;         // raw source track (mic or shared tab), kept for the 'ended' listener
+  let ldRecordStream = null;   // what actually gets fed to MediaRecorder (raw or enhanced)
   let ldRecorder = null;
   let ldChunks = [];
   let ldAnalyser = null;
@@ -4958,12 +4973,65 @@ processSharedFileIfAny();
     return m + ':' + s;
   }
 
-  function startMeter(){
+  // Voice-clarity chain: cuts rumble + boxiness, lifts presence/air, evens
+  // dynamics, then limits — built entirely from native Web Audio nodes so
+  // the *recorded* file is clean, not just something faked at playback.
+  // Never routed to ldAudioCtx.destination (real speakers) — that would
+  // cause feedback on mic capture or a doubled echo on tab-audio capture.
+  function buildAudioChain(stream, enhance){
     ldAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = ldAudioCtx.createMediaStreamSource(ldStream);
+    if (ldAudioCtx.state === 'suspended') ldAudioCtx.resume();
+    const source = ldAudioCtx.createMediaStreamSource(stream);
+    let tap = source;
+    let outputStream = stream;
+
+    if (enhance) {
+      const rumbleCut = ldAudioCtx.createBiquadFilter();
+      rumbleCut.type = 'highpass'; rumbleCut.frequency.value = 90; rumbleCut.Q.value = 0.7;
+
+      const boxCut = ldAudioCtx.createBiquadFilter();
+      boxCut.type = 'peaking'; boxCut.frequency.value = 300; boxCut.Q.value = 1.2; boxCut.gain.value = -4;
+
+      const presence = ldAudioCtx.createBiquadFilter();
+      presence.type = 'peaking'; presence.frequency.value = 3200; presence.Q.value = 1.0; presence.gain.value = 5;
+
+      const airShelf = ldAudioCtx.createBiquadFilter();
+      airShelf.type = 'highshelf'; airShelf.frequency.value = 8000; airShelf.gain.value = 3.5;
+
+      const leveler = ldAudioCtx.createDynamicsCompressor();
+      leveler.threshold.value = -28; leveler.knee.value = 24; leveler.ratio.value = 3.5;
+      leveler.attack.value = 0.003; leveler.release.value = 0.22;
+
+      const makeupGain = ldAudioCtx.createGain();
+      makeupGain.gain.value = 1.35;
+
+      const limiter = ldAudioCtx.createDynamicsCompressor(); // brickwall safety so makeup gain can't clip
+      limiter.threshold.value = -2; limiter.knee.value = 0; limiter.ratio.value = 20;
+      limiter.attack.value = 0.001; limiter.release.value = 0.1;
+
+      const dest = ldAudioCtx.createMediaStreamDestination();
+
+      source.connect(rumbleCut);
+      rumbleCut.connect(boxCut);
+      boxCut.connect(presence);
+      presence.connect(airShelf);
+      airShelf.connect(leveler);
+      leveler.connect(makeupGain);
+      makeupGain.connect(limiter);
+      limiter.connect(dest);
+
+      tap = limiter;
+      outputStream = dest.stream;
+    }
+
     ldAnalyser = ldAudioCtx.createAnalyser();
     ldAnalyser.fftSize = 512;
-    source.connect(ldAnalyser);
+    tap.connect(ldAnalyser);
+
+    return outputStream;
+  }
+
+  function startMeter(){
     const data = new Uint8Array(ldAnalyser.frequencyBinCount);
     meterWrap.classList.add('show');
     const tick = () => {
@@ -4989,9 +5057,13 @@ processSharedFileIfAny();
   function streamReady(){
     micBtn.disabled = true;
     tabBtn.disabled = true;
+    enhanceToggle.disabled = true;
     recordBtn.style.display = '';
+    ldRecordStream = buildAudioChain(ldStream, enhanceToggle.checked);
     startMeter();
-    setStatus('Audio source ready — click "Start Recording" when you\'re set.', 'ok');
+    setStatus(enhanceToggle.checked
+      ? 'Audio source ready, enhancement on — click "Start Recording" when you\'re set.'
+      : 'Audio source ready — click "Start Recording" when you\'re set.', 'ok');
 
     ldStream.getAudioTracks()[0].addEventListener('ended', () => {
       if (ldRecorder && ldRecorder.state === 'recording') stopRecording();
@@ -5041,7 +5113,7 @@ processSharedFileIfAny();
     ldChunks = [];
     const mimeType = pickMimeType();
     try {
-      ldRecorder = mimeType ? new MediaRecorder(ldStream, { mimeType }) : new MediaRecorder(ldStream);
+      ldRecorder = mimeType ? new MediaRecorder(ldRecordStream, { mimeType }) : new MediaRecorder(ldRecordStream);
     } catch (err) {
       setStatus('This browser can\'t record audio (MediaRecorder unsupported).', 'error');
       return;
@@ -5082,6 +5154,8 @@ processSharedFileIfAny();
 
   function teardownStream(){
     stopMeter();
+    if (ldRecordStream && ldRecordStream !== ldStream) { ldRecordStream.getTracks().forEach(t => t.stop()); }
+    ldRecordStream = null;
     if (ldStream) { ldStream.getTracks().forEach(t => t.stop()); ldStream = null; }
   }
 
@@ -5091,6 +5165,7 @@ processSharedFileIfAny();
     audioPreview.removeAttribute('src');
     micBtn.disabled = false;
     tabBtn.disabled = false;
+    enhanceToggle.disabled = false;
     recordBtn.textContent = '⏺ Start Recording';
     recordBtn.classList.remove('recording');
     recordBtn.style.display = 'none';
