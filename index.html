@@ -4979,11 +4979,32 @@ processSharedFileIfAny();
     });
   }
 
+  // A bare `audio: true` lets the browser pick defaults, which for tab/system
+  // capture can mean a mono downmix plus voice-call-style processing (auto
+  // gain, noise suppression) — fine for a mic, wrong for music. Ask explicitly
+  // for stereo with that processing off; fall back to plain `audio: true` if
+  // the browser rejects the detailed constraints.
+  async function requestTabAudio(){
+    try {
+      return await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: {
+          channelCount: { ideal: 2 },
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+    } catch (err) {
+      return await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    }
+  }
+
   tabBtn.addEventListener('click', async () => {
     setStatus('');
     let stream;
     try {
-      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      stream = await requestTabAudio();
     } catch (err) {
       setStatus('Permission wasn\'t granted, or your browser doesn\'t support tab-audio sharing (try Chrome or Edge on desktop).', 'error');
       return;
