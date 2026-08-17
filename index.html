@@ -2433,7 +2433,15 @@ document.getElementById('tabPeptide').addEventListener('click', () => setMode('p
 
 // --- state list, shared by both lookup panels (slugs confirmed against deflocktheusa.com and datacentermap.com) ---
 const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
-function stateSlug(name){ return name.toLowerCase().replace(/\s+/g, '-'); }
+// Restricted to [a-z0-9-] deliberately — this gets interpolated raw into HTML
+// attributes (data-state="...") in renderReviewCard. The frontend's review form
+// only offers a fixed <select> of real state names, but the backend doesn't
+// re-validate `state` server-side, so a direct API call could submit anything.
+// A slug that can only ever contain safe characters closes that off at the root,
+// rather than relying on every call site to remember to escape it correctly.
+function stateSlug(name){
+  return String(name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 
 function populateStateSelect(selectEl){
   selectEl.innerHTML = '<option value="">Select a state…</option>' +
