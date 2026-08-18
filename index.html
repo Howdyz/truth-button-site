@@ -2237,36 +2237,50 @@
           }
           #qr-generator-widget a.qr-download:hover{opacity:0.88;}
           #qr-generator-widget a.qr-download.disabled{opacity:.4; pointer-events:none;}
+          #qr-generator-widget .qr-result-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center;}
+          #qr-generator-widget button.qr-done-btn{
+            margin-top:14px; padding:10px 16px; background:none; border:1px solid var(--qr-border);
+            border-radius:5px; color:#14110F; font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #qr-generator-widget button.qr-done-btn:hover{border-color:var(--qr-accent); color:var(--qr-accent);}
+          #qr-generator-widget button.qr-reset-btn{
+            margin-top:14px; padding:10px 16px; background:none; border:1px solid var(--qr-border); color:var(--qr-text-dim);
+            border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
+          }
+          #qr-generator-widget button.qr-reset-btn:hover{border-color:var(--qr-accent); color:var(--qr-accent);}
         </style>
 
-        <textarea id="qrInput" placeholder="https://example.com, a phone number, a note to yourself — anything." maxlength="2000"></textarea>
+        <div id="qrEditControls">
+          <textarea id="qrInput" placeholder="https://example.com, a phone number, a note to yourself — anything." maxlength="2000"></textarea>
 
-        <div class="qr-options">
-          <div class="qr-opt">
-            <label for="qrEcLevel">Error correction</label>
-            <select id="qrEcLevel">
-              <option value="L">Low (L)</option>
-              <option value="M" selected>Medium (M)</option>
-              <option value="Q">Quartile (Q)</option>
-              <option value="H">High (H)</option>
-            </select>
-          </div>
-          <div class="qr-opt">
-            <label for="qrCellSize">Size</label>
-            <select id="qrCellSize">
-              <option value="4">Small</option>
-              <option value="6" selected>Medium</option>
-              <option value="10">Large</option>
-              <option value="16">Extra Large</option>
-            </select>
-          </div>
-          <div class="qr-opt">
-            <label for="qrFgColor">Code color</label>
-            <input type="color" id="qrFgColor" value="#000000">
-          </div>
-          <div class="qr-opt">
-            <label for="qrBgColor">Background</label>
-            <input type="color" id="qrBgColor" value="#ffffff">
+          <div class="qr-options">
+            <div class="qr-opt">
+              <label for="qrEcLevel">Error correction</label>
+              <select id="qrEcLevel">
+                <option value="L">Low (L)</option>
+                <option value="M" selected>Medium (M)</option>
+                <option value="Q">Quartile (Q)</option>
+                <option value="H">High (H)</option>
+              </select>
+            </div>
+            <div class="qr-opt">
+              <label for="qrCellSize">Size</label>
+              <select id="qrCellSize">
+                <option value="4">Small</option>
+                <option value="6" selected>Medium</option>
+                <option value="10">Large</option>
+                <option value="16">Extra Large</option>
+              </select>
+            </div>
+            <div class="qr-opt">
+              <label for="qrFgColor">Code color</label>
+              <input type="color" id="qrFgColor" value="#000000">
+            </div>
+            <div class="qr-opt">
+              <label for="qrBgColor">Background</label>
+              <input type="color" id="qrBgColor" value="#ffffff">
+            </div>
           </div>
         </div>
 
@@ -2274,8 +2288,13 @@
 
         <div class="qr-preview-wrap" id="qrPreviewWrap">
           <img id="qrPreviewImg" alt="Generated QR code">
-          <div><a class="qr-download" id="qrDownloadLink" download="qr-code.png">⬇ Download PNG</a></div>
+          <div class="qr-result-row">
+            <a class="qr-download" id="qrDownloadLink" download="qr-code.png">⬇ Download PNG</a>
+            <button class="qr-done-btn" id="qrDoneBtn" type="button">✅ Done</button>
+          </div>
         </div>
+
+        <button class="qr-reset-btn" id="qrMakeAnotherBtn" type="button" style="display:none;">🔁 Make Another QR Code</button>
       </div>
     </div>
 
@@ -5503,6 +5522,28 @@ processSharedFileIfAny();
   cellSize.addEventListener('change', generate);
   fgColor.addEventListener('input', generate);
   bgColor.addEventListener('input', generate);
+
+  const editControls = document.getElementById('qrEditControls');
+  const doneBtn = document.getElementById('qrDoneBtn');
+  const makeAnotherBtn = document.getElementById('qrMakeAnotherBtn');
+
+  doneBtn.addEventListener('click', () => {
+    editControls.style.display = 'none';
+    makeAnotherBtn.style.display = '';
+  });
+
+  makeAnotherBtn.addEventListener('click', () => {
+    input.value = '';
+    ecLevel.value = 'M';
+    cellSize.value = '6';
+    fgColor.value = '#000000';
+    bgColor.value = '#ffffff';
+    previewWrap.classList.remove('show');
+    setStatus('');
+    editControls.style.display = '';
+    makeAnotherBtn.style.display = 'none';
+    input.focus();
+  });
 })();
 </script>
 </body>
