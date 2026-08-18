@@ -1443,6 +1443,7 @@
     <div class="mode-tab" data-mode="scanner" id="tabScanner">🛡️ Repo Scanner</div>
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
+    <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
   </div>
 
   <div class="desk">
@@ -2194,6 +2195,95 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="qrcodePanel">
+    <div class="lookup-card">
+      <h3>📱 QR Code Generator</h3>
+      <div class="lc-sub">Type or paste a URL, text, or anything else — get a scannable QR code instantly, generated entirely in your browser.</div>
+
+      <div id="qr-generator-widget">
+        <style>
+          #qr-generator-widget {
+            --qr-bg: #14110F; --qr-panel: #1C1814; --qr-border: rgba(242,237,225,0.14);
+            --qr-text: #F2EDE1; --qr-text-dim: #8C8377; --qr-accent: #2F8F7A; --qr-red: #E8402C; --qr-bolt: #E8C23C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--qr-text); margin-top: 16px;
+          }
+          #qr-generator-widget *{box-sizing:border-box;}
+          #qr-generator-widget textarea{
+            width:100%; padding:10px 12px; background:var(--qr-bg); border:1px solid var(--qr-border);
+            border-radius:5px; color:var(--qr-text); font-size:13px; font-family:inherit; resize:vertical; min-height:70px;
+          }
+          #qr-generator-widget .qr-options{display:flex; gap:16px; flex-wrap:wrap; margin:12px 0;}
+          #qr-generator-widget .qr-opt label{display:block; font-size:11px; color:var(--qr-text-dim); margin-bottom:4px;}
+          #qr-generator-widget select{
+            padding:8px 10px; background:var(--qr-bg); border:1px solid var(--qr-border);
+            border-radius:5px; color:var(--qr-text); font-size:12.5px; font-family:inherit;
+          }
+          #qr-generator-widget input[type=color]{
+            width:44px; height:36px; padding:2px; background:var(--qr-bg); border:1px solid var(--qr-border);
+            border-radius:5px; cursor:pointer;
+          }
+          #qr-generator-widget .qr-status{font-size:12.5px; color:var(--qr-text-dim); margin-top:8px; min-height:18px;}
+          #qr-generator-widget .qr-status.error{color:var(--qr-red);}
+          #qr-generator-widget .qr-preview-wrap{
+            display:none; margin-top:16px; background:#FFFFFF; border-radius:8px; padding:20px;
+            text-align:center;
+          }
+          #qr-generator-widget .qr-preview-wrap.show{display:block;}
+          #qr-generator-widget .qr-preview-wrap img{max-width:100%; height:auto; image-rendering:pixelated;}
+          #qr-generator-widget a.qr-download{
+            display:inline-block; margin-top:14px; padding:10px 16px; background:var(--qr-bolt); border:none;
+            border-radius:5px; color:var(--qr-bg); font-weight:700; font-size:12.5px; text-decoration:none;
+            text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #qr-generator-widget a.qr-download:hover{opacity:0.88;}
+          #qr-generator-widget a.qr-download.disabled{opacity:.4; pointer-events:none;}
+        </style>
+
+        <textarea id="qrInput" placeholder="https://example.com, a phone number, a note to yourself — anything." maxlength="2000"></textarea>
+
+        <div class="qr-options">
+          <div class="qr-opt">
+            <label for="qrEcLevel">Error correction</label>
+            <select id="qrEcLevel">
+              <option value="L">Low (L)</option>
+              <option value="M" selected>Medium (M)</option>
+              <option value="Q">Quartile (Q)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+          <div class="qr-opt">
+            <label for="qrCellSize">Size</label>
+            <select id="qrCellSize">
+              <option value="4">Small</option>
+              <option value="6" selected>Medium</option>
+              <option value="10">Large</option>
+              <option value="16">Extra Large</option>
+            </select>
+          </div>
+          <div class="qr-opt">
+            <label for="qrFgColor">Code color</label>
+            <input type="color" id="qrFgColor" value="#000000">
+          </div>
+          <div class="qr-opt">
+            <label for="qrBgColor">Background</label>
+            <input type="color" id="qrBgColor" value="#ffffff">
+          </div>
+        </div>
+
+        <div class="qr-status" id="qrStatus"></div>
+
+        <div class="qr-preview-wrap" id="qrPreviewWrap">
+          <img id="qrPreviewImg" alt="Generated QR code">
+          <div><a class="qr-download" id="qrDownloadLink" download="qr-code.png">⬇ Download PNG</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> the QR code is generated entirely in your browser using a local copy of a standard open-source QR encoder — nothing you type is ever sent anywhere. Higher error correction levels make the code more resistant to damage/dirt but also denser (harder to scan from far away); "Medium" is a good default for most uses. Very long text needs a larger/denser code — if generation fails, try shortening the text or lowering the error correction level.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2243,6 +2333,7 @@
 <script src="pdf-lib.min.js"></script>
 <script src="pdf.min.js"></script>
 <script src="lame.min.js"></script>
+<script src="qrcode.min.js"></script>
 <script>
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
@@ -2377,6 +2468,7 @@ const peptidePanel = document.getElementById('peptidePanel');
 const scannerPanel = document.getElementById('scannerPanel');
 const pdfPanel = document.getElementById('pdfPanel');
 const downloaderPanel = document.getElementById('downloaderPanel');
+const qrcodePanel = document.getElementById('qrcodePanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2388,14 +2480,15 @@ const LOOKUP_TAGLINES = {
   peptide: 'Convert a known dose into a measurable syringe volume. This is arithmetic, not medical advice — it doesn\'t tell you what dose to take.',
   scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.',
   pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.',
-  downloader: 'Record music or audio playing in a browser tab, window, or your system, and save it as a high-quality MP3 — no separate app, nothing uploaded.'
+  downloader: 'Record music or audio playing in a browser tab, window, or your system, and save it as a high-quality MP3 — no separate app, nothing uploaded.',
+  qrcode: 'Type or paste anything and get a scannable QR code instantly — generated entirely in your browser, nothing sent anywhere.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2410,6 +2503,7 @@ function setMode(newMode){
   scannerPanel.classList.toggle('show', newMode === 'scanner');
   pdfPanel.classList.toggle('show', newMode === 'pdf');
   downloaderPanel.classList.toggle('show', newMode === 'downloader');
+  qrcodePanel.classList.toggle('show', newMode === 'qrcode');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2432,6 +2526,7 @@ document.getElementById('tabPhoto').addEventListener('click', () => setMode('pho
 document.getElementById('tabScanner').addEventListener('click', () => setMode('scanner'));
 document.getElementById('tabPdf').addEventListener('click', () => setMode('pdf'));
 document.getElementById('tabDownloader').addEventListener('click', () => setMode('downloader'));
+document.getElementById('tabQrCode').addEventListener('click', () => setMode('qrcode'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -4931,7 +5026,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -5322,6 +5417,92 @@ processSharedFileIfAny();
     timerEl.textContent = '00:00';
     setStatus('');
   });
+})();
+
+// --- QR Code Generator: local encoding via self-hosted qrcode-generator, live preview + PNG download ---
+(function(){
+  const root = document.getElementById('qr-generator-widget');
+  if (!root) return;
+
+  const input = document.getElementById('qrInput');
+  const ecLevel = document.getElementById('qrEcLevel');
+  const cellSize = document.getElementById('qrCellSize');
+  const fgColor = document.getElementById('qrFgColor');
+  const bgColor = document.getElementById('qrBgColor');
+  const statusEl = document.getElementById('qrStatus');
+  const previewWrap = document.getElementById('qrPreviewWrap');
+  const previewImg = document.getElementById('qrPreviewImg');
+  const downloadLink = document.getElementById('qrDownloadLink');
+
+  function setStatus(msg, cls){
+    statusEl.className = 'qr-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function generate(){
+    const text = input.value.trim();
+    if (!text) {
+      previewWrap.classList.remove('show');
+      setStatus('');
+      return;
+    }
+    if (typeof qrcode === 'undefined') {
+      setStatus('QR encoder failed to load — try refreshing the page.', 'error');
+      return;
+    }
+    try {
+      const qr = qrcode(0, ecLevel.value); // typeNumber 0 = auto-pick the smallest size that fits
+      qr.addData(text);
+      qr.make();
+
+      // Drawing modules directly (rather than using the library's built-in GIF
+      // renderer) so custom colors can be applied — its renderer is fixed to
+      // black-on-white and also outputs GIF despite being commonly documented
+      // as PNG, which a canvas round-trip was needed to fix anyway.
+      const moduleCount = qr.getModuleCount();
+      const cell = parseInt(cellSize.value, 10);
+      const margin = 4; // quiet-zone modules — part of the QR spec, needed for reliable scanning
+      const size = (moduleCount + margin * 2) * cell;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = bgColor.value;
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = fgColor.value;
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (qr.isDark(row, col)) {
+            ctx.fillRect((col + margin) * cell, (row + margin) * cell, cell, cell);
+          }
+        }
+      }
+
+      if (fgColor.value.toLowerCase() === bgColor.value.toLowerCase()) {
+        setStatus('Code color and background are the same — this won\'t be scannable until they\'re different.', 'error');
+      } else {
+        setStatus('');
+      }
+
+      const pngDataUrl = canvas.toDataURL('image/png');
+      previewImg.src = pngDataUrl;
+      downloadLink.href = pngDataUrl;
+      previewWrap.classList.add('show');
+    } catch (err) {
+      previewWrap.classList.remove('show');
+      setStatus('Too much text for a QR code at this error-correction level — try shortening it or lowering the error correction.', 'error');
+    }
+  }
+
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(generate, 300);
+  });
+  ecLevel.addEventListener('change', generate);
+  cellSize.addEventListener('change', generate);
+  fgColor.addEventListener('input', generate);
+  bgColor.addEventListener('input', generate);
 })();
 </script>
 </body>

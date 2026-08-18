@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free QR Code Generator — No Sign-Up, No Upload | The Truth Button</title>
+<meta name="description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account, nothing ever sent to a server.">
+<link rel="canonical" href="https://projectsilverbeam.com/qr-code-generator.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://projectsilverbeam.com/qr-code-generator.html">
+<meta property="og:title" content="Free QR Code Generator — No Sign-Up, No Upload">
+<meta property="og:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free QR Code Generator — No Sign-Up, No Upload">
+<meta name="twitter:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14110F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I make a QR code for free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this upload what I type anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server." }
+    },
+    {
+      "@type": "Question",
+      "name": "What's error correction level for?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, no account or install required." }
+    }
+  ]
+}
+</script>
+<style>
+  :root{
+    --void:#14110F; --void-2:#1C1814; --red:#E8402C; --teal:#2F8F7A; --bolt:#E8C23C;
+    --ink:#F2EDE1; --ink-soft:#C9C0AE; --muted:#8C8377; --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace; --font-body:'IBM Plex Sans', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(34,29,23,0.55) 0%, transparent 55%),
+      linear-gradient(rgba(20,17,15,0.9), rgba(20,17,15,0.94)),
+      url('washington-backdrop.png') center / cover no-repeat fixed;
+    color:var(--ink); font-family:var(--font-body); min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:48px 24px 80px;}
+  .kicker{font-family:var(--font-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--teal); text-align:center; margin-bottom:12px;}
+  h1{font-family:var(--font-stamp); font-size:clamp(28px, 5vw, 42px); text-align:center; line-height:1.2; margin:0 0 18px;}
+  h1 .accent{color:var(--teal);}
+  .lede{font-size:16px; color:var(--ink-soft); text-align:center; line-height:1.6; max-width:560px; margin:0 auto 32px;}
+  .cta-row{text-align:center; margin-bottom:48px;}
+  .cta-btn{display:inline-block; background:var(--teal); color:var(--void); text-decoration:none; padding:16px 32px; border-radius:6px; font-family:var(--font-mono); font-size:14px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; transition:transform .15s ease, opacity .15s ease;}
+  .cta-btn:hover{opacity:0.9; transform:translateY(-1px);}
+  .cta-fine{font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:10px;}
+  section{margin-bottom:40px;}
+  h2{font-family:var(--font-stamp); font-size:22px; color:var(--ink); margin-bottom:16px;}
+  p{line-height:1.7; color:var(--ink-soft); margin:0 0 14px;}
+  .steps{padding-left:0; list-style:none; margin:0;}
+  .steps li{display:flex; gap:14px; margin-bottom:16px; line-height:1.6; color:var(--ink-soft);}
+  .steps .num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--teal); color:var(--void); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; font-size:13px;}
+  .faq-item{border-bottom:1px solid var(--line); padding:18px 0;}
+  .faq-item:last-child{border-bottom:none;}
+  .faq-q{font-weight:600; color:var(--ink); margin-bottom:8px; font-size:15px;}
+  .faq-a{color:var(--ink-soft); line-height:1.6; margin:0;}
+  .disclaimer{background:var(--void-2); border:1px solid var(--line); border-radius:8px; padding:16px 18px; font-size:13px; color:var(--muted); line-height:1.6;}
+  .disclaimer b{color:var(--ink-soft);}
+  .other-tools{background:var(--void-2); border:1px solid var(--line); border-radius:8px; padding:20px 22px;}
+  .other-tools ul{margin:0; padding-left:20px; color:var(--ink-soft); line-height:2;}
+  .other-tools a{color:var(--teal); text-decoration:none;}
+  .other-tools a:hover{text-decoration:underline;}
+  footer{text-align:center; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:40px;}
+  footer a{color:var(--teal); text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Free · Generated Locally · Nothing Uploaded</div>
+  <h1>📱 <span class="accent">QR Code</span> Generator</h1>
+  <p class="lede">Type or paste a URL, phone number, or any text and get a scannable QR code instantly — generated entirely in your browser, downloadable as a PNG.</p>
+
+  <div class="cta-row">
+    <a class="cta-btn" href="index.html?mode=qrcode">Open QR Generator →</a>
+    <div class="cta-fine">Updates live as you type — no "generate" button to click</div>
+  </div>
+
+  <section>
+    <h2>What this actually is</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><span>Type or paste anything — a URL, a phone number, wifi info, a note — into the box.</span></li>
+      <li><span class="num">2</span><span>The QR code renders instantly as you type, right there on the page.</span></li>
+      <li><span class="num">3</span><span>Adjust error correction or size if you want, then click Download PNG.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Frequently asked questions</h2>
+    <div class="faq-item">
+      <div class="faq-q">How do I make a QR code for free?</div>
+      <p class="faq-a">Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does this upload what I type anywhere?</div>
+      <p class="faq-a">No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's error correction level for?</div>
+      <p class="faq-a">It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is this free?</div>
+      <p class="faq-a">Yes, completely free, no account or install required.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="disclaimer"><b>Being straight about this:</b> the QR code is generated entirely in your browser using a local copy of a standard open-source encoder — nothing you type is ever sent anywhere. Very long text needs a larger/denser code; if generation fails, try shortening the text or lowering the error correction level.</div>
+  </section>
+
+  <section>
+    <div class="other-tools">
+      <h2 style="margin-bottom:12px; font-size:18px;">Also on The Truth Button</h2>
+      <ul>
+        <li><a href="index.html?mode=photo">Check if a photo, video, or audio clip is AI-generated</a></li>
+        <li><a href="index.html?mode=flock">Find Flock Safety / ALPR surveillance cameras near you</a></li>
+        <li><a href="index.html?mode=datacenter">Look up data center facilities by state</a></li>
+        <li><a href="index.html?mode=reviews">Real reviews on prices, work, and local experiences by state</a></li>
+        <li><a href="index.html?mode=peptide">Peptide reconstitution &amp; dose calculator</a></li>
+        <li><a href="index.html?mode=scanner">Scan a GitHub repo for infostealer patterns</a></li>
+        <li><a href="index.html?mode=pdf">Merge, split, rotate, or watermark a PDF</a></li>
+        <li><a href="index.html?mode=downloader">Record music or audio from a browser tab, then download the MP3</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <a href="index.html">← Back to The Truth Button home</a>
+  </footer>
+</div>
+</body>
+</html>
