@@ -2249,6 +2249,22 @@
             border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
           }
           #qr-generator-widget button.qr-reset-btn:hover{border-color:var(--qr-accent); color:var(--qr-accent);}
+          #qr-generator-widget .qr-trackable-toggle{
+            display:flex; align-items:flex-start; gap:10px; background:var(--qr-bg); border:1px solid var(--qr-border);
+            border-radius:6px; padding:10px 12px; margin-top:14px; cursor:pointer;
+          }
+          #qr-generator-widget .qr-trackable-toggle input{margin-top:2px; accent-color:var(--qr-accent); flex-shrink:0;}
+          #qr-generator-widget .qr-trackable-toggle span{font-size:12px; color:var(--qr-text-dim); line-height:1.5;}
+          #qr-generator-widget .qr-trackable-toggle b{color:var(--qr-text);}
+          #qr-generator-widget .qr-trackable-panel{display:none; margin-top:10px;}
+          #qr-generator-widget .qr-trackable-panel.show{display:block;}
+          #qr-generator-widget button.qr-action{
+            padding:10px 16px; background:var(--qr-accent); border:none;
+            border-radius:5px; color:var(--qr-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #qr-generator-widget button.qr-action:hover{opacity:0.88;}
+          #qr-generator-widget button.qr-action:disabled{opacity:.5; cursor:default;}
         </style>
 
         <div id="qrEditControls">
@@ -2281,6 +2297,16 @@
               <label for="qrBgColor">Background</label>
               <input type="color" id="qrBgColor" value="#ffffff">
             </div>
+          </div>
+
+          <label class="qr-trackable-toggle">
+            <input type="checkbox" id="qrTrackableToggle">
+            <span>🔗 Make this a trackable landing page — the QR code points to a Truth Button link that shows your destination, tracks scans, and cross-promotes the site. <b>Requires sign-in.</b> Only works if what you typed above is a URL.</span>
+          </label>
+
+          <div class="qr-trackable-panel" id="qrTrackablePanel">
+            <div class="qr-status" id="qrTrackableStatus"></div>
+            <button class="qr-action" id="qrCreateTrackableBtn" type="button">Create Trackable QR Code</button>
           </div>
         </div>
 
@@ -5458,8 +5484,8 @@ processSharedFileIfAny();
     statusEl.textContent = msg;
   }
 
-  function generate(){
-    const text = input.value.trim();
+  function generate(overrideText){
+    const text = overrideText != null ? overrideText : input.value.trim();
     if (!text) {
       previewWrap.classList.remove('show');
       setStatus('');
@@ -5526,6 +5552,56 @@ processSharedFileIfAny();
   const editControls = document.getElementById('qrEditControls');
   const doneBtn = document.getElementById('qrDoneBtn');
   const makeAnotherBtn = document.getElementById('qrMakeAnotherBtn');
+  const trackableToggle = document.getElementById('qrTrackableToggle');
+  const trackablePanel = document.getElementById('qrTrackablePanel');
+  const trackableStatusEl = document.getElementById('qrTrackableStatus');
+  const createTrackableBtn = document.getElementById('qrCreateTrackableBtn');
+
+  function setTrackableStatus(msg, cls){
+    trackableStatusEl.className = 'qr-status' + (cls ? ' ' + cls : '');
+    trackableStatusEl.textContent = msg;
+  }
+
+  trackableToggle.addEventListener('change', () => {
+    trackablePanel.classList.toggle('show', trackableToggle.checked);
+    setTrackableStatus('');
+  });
+
+  createTrackableBtn.addEventListener('click', async () => {
+    const url = input.value.trim();
+    setTrackableStatus('');
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      setTrackableStatus('Sign in first to create a trackable link.', 'error');
+      if (typeof openAuthModal === 'function') openAuthModal();
+      return;
+    }
+    if (!url) { setTrackableStatus('Type a URL above first.', 'error'); return; }
+    let parsed;
+    try { parsed = new URL(url); } catch (e) { parsed = null; }
+    if (!parsed || (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')) {
+      setTrackableStatus('That doesn\'t look like a valid http(s) URL.', 'error');
+      return;
+    }
+
+    createTrackableBtn.disabled = true;
+    createTrackableBtn.textContent = 'Creating…';
+    try {
+      const res = await fetch(apiUrl('/api/qrlinks'), {
+        method: 'POST', headers: apiHeaders(true), body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setTrackableStatus(data.error || 'Could not create the link.', 'error');
+      } else {
+        generate(data.shortUrl);
+        setTrackableStatus('Trackable link created: ' + data.shortUrl, 'ok');
+      }
+    } catch (err) {
+      setTrackableStatus('Could not reach the server.', 'error');
+    }
+    createTrackableBtn.disabled = false;
+    createTrackableBtn.textContent = 'Create Trackable QR Code';
+  });
 
   doneBtn.addEventListener('click', () => {
     editControls.style.display = 'none';
