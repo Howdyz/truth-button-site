@@ -1445,6 +1445,7 @@
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
+    <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Hidden Link</div>
   </div>
 
   <div class="desk">
@@ -2330,6 +2331,145 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="stegoPanel">
+    <div class="lookup-card">
+      <h3>🕵️ Hidden Link</h3>
+      <div class="lc-sub">Hide a link invisibly inside a photo's pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.</div>
+
+      <div id="stego-widget">
+        <style>
+          #stego-widget {
+            --sg-bg: #14110F; --sg-panel: #1C1814; --sg-border: rgba(242,237,225,0.14);
+            --sg-text: #F2EDE1; --sg-text-dim: #8C8377; --sg-accent: #2F8F7A; --sg-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--sg-text); margin-top: 16px;
+          }
+          #stego-widget *{box-sizing:border-box;}
+          #stego-widget .sg-tabs{display:flex; gap:8px; margin-bottom:16px;}
+          #stego-widget .sg-tab{
+            flex:1; text-align:center; padding:10px 12px; background:var(--sg-panel); border:1px solid var(--sg-border);
+            border-radius:5px; cursor:pointer; font-size:12.5px; color:var(--sg-text-dim); text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #stego-widget .sg-tab.active{border-color:var(--sg-accent); color:var(--sg-text); background:var(--sg-bg);}
+          #stego-widget .sg-pane{display:none;}
+          #stego-widget .sg-pane.active{display:block;}
+          #stego-widget .sg-dropzone{
+            border:2px dashed var(--sg-border); border-radius:8px; padding:24px; text-align:center;
+            cursor:pointer; font-size:12.5px; color:var(--sg-text-dim);
+          }
+          #stego-widget .sg-dropzone:hover{border-color:var(--sg-accent);}
+          #stego-widget .sg-dropzone.has-file{border-style:solid; border-color:var(--sg-accent);}
+          #stego-widget textarea{
+            width:100%; padding:10px 12px; background:var(--sg-bg); border:1px solid var(--sg-border);
+            border-radius:5px; color:var(--sg-text); font-size:13px; font-family:inherit; resize:vertical; min-height:60px; margin-top:12px;
+          }
+          #stego-widget .sg-capacity{font-size:11px; color:var(--sg-text-dim); margin-top:6px;}
+          #stego-widget .sg-status{font-size:12.5px; color:var(--sg-text-dim); margin-top:10px; min-height:18px;}
+          #stego-widget .sg-status.error{color:var(--sg-red);}
+          #stego-widget .sg-status.ok{color:var(--sg-accent);}
+          #stego-widget button.sg-action{
+            padding:10px 16px; background:var(--sg-accent); border:none; margin-top:12px;
+            border-radius:5px; color:var(--sg-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #stego-widget button.sg-action:hover{opacity:0.88;}
+          #stego-widget button.sg-action:disabled{opacity:.5; cursor:default;}
+          #stego-widget .sg-preview-wrap{display:none; margin-top:16px; text-align:center;}
+          #stego-widget .sg-preview-wrap.show{display:block;}
+          #stego-widget .sg-preview-wrap img{max-width:100%; max-height:280px; border-radius:6px; border:1px solid var(--sg-border);}
+          #stego-widget a.sg-download{
+            display:inline-block; margin-top:14px; padding:10px 16px; background:var(--sg-accent); border:none;
+            border-radius:5px; color:var(--sg-bg); font-weight:700; font-size:12.5px; text-decoration:none;
+            text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #stego-widget a.sg-download:hover{opacity:0.88;}
+          #stego-widget .sg-result-box{
+            margin-top:14px; padding:14px; background:var(--sg-bg); border:1px solid var(--sg-accent);
+            border-radius:6px; font-size:13px; color:var(--sg-text); word-break:break-word; text-align:left;
+          }
+          #stego-widget input[type=file]{display:none;}
+        </style>
+
+        <div class="sg-tabs">
+          <div class="sg-tab active" id="sgTabHide">🔒 Hide a Link</div>
+          <div class="sg-tab" id="sgTabReveal">🔍 Reveal a Link</div>
+          <div class="sg-tab" id="sgTabShare">📤 Share Page</div>
+        </div>
+
+        <div class="sg-pane active" id="sgPaneHide">
+          <div class="sg-dropzone" id="sgHideDropzone">
+            <div id="sgHideDzText">Click to choose a photo, or drag one here (JPG or PNG in — always saved as PNG, since hiding data needs a lossless file)</div>
+            <input type="file" id="sgHideFileInput" accept="image/*">
+          </div>
+          <textarea id="sgMessageInput" placeholder="https://example.com — or any short message to hide" maxlength="2000"></textarea>
+          <div class="sg-capacity" id="sgCapacity"></div>
+          <button class="sg-action" id="sgHideBtn" disabled>Hide Link In Photo</button>
+          <div class="sg-status" id="sgHideStatus"></div>
+          <div class="sg-preview-wrap" id="sgHidePreviewWrap">
+            <img id="sgHidePreviewImg" alt="Photo with hidden link" title="Click to open the hidden link">
+            <div id="sgHideClickHint" class="sg-capacity" style="display:none;">👆 Click the photo above to open the link (this is what happens when someone reveals it)</div>
+            <div><a class="sg-download" id="sgDownloadLink" download="hidden-link.png">⬇ Download PNG</a></div>
+          </div>
+        </div>
+
+        <div class="sg-pane" id="sgPaneReveal">
+          <div class="sg-dropzone" id="sgRevealDropzone">
+            <div id="sgRevealDzText">Click to choose a PNG to check, or drag one here</div>
+            <input type="file" id="sgRevealFileInput" accept="image/*">
+          </div>
+          <div class="sg-preview-wrap" id="sgRevealPreviewWrap">
+            <img id="sgRevealPreviewImg" alt="Uploaded photo">
+          </div>
+          <button class="sg-action" id="sgRevealBtn" disabled>Reveal Hidden Link</button>
+          <div class="sg-status" id="sgRevealStatus"></div>
+          <div class="sg-result-box" id="sgResultBox" style="display:none;"></div>
+        </div>
+
+        <div class="sg-pane" id="sgPaneShare">
+          <div class="sg-capacity" style="margin-top:0; margin-bottom:12px; line-height:1.6;">
+            Facebook (and most other platforms) won't let a raw photo upload be clickable — it always opens its own photo viewer. The real fix: share a <b style="color:var(--sg-text);">link</b> instead of a photo file. This generates a small page with the right preview tags, so the platform shows your photo as a clickable card that goes straight to your site.
+          </div>
+          <div class="sg-capacity" style="margin-bottom:12px; line-height:1.6;">
+            <b style="color:var(--sg-text);">Works on:</b> Facebook, LinkedIn, X/Twitter, Slack, Discord, Telegram, WhatsApp, iMessage, Reddit.<br>
+            <b style="color:var(--sg-red);">Does not work on:</b> Instagram or TikTok — those platforms don't make links clickable in regular posts at all, no matter what tags a page has. Only a bio link, a Stories link sticker, or paid ads get you an outbound link there.
+          </div>
+
+          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin-bottom:4px;">Destination URL (where clicking should take people)</label>
+          <textarea id="sgShareDest" placeholder="https://yourwebsite.com" style="min-height:20px;"></textarea>
+
+          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Photo URL (must already be hosted somewhere public — Facebook has to be able to fetch it)</label>
+          <textarea id="sgShareImage" placeholder="https://yoursite.com/photo.jpg" style="min-height:20px;"></textarea>
+
+          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Title</label>
+          <textarea id="sgShareTitle" placeholder="What shows as the headline on the card" style="min-height:20px;" maxlength="120"></textarea>
+
+          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Description (optional)</label>
+          <textarea id="sgShareDesc" placeholder="A line or two under the title" maxlength="300" style="min-height:44px;"></textarea>
+
+          <button class="sg-action" id="sgShareGenBtn">Generate Share Page</button>
+          <div class="sg-status" id="sgShareStatus"></div>
+
+          <div id="sgSharePreviewCard" style="display:none; margin-top:16px; border:1px solid var(--sg-border); border-radius:8px; overflow:hidden; text-align:left; background:var(--sg-panel);">
+            <div id="sgSharePreviewImgWrap" style="width:100%; aspect-ratio:1.91/1; background:#000; overflow:hidden;"><img id="sgSharePreviewImg" style="width:100%; height:100%; object-fit:cover; display:block;"></div>
+            <div style="padding:10px 12px;">
+              <div style="font-size:10px; color:var(--sg-text-dim); text-transform:uppercase; letter-spacing:0.05em;" id="sgSharePreviewDomain"></div>
+              <div style="font-weight:700; font-size:14px; margin-top:2px;" id="sgSharePreviewTitle"></div>
+              <div style="font-size:12px; color:var(--sg-text-dim); margin-top:2px;" id="sgSharePreviewDesc"></div>
+            </div>
+          </div>
+          <div id="sgShareOutput" style="display:none; margin-top:14px;">
+            <div class="sg-capacity" style="margin-bottom:6px;">Download this file, upload it to any public web host you control, then paste <b style="color:var(--sg-text);">that page's URL</b> (not the photo) into Facebook.</div>
+            <a class="sg-download" id="sgShareDownloadLink" download="share-page.html">⬇ Download share-page.html</a>
+            <textarea id="sgShareCode" readonly style="margin-top:12px; min-height:120px; font-size:11px;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> Hide/Reveal isn't cryptography — it's text stored in the least-significant bit of each pixel, invisible to the eye but not robust. The output MUST stay a PNG and be shared as-is: JPEG conversion, resizing, screenshotting, or most messaging apps (which recompress images) will destroy the hidden data. Anyone with this same tool can extract it, so don't use it for anything that needs real secrecy. The Share Page tool is a different mechanism entirely (Open Graph/Twitter Card tags, not steganography) — it only generates a static HTML file locally; you still have to host that file somewhere public yourself before a platform's crawler can read it. It works on Facebook, LinkedIn, X, Slack, Discord, Telegram, WhatsApp, iMessage, and Reddit, but not Instagram or TikTok, which don't support clickable links in regular posts regardless of what tags a page has.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2515,6 +2655,7 @@ const scannerPanel = document.getElementById('scannerPanel');
 const pdfPanel = document.getElementById('pdfPanel');
 const downloaderPanel = document.getElementById('downloaderPanel');
 const qrcodePanel = document.getElementById('qrcodePanel');
+const stegoPanel = document.getElementById('stegoPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2527,14 +2668,15 @@ const LOOKUP_TAGLINES = {
   scanner: 'Paste a public repo URL or upload a .zip to check the source for infostealer-style patterns before you trust it into your own machine.',
   pdf: 'Merge, split, rotate, watermark, or compress a PDF — all done locally in your browser. Nothing is ever uploaded.',
   downloader: 'Record music or audio playing in a browser tab, window, or your system, and save it as a high-quality MP3 — no separate app, nothing uploaded.',
-  qrcode: 'Type or paste anything and get a scannable QR code instantly — generated entirely in your browser, nothing sent anywhere.'
+  qrcode: 'Type or paste anything and get a scannable QR code instantly — generated entirely in your browser, nothing sent anywhere.',
+  stego: 'Hide a link invisibly inside a photo\'s pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2550,6 +2692,7 @@ function setMode(newMode){
   pdfPanel.classList.toggle('show', newMode === 'pdf');
   downloaderPanel.classList.toggle('show', newMode === 'downloader');
   qrcodePanel.classList.toggle('show', newMode === 'qrcode');
+  stegoPanel.classList.toggle('show', newMode === 'stego');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2573,6 +2716,7 @@ document.getElementById('tabScanner').addEventListener('click', () => setMode('s
 document.getElementById('tabPdf').addEventListener('click', () => setMode('pdf'));
 document.getElementById('tabDownloader').addEventListener('click', () => setMode('downloader'));
 document.getElementById('tabQrCode').addEventListener('click', () => setMode('qrcode'));
+document.getElementById('tabStego').addEventListener('click', () => setMode('stego'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -5072,7 +5216,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -5620,6 +5764,335 @@ processSharedFileIfAny();
     editControls.style.display = '';
     makeAnotherBtn.style.display = 'none';
     input.focus();
+  });
+})();
+
+// --- Hidden Link: LSB image steganography, entirely client-side via Canvas ---
+(function(){
+  const root = document.getElementById('stego-widget');
+  if (!root) return;
+
+  function isValidHttpUrl(str){
+    try { const u = new URL(str); return u.protocol === 'http:' || u.protocol === 'https:'; } catch(e){ return false; }
+  }
+
+  function wireDropzone(dz, fileInput, onFile){
+    dz.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) onFile(fileInput.files[0]); });
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('has-file'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('has-file'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) onFile(f);
+    });
+  }
+
+  function loadImageToCanvas(file){
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        resolve({ canvas, ctx, width: canvas.width, height: canvas.height });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not load that image.')); };
+      img.src = url;
+    });
+  }
+
+  function capacityBitsFor(width, height){
+    return width * height * 3; // R,G,B LSB per pixel; alpha skipped
+  }
+
+  function buildPayload(messageBytes){
+    const payload = new Uint8Array(4 + messageBytes.length);
+    const view = new DataView(payload.buffer);
+    view.setUint32(0, messageBytes.length, false);
+    payload.set(messageBytes, 4);
+    return payload;
+  }
+
+  function encodeBitsIntoImageData(imageData, payload){
+    const data = imageData.data;
+    const totalBits = payload.length * 8;
+    let bitIndex = 0;
+    for (let i = 0; i < data.length && bitIndex < totalBits; i++) {
+      if (i % 4 === 3) continue; // skip alpha channel
+      const byteIndex = bitIndex >> 3;
+      const bitInByte = 7 - (bitIndex % 8);
+      const bit = (payload[byteIndex] >> bitInByte) & 1;
+      data[i] = (data[i] & 0xFE) | bit;
+      bitIndex++;
+    }
+  }
+
+  function decodeBitsFromImageData(imageData, numBits){
+    const data = imageData.data;
+    const numBytes = Math.ceil(numBits / 8);
+    const out = new Uint8Array(numBytes);
+    let bitIndex = 0;
+    for (let i = 0; i < data.length && bitIndex < numBits; i++) {
+      if (i % 4 === 3) continue;
+      if (data[i] & 1) out[bitIndex >> 3] |= (1 << (7 - (bitIndex % 8)));
+      bitIndex++;
+    }
+    return out;
+  }
+
+  // ---- Tabs ----
+  const tabHide = document.getElementById('sgTabHide');
+  const tabReveal = document.getElementById('sgTabReveal');
+  const tabShare = document.getElementById('sgTabShare');
+  const paneHide = document.getElementById('sgPaneHide');
+  const paneReveal = document.getElementById('sgPaneReveal');
+  const paneShare = document.getElementById('sgPaneShare');
+  const allTabs = [tabHide, tabReveal, tabShare];
+  const allPanes = [paneHide, paneReveal, paneShare];
+  function activateTab(tab, pane){
+    allTabs.forEach(t => t.classList.toggle('active', t === tab));
+    allPanes.forEach(p => p.classList.toggle('active', p === pane));
+  }
+  tabHide.addEventListener('click', () => activateTab(tabHide, paneHide));
+  tabReveal.addEventListener('click', () => activateTab(tabReveal, paneReveal));
+  tabShare.addEventListener('click', () => activateTab(tabShare, paneShare));
+
+  // ---- Hide pane ----
+  const hideDropzone = document.getElementById('sgHideDropzone');
+  const hideDzText = document.getElementById('sgHideDzText');
+  const hideFileInput = document.getElementById('sgHideFileInput');
+  const messageInput = document.getElementById('sgMessageInput');
+  const capacityEl = document.getElementById('sgCapacity');
+  const hideBtn = document.getElementById('sgHideBtn');
+  const hideStatus = document.getElementById('sgHideStatus');
+  const hidePreviewWrap = document.getElementById('sgHidePreviewWrap');
+  const hidePreviewImg = document.getElementById('sgHidePreviewImg');
+  const hideClickHint = document.getElementById('sgHideClickHint');
+  const downloadLink = document.getElementById('sgDownloadLink');
+
+  let hideLoaded = null; // { canvas, ctx, width, height }
+
+  function setHideStatus(msg, cls){
+    hideStatus.className = 'sg-status' + (cls ? ' ' + cls : '');
+    hideStatus.textContent = msg;
+  }
+
+  function updateCapacityDisplay(){
+    if (!hideLoaded) { capacityEl.textContent = ''; return; }
+    const capBytes = Math.floor(capacityBitsFor(hideLoaded.width, hideLoaded.height) / 8) - 4;
+    const used = new TextEncoder().encode(messageInput.value).length;
+    capacityEl.textContent = 'This photo can hold about ' + Math.max(capBytes, 0) + ' characters — using ' + used + '.';
+    hideBtn.disabled = !(hideLoaded && messageInput.value.trim() && used <= capBytes);
+  }
+
+  wireDropzone(hideDropzone, hideFileInput, async (file) => {
+    hideStatus.textContent = '';
+    hidePreviewWrap.classList.remove('show');
+    try {
+      hideLoaded = await loadImageToCanvas(file);
+      hideDropzone.classList.add('has-file');
+      hideDzText.textContent = '✓ ' + file.name + ' (' + hideLoaded.width + '×' + hideLoaded.height + ')';
+      updateCapacityDisplay();
+    } catch (err) {
+      setHideStatus(err.message, 'error');
+    }
+  });
+
+  messageInput.addEventListener('input', updateCapacityDisplay);
+
+  hideBtn.addEventListener('click', () => {
+    setHideStatus('');
+    if (!hideLoaded) { setHideStatus('Choose a photo first.', 'error'); return; }
+    const message = messageInput.value.trim();
+    if (!message) { setHideStatus('Type a link or message to hide first.', 'error'); return; }
+
+    const msgBytes = new TextEncoder().encode(message);
+    const payload = buildPayload(msgBytes);
+    const capacityBits = capacityBitsFor(hideLoaded.width, hideLoaded.height);
+    if (payload.length * 8 > capacityBits) {
+      const capBytes = Math.floor(capacityBits / 8) - 4;
+      setHideStatus('Too long for this photo — it can hold about ' + Math.max(capBytes, 0) + ' characters. Try a shorter message or a larger photo.', 'error');
+      return;
+    }
+
+    const imageData = hideLoaded.ctx.getImageData(0, 0, hideLoaded.width, hideLoaded.height);
+    encodeBitsIntoImageData(imageData, payload);
+    hideLoaded.ctx.putImageData(imageData, 0, 0);
+
+    const pngDataUrl = hideLoaded.canvas.toDataURL('image/png');
+    hidePreviewImg.src = pngDataUrl;
+    downloadLink.href = pngDataUrl;
+    hidePreviewWrap.classList.add('show');
+
+    if (isValidHttpUrl(message)) {
+      hidePreviewImg.style.cursor = 'pointer';
+      hideClickHint.style.display = '';
+      hidePreviewImg.onclick = () => window.open(message, '_blank', 'noopener');
+    } else {
+      hidePreviewImg.style.cursor = '';
+      hideClickHint.style.display = 'none';
+      hidePreviewImg.onclick = null;
+    }
+    setHideStatus('Done — the link is hidden in the photo below. Download it as a PNG (not JPEG) to keep the hidden data intact.', 'ok');
+  });
+
+  // ---- Reveal pane ----
+  const revealDropzone = document.getElementById('sgRevealDropzone');
+  const revealDzText = document.getElementById('sgRevealDzText');
+  const revealFileInput = document.getElementById('sgRevealFileInput');
+  const revealBtn = document.getElementById('sgRevealBtn');
+  const revealStatus = document.getElementById('sgRevealStatus');
+  const revealPreviewWrap = document.getElementById('sgRevealPreviewWrap');
+  const revealPreviewImg = document.getElementById('sgRevealPreviewImg');
+  const resultBox = document.getElementById('sgResultBox');
+
+  let revealLoaded = null;
+
+  function setRevealStatus(msg, cls){
+    revealStatus.className = 'sg-status' + (cls ? ' ' + cls : '');
+    revealStatus.textContent = msg;
+  }
+
+  wireDropzone(revealDropzone, revealFileInput, async (file) => {
+    revealStatus.textContent = '';
+    resultBox.style.display = 'none';
+    try {
+      revealLoaded = await loadImageToCanvas(file);
+      revealDropzone.classList.add('has-file');
+      revealDzText.textContent = '✓ ' + file.name + ' (' + revealLoaded.width + '×' + revealLoaded.height + ')';
+      revealPreviewImg.src = URL.createObjectURL(file);
+      revealPreviewImg.style.cursor = '';
+      revealPreviewImg.onclick = null;
+      revealPreviewWrap.classList.add('show');
+      revealBtn.disabled = false;
+    } catch (err) {
+      setRevealStatus(err.message, 'error');
+    }
+  });
+
+  revealBtn.addEventListener('click', () => {
+    setRevealStatus('');
+    resultBox.style.display = 'none';
+    if (!revealLoaded) { setRevealStatus('Choose a photo first.', 'error'); return; }
+
+    const capacityBits = capacityBitsFor(revealLoaded.width, revealLoaded.height);
+    if (capacityBits < 32) { setRevealStatus('No hidden link found in this photo.', 'error'); return; }
+
+    const imageData = revealLoaded.ctx.getImageData(0, 0, revealLoaded.width, revealLoaded.height);
+    const headerBytes = decodeBitsFromImageData(imageData, 32);
+    const msgLen = new DataView(headerBytes.buffer).getUint32(0, false);
+
+    const maxPossibleBytes = Math.floor(capacityBits / 8) - 4;
+    if (msgLen === 0 || msgLen > maxPossibleBytes || msgLen > 100000) {
+      setRevealStatus('No hidden link found in this photo — either it doesn\'t have one, or it was resaved/recompressed after the link was hidden (that destroys the hidden data).', 'error');
+      return;
+    }
+
+    try {
+      const fullPayload = decodeBitsFromImageData(imageData, 32 + msgLen * 8);
+      const msgBytes = fullPayload.slice(4, 4 + msgLen);
+      const message = new TextDecoder('utf-8', { fatal: true }).decode(msgBytes);
+
+      if (isValidHttpUrl(message)) {
+        resultBox.innerHTML = '🔗 Hidden link found: <a href="' + message.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" style="color:var(--sg-accent);">' + message.replace(/</g, '&lt;') + '</a>';
+        revealPreviewImg.style.cursor = 'pointer';
+        revealPreviewImg.title = 'Click to open the hidden link';
+        revealPreviewImg.onclick = () => window.open(message, '_blank', 'noopener');
+        setRevealStatus('👆 Click the photo above (or the link) to open it.', 'ok');
+      } else {
+        resultBox.textContent = '💬 Hidden message found: ' + message;
+        setRevealStatus('This wasn\'t a URL, just hidden text.', 'ok');
+      }
+      resultBox.style.display = '';
+    } catch (err) {
+      setRevealStatus('No hidden link found in this photo — either it doesn\'t have one, or it was resaved/recompressed after the link was hidden (that destroys the hidden data).', 'error');
+    }
+  });
+
+  // ---- Share Page (Open Graph card generator) ----
+  const shareDest = document.getElementById('sgShareDest');
+  const shareImage = document.getElementById('sgShareImage');
+  const shareTitle = document.getElementById('sgShareTitle');
+  const shareDesc = document.getElementById('sgShareDesc');
+  const shareGenBtn = document.getElementById('sgShareGenBtn');
+  const shareStatus = document.getElementById('sgShareStatus');
+  const sharePreviewCard = document.getElementById('sgSharePreviewCard');
+  const sharePreviewImg = document.getElementById('sgSharePreviewImg');
+  const sharePreviewDomain = document.getElementById('sgSharePreviewDomain');
+  const sharePreviewTitle = document.getElementById('sgSharePreviewTitle');
+  const sharePreviewDesc = document.getElementById('sgSharePreviewDesc');
+  const shareOutput = document.getElementById('sgShareOutput');
+  const shareDownloadLink = document.getElementById('sgShareDownloadLink');
+  const shareCode = document.getElementById('sgShareCode');
+
+  function setShareStatus(msg, cls){
+    shareStatus.className = 'sg-status' + (cls ? ' ' + cls : '');
+    shareStatus.textContent = msg;
+  }
+
+  function escapeHtmlAttr(str){
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escapeJsString(str){
+    return String(str).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/</g, '\\u003C');
+  }
+
+  shareGenBtn.addEventListener('click', () => {
+    setShareStatus('');
+    shareOutput.style.display = 'none';
+    sharePreviewCard.style.display = 'none';
+
+    const dest = shareDest.value.trim();
+    const image = shareImage.value.trim();
+    const title = shareTitle.value.trim() || 'Take a look at this';
+    const desc = shareDesc.value.trim();
+
+    if (!isValidHttpUrl(dest)) { setShareStatus('Destination needs to be a valid http(s) URL.', 'error'); return; }
+    if (!isValidHttpUrl(image)) { setShareStatus('Photo URL needs to be a valid http(s) URL — it has to already be hosted somewhere public. A file on your computer won\'t work here; Facebook has to be able to fetch it.', 'error'); return; }
+
+    const html = '<!DOCTYPE html>\n' +
+'<html lang="en">\n' +
+'<head>\n' +
+'<meta charset="UTF-8">\n' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+'<title>' + escapeHtmlAttr(title) + '</title>\n' +
+'<!-- IMPORTANT: replace the og:url below with the actual URL where you host this file -->\n' +
+'<meta property="og:type" content="website">\n' +
+'<meta property="og:url" content="PASTE-THIS-PAGES-OWN-PUBLIC-URL-HERE">\n' +
+'<meta property="og:title" content="' + escapeHtmlAttr(title) + '">\n' +
+'<meta property="og:description" content="' + escapeHtmlAttr(desc) + '">\n' +
+'<meta property="og:image" content="' + escapeHtmlAttr(image) + '">\n' +
+'<meta name="twitter:card" content="summary_large_image">\n' +
+'<meta name="twitter:title" content="' + escapeHtmlAttr(title) + '">\n' +
+'<meta name="twitter:description" content="' + escapeHtmlAttr(desc) + '">\n' +
+'<meta name="twitter:image" content="' + escapeHtmlAttr(image) + '">\n' +
+'<meta http-equiv="refresh" content="0; url=' + escapeHtmlAttr(dest) + '">\n' +
+'<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#14110F;color:#F2EDE1;font-family:sans-serif;text-align:center;padding:24px;}a{color:#2F8F7A;}</style>\n' +
+'</head>\n' +
+'<body>\n' +
+'<p>Redirecting… <a href="' + escapeHtmlAttr(dest) + '">Click here if you are not redirected automatically.</a></p>\n' +
+'<script>location.replace("' + escapeJsString(dest) + '");<\/script>\n' +
+'</body>\n' +
+'</html>\n';
+
+    shareCode.value = html;
+    const blob = new Blob([html], { type: 'text/html' });
+    shareDownloadLink.href = URL.createObjectURL(blob);
+
+    let domain = '';
+    try { domain = new URL(dest).hostname; } catch (e) {}
+    sharePreviewImg.src = image;
+    sharePreviewDomain.textContent = domain.toUpperCase();
+    sharePreviewTitle.textContent = title;
+    sharePreviewDesc.textContent = desc;
+    sharePreviewCard.style.display = '';
+    shareOutput.style.display = '';
+    setShareStatus('Generated. This is a static file — nothing was uploaded or hosted by this site. You still need to host it somewhere public before Facebook can read it.', 'ok');
   });
 })();
 </script>

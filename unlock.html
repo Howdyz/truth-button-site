@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock Mobile Share — The Truth Button</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14110F; --void-2:#1C1814; --ink:#F2EDE1; --ink-soft:#C9C0AE; --muted:#8C8377;
+    --red:#E8402C; --teal:#2F8F7A; --line: rgba(242,237,225,0.14);
+    --font-stamp:'Special Elite', monospace; --font-body:'IBM Plex Sans', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--void); color:var(--ink); font-family:var(--font-body); padding:24px;}
+  .card{background:var(--void-2); border:1px solid var(--line); border-radius:10px; padding:32px; max-width:460px; width:100%; text-align:center;}
+  h1{font-family:var(--font-stamp); font-size:26px; margin:0 0 10px;}
+  p{color:var(--ink-soft); font-size:14px; line-height:1.6; margin:0 0 20px;}
+  .key-box{
+    font-family:var(--font-mono); font-size:20px; letter-spacing:0.06em; color:var(--teal);
+    background:var(--void); border:1px solid rgba(47,143,122,0.35); border-radius:6px;
+    padding:16px; margin-bottom:16px; word-break:break-all;
+  }
+  .status{font-family:var(--font-mono); font-size:12.5px; color:var(--muted); margin-bottom:16px;}
+  .status.error{color:var(--red);}
+  button{
+    background:var(--red); color:var(--void); border:none; border-radius:5px; padding:12px 20px;
+    font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.06em; text-transform:uppercase;
+    font-weight:600; cursor:pointer; margin:4px;
+  }
+  button:hover{opacity:0.88;}
+  button.secondary{background:transparent; border:1px solid var(--line); color:var(--ink-soft);}
+  a{color:var(--teal);}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2526876080898597" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="card">
+  <h1>Thank you</h1>
+  <div id="content">
+    <p>Confirming your payment and generating your license key…</p>
+    <div class="status" id="status">Checking…</div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const sessionId = params.get('session_id');
+const API_BASE = 'https://truth-button-backend.onrender.com';
+const contentEl = document.getElementById('content');
+const statusEl = document.getElementById('status');
+
+async function poll(attempt){
+  if (!sessionId) {
+    contentEl.innerHTML = '<p>No checkout session found in the URL. If you just paid, check your email receipt or contact support.</p>';
+    return;
+  }
+  try {
+    const res = await fetch(API_BASE + '/api/license/for-session?session_id=' + encodeURIComponent(sessionId));
+    if (res.status === 202) {
+      if (attempt >= 8) {
+        statusEl.textContent = 'Still processing — this can take a few extra seconds.';
+        statusEl.className = 'status error';
+        setTimeout(() => poll(attempt + 1), 3000);
+        return;
+      }
+      statusEl.textContent = 'Checking… (' + (attempt + 1) + ')';
+      setTimeout(() => poll(attempt + 1), 1500);
+      return;
+    }
+    const data = await res.json();
+    if (data.key) {
+      localStorage.setItem('tb_license_key', data.key);
+      localStorage.setItem('tb_unlocked', 'true');
+      contentEl.innerHTML =
+        '<p>Mobile Share is unlocked on this device. Your license key (save it — you can use it on other devices too):</p>' +
+        '<div class="key-box">' + data.key + '</div>' +
+        '<button id="copyBtn">Copy key</button>' +
+        '<button class="secondary" onclick="location.href=\'/\'">Go to the app</button>';
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(data.key);
+        document.getElementById('copyBtn').textContent = 'Copied!';
+      });
+    } else {
+      statusEl.textContent = 'Something went wrong generating your key. Contact support with this session ID: ' + sessionId;
+      statusEl.className = 'status error';
+    }
+  } catch (e) {
+    statusEl.textContent = 'Could not reach the server. Refresh this page to try again.';
+    statusEl.className = 'status error';
+  }
+}
+poll(0);
+</script>
+</body>
+</html>
