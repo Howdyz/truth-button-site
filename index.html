@@ -6742,21 +6742,29 @@ processSharedFileIfAny();
 
   async function startScan(){
     setStatus('');
+    // Wrapping the WHOLE function body, not just requestLEScan — an exception
+    // anywhere in here (e.g. from addEventListener/setInterval) would otherwise
+    // become an unhandled promise rejection with zero user-facing feedback, since
+    // the click handler below doesn't await/catch this async function's promise.
     try {
       activeScan = await navigator.bluetooth.requestLEScan({ acceptAllAdvertisements: true, keepRepeatedDevices: true });
+
+      scanning = true;
+      scanBtn.textContent = '⏹ Stop Scan';
+      scanBtn.classList.add('scanning');
+      setStatus('🔴 Scanning…', 'ok');
+
+      navigator.bluetooth.addEventListener('advertisementreceived', onAdvertisement);
+      refreshTimer = setInterval(renderList, 1000);
+      renderList();
     } catch (err) {
-      setStatus('Could not start scanning — permission was denied, or no Bluetooth adapter was found.', 'error');
-      return;
+      console.error('Bluetooth Tracker Hunter — scan failed to start:', err);
+      const reason = (err && err.message) ? err.message : 'unknown error';
+      setStatus('Could not start scanning (' + reason + ') — check that Bluetooth is turned on for your device/OS, and that you allowed the permission prompt.', 'error');
+      scanning = false;
+      scanBtn.textContent = '▶ Start Scan';
+      scanBtn.classList.remove('scanning');
     }
-
-    scanning = true;
-    scanBtn.textContent = '⏹ Stop Scan';
-    scanBtn.classList.add('scanning');
-    setStatus('🔴 Scanning…', 'ok');
-
-    navigator.bluetooth.addEventListener('advertisementreceived', onAdvertisement);
-    refreshTimer = setInterval(renderList, 1000);
-    renderList();
   }
 
   function onAdvertisement(event){
