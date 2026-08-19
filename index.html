@@ -2426,7 +2426,7 @@
 
         <div class="sg-pane" id="sgPaneShare">
           <div class="sg-capacity" style="margin-top:0; margin-bottom:12px; line-height:1.6;">
-            Facebook (and most other platforms) won't let a raw photo upload be clickable — it always opens its own photo viewer. The real fix: share a <b style="color:var(--sg-text);">link</b> instead of a photo file. This generates a small page with the right preview tags, so the platform shows your photo as a clickable card that goes straight to your site.
+            Facebook (and most other platforms) won't let a raw photo upload be clickable — it always opens its own photo viewer. The real fix: share a <b style="color:var(--sg-text);">link</b> instead of a photo file. This creates a page — hosted here, ready instantly — with the right preview tags, so the platform shows your photo as a clickable card that goes straight to your site.
           </div>
           <div class="sg-capacity" style="margin-bottom:12px; line-height:1.6;">
             <b style="color:var(--sg-text);">Works on:</b> Facebook, LinkedIn, X/Twitter, Slack, Discord, Telegram, WhatsApp, iMessage, Reddit.<br>
@@ -2443,7 +2443,7 @@
             <span class="sg-capacity" id="sgUploadStatus" style="margin-top:0;"></span>
           </div>
           <input type="file" id="sgUploadFileInput" accept="image/*" style="display:none;">
-          <div class="sg-capacity" style="margin-top:6px;">Requires sign-in. Hosted on The Truth Button's server for 90 days, then auto-deleted — this is the one part of this tool that isn't purely local (see disclaimer below).</div>
+          <div class="sg-capacity" style="margin-top:6px;">Requires sign-in. Hosted on The Truth Button's server for 90 days, then auto-deleted (see disclaimer below).</div>
 
           <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Title</label>
           <textarea id="sgShareTitle" placeholder="What shows as the headline on the card" style="min-height:20px;" maxlength="120"></textarea>
@@ -2451,7 +2451,7 @@
           <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Description (optional)</label>
           <textarea id="sgShareDesc" placeholder="A line or two under the title" maxlength="300" style="min-height:44px;"></textarea>
 
-          <button class="sg-action" id="sgShareGenBtn">Generate Share Page</button>
+          <button class="sg-action" id="sgShareGenBtn">Create Share Page</button>
           <div class="sg-status" id="sgShareStatus"></div>
 
           <div id="sgSharePreviewCard" style="display:none; margin-top:16px; border:1px solid var(--sg-border); border-radius:8px; overflow:hidden; text-align:left; background:var(--sg-panel);">
@@ -2463,16 +2463,18 @@
             </div>
           </div>
           <div id="sgShareOutput" style="display:none; margin-top:14px;">
-            <div class="sg-capacity" style="margin-bottom:6px;">Download this file, upload it to any public web host you control, then paste <b style="color:var(--sg-text);">that page's URL</b> (not the photo) into Facebook.</div>
-            <a class="sg-download" id="sgShareDownloadLink" download="share-page.html">⬇ Download share-page.html</a>
-            <textarea id="sgShareCode" readonly style="margin-top:12px; min-height:120px; font-size:11px;"></textarea>
+            <div class="sg-capacity" style="margin-bottom:6px;">Ready — paste this URL into Facebook (or LinkedIn, X, Slack, etc.). Nothing to download or host yourself.</div>
+            <div class="sg-result-box" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <a id="sgShareResultLink" href="#" target="_blank" rel="noopener" style="color:var(--sg-accent); word-break:break-all; flex:1; min-width:200px;"></a>
+              <button class="sg-action" id="sgShareCopyBtn" type="button" style="margin-top:0; padding:8px 14px;">📋 Copy</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> Hide/Reveal isn't cryptography — it's text stored in the least-significant bit of each pixel, invisible to the eye but not robust. The output MUST stay a PNG and be shared as-is: JPEG conversion, resizing, screenshotting, or most messaging apps (which recompress images) will destroy the hidden data. Anyone with this same tool can extract it, so don't use it for anything that needs real secrecy. The Share Page tool is a different mechanism entirely (Open Graph/Twitter Card tags, not steganography) — it only generates a static HTML file locally; you still have to host that file somewhere public yourself before a platform's crawler can read it. It works on Facebook, LinkedIn, X, Slack, Discord, Telegram, WhatsApp, iMessage, and Reddit, but not Instagram or TikTok, which don't support clickable links in regular posts regardless of what tags a page has. The "Upload a photo" button on that tab is the one part of this whole tool that isn't purely local — it requires signing in, and the photo is stored on The Truth Button's server for 90 days (then auto-deleted) so platforms have a real URL to fetch it from.
+      <b>Being straight about this:</b> Hide/Reveal isn't cryptography — it's text stored in the least-significant bit of each pixel, invisible to the eye but not robust. The output MUST stay a PNG and be shared as-is: JPEG conversion, resizing, screenshotting, or most messaging apps (which recompress images) will destroy the hidden data. Anyone with this same tool can extract it, so don't use it for anything that needs real secrecy. The Share Page tool is a different mechanism entirely (Open Graph/Twitter Card tags, not steganography), and unlike the rest of this tool it isn't purely local: creating a share page or uploading a photo both require signing in, and both are hosted on The Truth Button's server (photos for 90 days, then auto-deleted) rather than staying on your device — that's what makes the resulting URL something Facebook and friends can actually fetch. Share pages work on Facebook, LinkedIn, X, Slack, Discord, Telegram, WhatsApp, iMessage, and Reddit, but not Instagram or TikTok, which don't support clickable links in regular posts regardless of what tags a page has.
     </div>
   </div>
 
@@ -6033,19 +6035,12 @@ processSharedFileIfAny();
   const sharePreviewTitle = document.getElementById('sgSharePreviewTitle');
   const sharePreviewDesc = document.getElementById('sgSharePreviewDesc');
   const shareOutput = document.getElementById('sgShareOutput');
-  const shareDownloadLink = document.getElementById('sgShareDownloadLink');
-  const shareCode = document.getElementById('sgShareCode');
+  const shareResultLink = document.getElementById('sgShareResultLink');
+  const shareCopyBtn = document.getElementById('sgShareCopyBtn');
 
   function setShareStatus(msg, cls){
     shareStatus.className = 'sg-status' + (cls ? ' ' + cls : '');
     shareStatus.textContent = msg;
-  }
-
-  function escapeHtmlAttr(str){
-    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-  function escapeJsString(str){
-    return String(str).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/</g, '\\u003C');
   }
 
   // ---- Upload a photo to get a URL (feeds the Photo URL field above) ----
@@ -6117,7 +6112,7 @@ processSharedFileIfAny();
     uploadBtn.disabled = false;
   });
 
-  shareGenBtn.addEventListener('click', () => {
+  shareGenBtn.addEventListener('click', async () => {
     setShareStatus('');
     shareOutput.style.display = 'none';
     sharePreviewCard.style.display = 'none';
@@ -6130,34 +6125,11 @@ processSharedFileIfAny();
     if (!isValidHttpUrl(dest)) { setShareStatus('Destination needs to be a valid http(s) URL.', 'error'); return; }
     if (!isValidHttpUrl(image)) { setShareStatus('Photo URL needs to be a valid http(s) URL — it has to already be hosted somewhere public. A file on your computer won\'t work here; Facebook has to be able to fetch it.', 'error'); return; }
 
-    const html = '<!DOCTYPE html>\n' +
-'<html lang="en">\n' +
-'<head>\n' +
-'<meta charset="UTF-8">\n' +
-'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-'<title>' + escapeHtmlAttr(title) + '</title>\n' +
-'<!-- IMPORTANT: replace the og:url below with the actual URL where you host this file -->\n' +
-'<meta property="og:type" content="website">\n' +
-'<meta property="og:url" content="PASTE-THIS-PAGES-OWN-PUBLIC-URL-HERE">\n' +
-'<meta property="og:title" content="' + escapeHtmlAttr(title) + '">\n' +
-'<meta property="og:description" content="' + escapeHtmlAttr(desc) + '">\n' +
-'<meta property="og:image" content="' + escapeHtmlAttr(image) + '">\n' +
-'<meta name="twitter:card" content="summary_large_image">\n' +
-'<meta name="twitter:title" content="' + escapeHtmlAttr(title) + '">\n' +
-'<meta name="twitter:description" content="' + escapeHtmlAttr(desc) + '">\n' +
-'<meta name="twitter:image" content="' + escapeHtmlAttr(image) + '">\n' +
-'<meta http-equiv="refresh" content="0; url=' + escapeHtmlAttr(dest) + '">\n' +
-'<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#14110F;color:#F2EDE1;font-family:sans-serif;text-align:center;padding:24px;}a{color:#2F8F7A;}</style>\n' +
-'</head>\n' +
-'<body>\n' +
-'<p>Redirecting… <a href="' + escapeHtmlAttr(dest) + '">Click here if you are not redirected automatically.</a></p>\n' +
-'<script>location.replace("' + escapeJsString(dest) + '");<\/script>\n' +
-'</body>\n' +
-'</html>\n';
-
-    shareCode.value = html;
-    const blob = new Blob([html], { type: 'text/html' });
-    shareDownloadLink.href = URL.createObjectURL(blob);
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      setShareStatus('Sign in first to create a share page.', 'error');
+      if (typeof openAuthModal === 'function') openAuthModal();
+      return;
+    }
 
     let domain = '';
     try { domain = new URL(dest).hostname; } catch (e) {}
@@ -6166,8 +6138,36 @@ processSharedFileIfAny();
     sharePreviewTitle.textContent = title;
     sharePreviewDesc.textContent = desc;
     sharePreviewCard.style.display = '';
-    shareOutput.style.display = '';
-    setShareStatus('Generated. This is a static file — nothing was uploaded or hosted by this site. You still need to host it somewhere public before Facebook can read it.', 'ok');
+
+    shareGenBtn.disabled = true;
+    setShareStatus('Creating…');
+    try {
+      const res = await fetch(apiUrl('/api/shares'), {
+        method: 'POST', headers: apiHeaders(true),
+        body: JSON.stringify({ destUrl: dest, imageUrl: image, title, description: desc })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setShareStatus(data.error || 'Could not create the share page.', 'error');
+        shareGenBtn.disabled = false;
+        return;
+      }
+      shareResultLink.href = data.url;
+      shareResultLink.textContent = data.url;
+      shareOutput.style.display = '';
+      setShareStatus('✓ Ready — hosted here, og:url filled in automatically. Paste the URL above into Facebook.', 'ok');
+    } catch (err) {
+      setShareStatus('Could not reach the server.', 'error');
+    }
+    shareGenBtn.disabled = false;
+  });
+
+  shareCopyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(shareResultLink.href).then(() => {
+      const restore = shareCopyBtn.textContent;
+      shareCopyBtn.textContent = '✓ Copied';
+      setTimeout(() => { shareCopyBtn.textContent = restore; }, 2000);
+    }).catch(() => {});
   });
 })();
 </script>
