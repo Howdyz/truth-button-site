@@ -36,6 +36,11 @@
     },
     {
       "@type": "Question",
+      "name": "I'm using Chrome and it still says scanning isn't available — why?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Bluetooth scanning is still an experimental Chrome feature, off by default on every platform, even in regular Chrome or Edge on desktop and Android. Go to chrome://flags/#enable-experimental-web-platform-features, set it to Enabled, and relaunch your browser — then reload this page and the scan button will work." }
+    },
+    {
+      "@type": "Question",
       "name": "Is my scan data uploaded anywhere?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Scanning happens entirely through your browser's own Bluetooth permission, locally on your device. Nothing is sent to this site or anywhere else." }
     },
@@ -120,11 +125,12 @@
   <section>
     <h2>How to actually find it</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Tap <b>Start Scan</b> and allow the Bluetooth permission prompt — this only lets the page listen for nearby devices, it can't connect to or control anything.</span></li>
-      <li><span class="num">2</span><span>Every device that answers gets a live <b>signal-strength ring</b>. Closer devices show a fuller, redder ring; farther ones stay green and low. Signal naturally jitters — watch the trend over a few seconds, not one reading.</span></li>
-      <li><span class="num">3</span><span>Walk slowly around wherever you suspect something's hidden — your car (inside and under the seats/wheel wells), a bag, a jacket lining, a gift someone gave you. Whichever device's signal <b>keeps climbing as you approach a specific spot</b> is physically there.</span></li>
-      <li><span class="num">4</span><span>Anything tagged <b>Possible Tracker</b> matched a known signature for AirTag/Find My or Tile hardware — check those first. Everything else is still fair game; it just couldn't be identified by brand from the data alone.</span></li>
-      <li><span class="num">5</span><span>Found something that isn't yours? Apple's own <a href="https://support.apple.com/en-us/109431" target="_blank" rel="noopener" style="color:var(--teal);">Tracker Detect</a> app can help confirm and disable an AirTag. If you believe you're being tracked without consent, your local police non-emergency line or a locksmith can help with next steps — this tool's job is just finding it.</span></li>
+      <li><span class="num">1</span><span><b>One-time setup</b> (Chrome/Edge/Samsung Internet only): this needs an experimental flag turned on — go to <b>chrome://flags/#enable-experimental-web-platform-features</b>, set it to Enabled, and relaunch your browser. Skip this if the scan button is already active.</span></li>
+      <li><span class="num">2</span><span>Tap <b>Start Scan</b> and allow the Bluetooth permission prompt — this only lets the page listen for nearby devices, it can't connect to or control anything.</span></li>
+      <li><span class="num">3</span><span>Every device that answers gets a live <b>signal-strength ring</b>. Closer devices show a fuller, redder ring; farther ones stay green and low. Signal naturally jitters — watch the trend over a few seconds, not one reading.</span></li>
+      <li><span class="num">4</span><span>Walk slowly around wherever you suspect something's hidden — your car (inside and under the seats/wheel wells), a bag, a jacket lining, a gift someone gave you. Whichever device's signal <b>keeps climbing as you approach a specific spot</b> is physically there.</span></li>
+      <li><span class="num">5</span><span>Anything tagged <b>Possible Tracker</b> matched a known signature for AirTag/Find My or Tile hardware — check those first. Everything else is still fair game; it just couldn't be identified by brand from the data alone.</span></li>
+      <li><span class="num">6</span><span>Found something that isn't yours? Apple's own <a href="https://support.apple.com/en-us/109431" target="_blank" rel="noopener" style="color:var(--teal);">Tracker Detect</a> app can help confirm and disable an AirTag. If you believe you're being tracked without consent, your local police non-emergency line or a locksmith can help with next steps — this tool's job is just finding it.</span></li>
     </ol>
   </section>
 
@@ -140,7 +146,7 @@
         <p>iPhone/iPad (any browser) · Safari · Firefox</p>
       </div>
     </div>
-    <p style="margin-top:14px; font-size:13px;">The iPhone limitation isn't this tool's choice — Apple requires every browser on iOS to use Safari's engine, and Safari doesn't support Bluetooth scanning at all. There's no workaround from a web app.</p>
+    <p style="margin-top:14px; font-size:13px;">The iPhone limitation isn't this tool's choice — Apple requires every browser on iOS to use Safari's engine, and Safari doesn't support Bluetooth scanning at all. There's no workaround from a web app. On the browsers that do support it, there's one more step: it's still an experimental Chrome feature, off by default everywhere — see step 1 above.</p>
   </section>
 
   <section>
@@ -152,6 +158,10 @@
     <div class="faq-item">
       <div class="faq-q">Does this work on iPhone?</div>
       <p class="faq-a">No. Apple blocks Bluetooth scanning in every browser on iOS and iPadOS, including Chrome for iPhone, since Apple requires all iOS browsers to use Safari's engine, and Safari doesn't support it. This works on Android (Chrome, Edge, Samsung Internet) and on desktop Chrome or Edge — not Safari or Firefox anywhere.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">I'm using Chrome and it still says scanning isn't available — why?</div>
+      <p class="faq-a">Bluetooth scanning is still an experimental Chrome feature, off by default on every platform, even in regular Chrome or Edge on desktop and Android. Go to chrome://flags/#enable-experimental-web-platform-features, set it to Enabled, and relaunch your browser — then reload this page and the scan button will work.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Is my scan data uploaded anywhere?</div>
@@ -168,7 +178,7 @@
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> Web Bluetooth scanning only works in Chromium-based browsers (Chrome, Edge, Samsung Internet, Opera) on desktop or Android — not Safari, not Firefox, and not any browser on iOS/iPadOS. Brand identification is limited to what's honestly detectable from a device's advertisement data: Apple Find My/AirTag and Tile trackers have documented, recognizable signatures, so those get flagged with real confidence. Samsung SmartTags aren't flagged at all, since they can't be reliably told apart from other Samsung Bluetooth hardware. Everything runs locally through your browser's own Bluetooth permission — this site never sees your scan results.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> Web Bluetooth scanning only works in Chromium-based browsers (Chrome, Edge, Samsung Internet, Opera) on desktop or Android — not Safari, not Firefox, and not any browser on iOS/iPadOS. Even there, it needs an experimental flag turned on first (<b>chrome://flags/#enable-experimental-web-platform-features</b>) — it isn't enabled by default in any production Chrome build yet, on any platform. Brand identification is limited to what's honestly detectable from a device's advertisement data: Apple Find My/AirTag and Tile trackers have documented, recognizable signatures, so those get flagged with real confidence. Samsung SmartTags aren't flagged at all, since they can't be reliably told apart from other Samsung Bluetooth hardware. Everything runs locally through your browser's own Bluetooth permission — this site never sees your scan results.</div>
   </section>
 
   <section>

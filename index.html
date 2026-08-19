@@ -2669,6 +2669,7 @@
         <div class="th-howto">
           <h4>🎯 How to hunt down a tracker</h4>
           <ol>
+            <li><b>One-time setup (Chrome/Edge/Samsung Internet only):</b> this needs an experimental flag turned on. Go to <b>chrome://flags/#enable-experimental-web-platform-features</b>, set it to <b>Enabled</b>, and relaunch your browser. You'll only need to do this once — skip this step if the scan button below is already active.</li>
             <li>Tap <b>Start Scan</b> and grant Bluetooth permission when your browser asks — this only lets the page listen for nearby devices, it can't connect to or control anything.</li>
             <li>Every device that responds gets a <b>signal strength ring</b> — the closer the device, the fuller and redder the ring. Signal jumps around naturally, so watch the trend, not one single reading.</li>
             <li>Walk slowly around your car, bag, jacket, or wherever you suspect something's hidden. Whichever device's signal <b>consistently gets stronger</b> as you approach is physically near you — that's your target.</li>
@@ -2687,7 +2688,7 @@
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> this only works in Chromium-based browsers (Chrome, Edge, Samsung Internet, Opera) on desktop or Android — Web Bluetooth scanning isn't supported in Safari or Firefox at all, and Apple blocks it on every iOS/iPadOS browser (including Chrome for iPhone, since Apple requires all iOS browsers to use Safari's engine). Everything runs locally via your browser's Bluetooth permission — nothing is scanned, stored, or sent anywhere by this site. Brand identification is limited to what's honestly detectable: Apple Find My/AirTag devices and Tile trackers have a documented, recognizable signature in their Bluetooth advertisements, so those get flagged with real confidence. Samsung SmartTags can't be reliably told apart from any other Samsung Bluetooth device (phones, earbuds, TVs) from this data alone, so they're deliberately not flagged to avoid false alarms — and most Bluetooth devices you'll see are completely mundane (someone's headphones, a smart TV, a car stereo), not trackers.
+      <b>Being straight about this:</b> this only works in Chromium-based browsers (Chrome, Edge, Samsung Internet, Opera) on desktop or Android — Web Bluetooth scanning isn't supported in Safari or Firefox at all, and Apple blocks it on every iOS/iPadOS browser (including Chrome for iPhone, since Apple requires all iOS browsers to use Safari's engine). Even on a supported browser, this needs an experimental flag turned on first (<b>chrome://flags/#enable-experimental-web-platform-features</b>) — it isn't enabled by default in any production Chrome build yet, on any platform. Everything runs locally via your browser's Bluetooth permission — nothing is scanned, stored, or sent anywhere by this site. Brand identification is limited to what's honestly detectable: Apple Find My/AirTag devices and Tile trackers have a documented, recognizable signature in their Bluetooth advertisements, so those get flagged with real confidence. Samsung SmartTags can't be reliably told apart from any other Samsung Bluetooth device (phones, earbuds, TVs) from this data alone, so they're deliberately not flagged to avoid false alarms — and most Bluetooth devices you'll see are completely mundane (someone's headphones, a smart TV, a car stereo), not trackers.
     </div>
   </div>
 
@@ -6648,10 +6649,19 @@ processSharedFileIfAny();
     statusEl.textContent = msg;
   }
 
+  // requestLEScan is NOT enabled by default in any production Chrome build yet — it's
+  // gated behind the #enable-experimental-web-platform-features flag even on desktop
+  // and Android. navigator.bluetooth existing but requestLEScan being missing means
+  // "right browser family, flag not flipped" — a real extra step, not just "use Chrome."
+  const hasBluetoothAPI = !!navigator.bluetooth;
   const supported = !!(navigator.bluetooth && navigator.bluetooth.requestLEScan);
   if (!supported) {
     unsupportedEl.classList.add('show');
-    unsupportedEl.innerHTML = '⚠ Bluetooth scanning isn\'t available in this browser. This needs a Chromium-based browser (Chrome, Edge, Samsung Internet) on desktop or Android — Safari and Firefox don\'t support it, and no browser on iPhone/iPad can (Apple blocks it system-wide on iOS).';
+    if (hasBluetoothAPI) {
+      unsupportedEl.innerHTML = '⚠ One extra step needed: Bluetooth scanning is still behind an experimental flag in Chrome, even on desktop and Android. Open a new tab to <b>chrome://flags/#enable-experimental-web-platform-features</b>, set it to <b>Enabled</b>, then relaunch your browser and reload this page. (This is a Chrome-wide setting, not something this site can turn on for you — and it can make other experimental web features behave unpredictably too, so consider flipping it back off afterward if you don\'t use it elsewhere.)';
+    } else {
+      unsupportedEl.innerHTML = '⚠ Bluetooth scanning isn\'t available in this browser at all. This needs a Chromium-based browser (Chrome, Edge, Samsung Internet) on desktop or Android — Safari and Firefox don\'t support it, and no browser on iPhone/iPad can (Apple blocks it system-wide on iOS).';
+    }
     scanBtn.disabled = true;
   }
 
