@@ -1447,6 +1447,7 @@
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 Silver Surfer Radio</div>
+    <div class="mode-tab" data-mode="trackerhunter" id="tabTrackerHunter">🎯 Bluetooth Tracker Hunter</div>
   </div>
 
   <div class="desk">
@@ -2601,6 +2602,95 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="trackerHunterPanel">
+    <div class="lookup-card">
+      <h3>🎯 Bluetooth Tracker Hunter</h3>
+      <div class="lc-sub">Scan for nearby Bluetooth devices and hunt down hidden trackers (AirTags, Tile, and similar) using real signal strength — everything runs locally in your browser, nothing is uploaded.</div>
+
+      <div id="th-widget">
+        <style>
+          #th-widget {
+            --th-bg: #14110F; --th-panel: #1C1814; --th-border: rgba(242,237,225,0.14);
+            --th-text: #F2EDE1; --th-text-dim: #8C8377; --th-accent: #2F8F7A; --th-red: #E8402C; --th-gold: #E8C23C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--th-text); margin-top: 16px;
+          }
+          #th-widget *{box-sizing:border-box;}
+          #th-widget .th-howto{
+            background:var(--th-panel); border:1px solid var(--th-border); border-radius:8px;
+            padding:16px 18px; margin-bottom:16px;
+          }
+          #th-widget .th-howto h4{margin:0 0 10px; font-size:13px; color:var(--th-gold); text-transform:uppercase; letter-spacing:0.05em;}
+          #th-widget .th-howto ol{margin:0; padding-left:20px; color:var(--th-text-dim); font-size:12.5px; line-height:1.9;}
+          #th-widget .th-howto li b{color:var(--th-text);}
+          #th-widget .th-unsupported{
+            display:none; background:rgba(232,64,44,0.1); border:1px solid var(--th-red); border-radius:8px;
+            padding:14px 16px; font-size:12.5px; color:var(--th-text); line-height:1.6; margin-bottom:16px;
+          }
+          #th-widget .th-unsupported.show{display:block;}
+          #th-widget .th-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+          #th-widget button.th-scan-btn{
+            padding:12px 22px; background:var(--th-accent); border:none;
+            border-radius:5px; color:var(--th-bg); font-weight:700; font-size:13px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.05em;
+          }
+          #th-widget button.th-scan-btn:hover{opacity:0.88;}
+          #th-widget button.th-scan-btn:disabled{opacity:.5; cursor:default;}
+          #th-widget button.th-scan-btn.scanning{background:var(--th-red);}
+          #th-widget .th-scan-pulse{display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--th-red); margin-right:8px; animation:thPulse 1.2s infinite;}
+          @keyframes thPulse{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+          #th-widget .th-status{font-size:12.5px; color:var(--th-text-dim); min-height:18px;}
+          #th-widget .th-status.error{color:var(--th-red);}
+          #th-widget .th-status.ok{color:var(--th-accent);}
+          #th-widget .th-list{margin-top:14px; display:flex; flex-direction:column; gap:8px;}
+          #th-widget .th-device{
+            display:flex; align-items:center; gap:12px; padding:12px 14px;
+            background:var(--th-panel); border:1px solid var(--th-border); border-radius:8px;
+            transition:opacity .3s ease;
+          }
+          #th-widget .th-device.stale{opacity:0.4;}
+          #th-widget .th-device.tracker{border-color:var(--th-gold);}
+          #th-widget .th-signal-badge{
+            flex-shrink:0; width:56px; height:56px; border-radius:50%; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; font-size:10px; font-weight:700; border:3px solid var(--th-border);
+          }
+          #th-widget .th-signal-pct{font-size:14px;}
+          #th-widget .th-device-info{flex:1; min-width:0;}
+          #th-widget .th-device-name{font-size:13px; font-weight:600; color:var(--th-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+          #th-widget .th-device-meta{font-size:11px; color:var(--th-text-dim); margin-top:2px;}
+          #th-widget .th-tracker-badge{
+            display:inline-block; margin-top:4px; padding:2px 8px; background:rgba(232,194,60,0.15); color:var(--th-gold);
+            border-radius:10px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
+          }
+          #th-widget .th-empty{text-align:center; padding:24px; color:var(--th-text-dim); font-size:12.5px;}
+        </style>
+
+        <div class="th-unsupported" id="thUnsupported"></div>
+
+        <div class="th-howto">
+          <h4>🎯 How to hunt down a tracker</h4>
+          <ol>
+            <li>Tap <b>Start Scan</b> and grant Bluetooth permission when your browser asks — this only lets the page listen for nearby devices, it can't connect to or control anything.</li>
+            <li>Every device that responds gets a <b>signal strength ring</b> — the closer the device, the fuller and redder the ring. Signal jumps around naturally, so watch the trend, not one single reading.</li>
+            <li>Walk slowly around your car, bag, jacket, or wherever you suspect something's hidden. Whichever device's signal <b>consistently gets stronger</b> as you approach is physically near you — that's your target.</li>
+            <li>Devices tagged <b>Possible Tracker</b> matched a known signature for AirTag/Find My or Tile hardware — worth checking first. Everything else is still worth a look; it just couldn't be identified by brand.</li>
+            <li>Found a suspicious tracker? Apple's <a href="https://support.apple.com/en-us/109431" target="_blank" rel="noopener" style="color:var(--th-accent);">Tracker Detect</a> app or a locksmith/police non-emergency line can help you deal with what's next — this tool only helps you find it.</li>
+          </ol>
+        </div>
+
+        <div class="th-controls">
+          <button class="th-scan-btn" id="thScanBtn" type="button">▶ Start Scan</button>
+          <div class="th-status" id="thStatus"></div>
+        </div>
+
+        <div class="th-list" id="thList"></div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> this only works in Chromium-based browsers (Chrome, Edge, Samsung Internet, Opera) on desktop or Android — Web Bluetooth scanning isn't supported in Safari or Firefox at all, and Apple blocks it on every iOS/iPadOS browser (including Chrome for iPhone, since Apple requires all iOS browsers to use Safari's engine). Everything runs locally via your browser's Bluetooth permission — nothing is scanned, stored, or sent anywhere by this site. Brand identification is limited to what's honestly detectable: Apple Find My/AirTag devices and Tile trackers have a documented, recognizable signature in their Bluetooth advertisements, so those get flagged with real confidence. Samsung SmartTags can't be reliably told apart from any other Samsung Bluetooth device (phones, earbuds, TVs) from this data alone, so they're deliberately not flagged to avoid false alarms — and most Bluetooth devices you'll see are completely mundane (someone's headphones, a smart TV, a car stereo), not trackers.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2788,6 +2878,7 @@ const downloaderPanel = document.getElementById('downloaderPanel');
 const qrcodePanel = document.getElementById('qrcodePanel');
 const stegoPanel = document.getElementById('stegoPanel');
 const radioPanel = document.getElementById('radioPanel');
+const trackerHunterPanel = document.getElementById('trackerHunterPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2802,14 +2893,15 @@ const LOOKUP_TAGLINES = {
   downloader: 'Record music or audio playing in a browser tab, window, or your system, and save it as a high-quality MP3 — no separate app, nothing uploaded.',
   qrcode: 'Type or paste anything and get a scannable QR code instantly — generated entirely in your browser, nothing sent anywhere.',
   stego: 'Hide a link invisibly inside a photo\'s pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.',
-  radio: 'Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account.'
+  radio: 'Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account.',
+  trackerhunter: 'Scan for nearby Bluetooth devices and hunt down hidden trackers like AirTags or Tile using real signal strength — everything runs locally, nothing is uploaded.'
 };
 
 function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'trackerhunter');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2827,6 +2919,7 @@ function setMode(newMode){
   qrcodePanel.classList.toggle('show', newMode === 'qrcode');
   stegoPanel.classList.toggle('show', newMode === 'stego');
   radioPanel.classList.toggle('show', newMode === 'radio');
+  trackerHunterPanel.classList.toggle('show', newMode === 'trackerhunter');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2852,6 +2945,7 @@ document.getElementById('tabDownloader').addEventListener('click', () => setMode
 document.getElementById('tabQrCode').addEventListener('click', () => setMode('qrcode'));
 document.getElementById('tabStego').addEventListener('click', () => setMode('stego'));
 document.getElementById('tabRadio').addEventListener('click', () => setMode('radio'));
+document.getElementById('tabTrackerHunter').addEventListener('click', () => setMode('trackerhunter'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -5351,7 +5445,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','trackerhunter']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -6528,6 +6622,161 @@ processSharedFileIfAny();
 
   loadCountries();
   fetchStations();
+})();
+
+// --- Bluetooth Tracker Hunter: live BLE scan via Web Bluetooth, entirely local ---
+(function(){
+  const root = document.getElementById('th-widget');
+  if (!root) return;
+
+  const unsupportedEl = document.getElementById('thUnsupported');
+  const scanBtn = document.getElementById('thScanBtn');
+  const statusEl = document.getElementById('thStatus');
+  const listEl = document.getElementById('thList');
+
+  const STALE_MS = 8000;   // fade a device out if it hasn't been heard from in this long
+  const RSSI_FLOOR = -100; // treated as 0% proximity
+  const RSSI_CEIL = -40;   // treated as 100% proximity
+
+  let scanning = false;
+  let activeScan = null;
+  let refreshTimer = null;
+  const devices = new Map(); // device.id -> { id, name, rssi, lastSeen, trackerType }
+
+  function setStatus(msg, cls){
+    statusEl.className = 'th-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  const supported = !!(navigator.bluetooth && navigator.bluetooth.requestLEScan);
+  if (!supported) {
+    unsupportedEl.classList.add('show');
+    unsupportedEl.innerHTML = '⚠ Bluetooth scanning isn\'t available in this browser. This needs a Chromium-based browser (Chrome, Edge, Samsung Internet) on desktop or Android — Safari and Firefox don\'t support it, and no browser on iPhone/iPad can (Apple blocks it system-wide on iOS).';
+    scanBtn.disabled = true;
+  }
+
+  // Apple's Find My network (AirTags and other Find-My-compatible trackers) uses
+  // company ID 0x004C with a type byte of 0x12 in manufacturer data — documented by
+  // independent security research (see disclaimer). Apple uses company ID 76 for lots
+  // of other things too (AirPods, Continuity, etc.), so checking the type byte
+  // specifically avoids flagging every nearby iPhone/AirPods as a "tracker."
+  // Tile's registered company ID (741) is checked alone since Tile only makes tracker
+  // hardware, so no other product line can cause a false positive.
+  function identifyTracker(manufacturerData){
+    if (!manufacturerData) return null;
+    const apple = manufacturerData.get(76);
+    if (apple && apple.byteLength >= 1 && apple.getUint8(0) === 0x12) return '🍎 Possible AirTag / Find My';
+    if (manufacturerData.has(741)) return '🔵 Tile tracker';
+    return null;
+  }
+
+  function proximityPercent(rssi){
+    if (typeof rssi !== 'number') return 0;
+    return Math.max(0, Math.min(100, Math.round((rssi - RSSI_FLOOR) / (RSSI_CEIL - RSSI_FLOOR) * 100)));
+  }
+
+  function signalColor(pct){
+    if (pct >= 75) return '#E8402C';
+    if (pct >= 45) return '#E8C23C';
+    return '#2F8F7A';
+  }
+
+  function renderList(){
+    const now = Date.now();
+    const list = [...devices.values()].sort((a, b) => (b.rssi || -999) - (a.rssi || -999));
+
+    if (!list.length) {
+      listEl.innerHTML = scanning
+        ? '<div class="th-empty">Listening… devices will appear here as they\'re heard.</div>'
+        : '<div class="th-empty">No scan running. Hit Start Scan to begin.</div>';
+      return;
+    }
+
+    listEl.innerHTML = '';
+    list.forEach(d => {
+      const stale = (now - d.lastSeen) > STALE_MS;
+      const pct = proximityPercent(d.rssi);
+      const color = signalColor(pct);
+
+      const row = document.createElement('div');
+      row.className = 'th-device' + (stale ? ' stale' : '') + (d.trackerType ? ' tracker' : '');
+
+      const badge = document.createElement('div');
+      badge.className = 'th-signal-badge';
+      badge.style.borderColor = color;
+      badge.style.color = color;
+      badge.innerHTML = '<div class="th-signal-pct">' + pct + '%</div><div>' + (d.rssi != null ? d.rssi + ' dBm' : '—') + '</div>';
+      row.appendChild(badge);
+
+      const info = document.createElement('div');
+      info.className = 'th-device-info';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'th-device-name';
+      nameEl.textContent = d.name || 'Unnamed device';
+      const metaEl = document.createElement('div');
+      metaEl.className = 'th-device-meta';
+      metaEl.textContent = stale ? 'Last seen ' + Math.round((now - d.lastSeen) / 1000) + 's ago' : 'Active now';
+      info.appendChild(nameEl);
+      info.appendChild(metaEl);
+      if (d.trackerType) {
+        const badgeEl = document.createElement('div');
+        badgeEl.className = 'th-tracker-badge';
+        badgeEl.textContent = d.trackerType;
+        info.appendChild(badgeEl);
+      }
+      row.appendChild(info);
+
+      listEl.appendChild(row);
+    });
+  }
+
+  async function startScan(){
+    setStatus('');
+    try {
+      activeScan = await navigator.bluetooth.requestLEScan({ acceptAllAdvertisements: true, keepRepeatedDevices: true });
+    } catch (err) {
+      setStatus('Could not start scanning — permission was denied, or no Bluetooth adapter was found.', 'error');
+      return;
+    }
+
+    scanning = true;
+    scanBtn.textContent = '⏹ Stop Scan';
+    scanBtn.classList.add('scanning');
+    setStatus('🔴 Scanning…', 'ok');
+
+    navigator.bluetooth.addEventListener('advertisementreceived', onAdvertisement);
+    refreshTimer = setInterval(renderList, 1000);
+    renderList();
+  }
+
+  function onAdvertisement(event){
+    const id = event.device.id;
+    const trackerType = identifyTracker(event.manufacturerData);
+    devices.set(id, {
+      id,
+      name: event.name || event.device.name || null,
+      rssi: event.rssi,
+      lastSeen: Date.now(),
+      trackerType: trackerType || (devices.get(id) && devices.get(id).trackerType) || null
+    });
+  }
+
+  function stopScan(){
+    if (activeScan) { try { activeScan.stop(); } catch (e) {} }
+    navigator.bluetooth.removeEventListener('advertisementreceived', onAdvertisement);
+    clearInterval(refreshTimer);
+    scanning = false;
+    scanBtn.textContent = '▶ Start Scan';
+    scanBtn.classList.remove('scanning');
+    setStatus('Stopped. Devices below are from the last scan.');
+    renderList();
+  }
+
+  scanBtn.addEventListener('click', () => {
+    if (scanning) stopScan(); else startScan();
+  });
+
+  renderList();
 })();
 </script>
 </body>
