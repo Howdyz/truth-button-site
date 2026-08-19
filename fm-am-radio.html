@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free QR Code Generator — No Sign-Up, No Upload | The Truth Button</title>
-<meta name="description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account, nothing ever sent to a server.">
-<link rel="canonical" href="https://projectsilverbeam.com/qr-code-generator.html">
+<title>Free FM/AM Internet Radio — Stream Real Stations Online | The Truth Button</title>
+<meta name="description" content="Search and stream thousands of real, live FM and AM radio stations from around the world, free, right in your browser. No account, no app, nothing installed.">
+<link rel="canonical" href="https://projectsilverbeam.com/fm-am-radio.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://projectsilverbeam.com/qr-code-generator.html">
-<meta property="og:title" content="Free QR Code Generator — No Sign-Up, No Upload">
-<meta property="og:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta property="og:url" content="https://projectsilverbeam.com/fm-am-radio.html">
+<meta property="og:title" content="Free FM/AM Internet Radio — Stream Real Stations Online">
+<meta property="og:description" content="Search and stream thousands of real, live FM and AM radio stations from around the world, free, right in your browser.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Free QR Code Generator — No Sign-Up, No Upload">
-<meta name="twitter:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta name="twitter:title" content="Free FM/AM Internet Radio — Stream Real Stations Online">
+<meta name="twitter:description" content="Search and stream thousands of real, live FM and AM radio stations from around the world, free, right in your browser.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,23 +26,23 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "How do I make a QR code for free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it." }
+      "name": "Is this real radio, or something simulated?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Real, live radio — this plays the actual internet streams that real FM and AM stations broadcast, pulled from Radio Browser, a free public directory of thousands of stations worldwide." }
     },
     {
       "@type": "Question",
-      "name": "Does this upload what I type anywhere?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server." }
+      "name": "Do I need an account or app?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It's free, runs entirely in your browser, and doesn't require signing in, installing anything, or giving out any information." }
     },
     {
       "@type": "Question",
-      "name": "What's error correction level for?",
-      "acceptedAnswer": { "@type": "Answer", "text": "It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses." }
+      "name": "How does the FM/AM filter work?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It's a text match on the station's name (e.g. contains \"FM\" or \"AM\") — not a verified broadcast-band field from the directory. Most US-style terrestrial simulcasts follow that naming convention, so it works well for those, but it won't catch every station worldwide." }
     },
     {
       "@type": "Question",
-      "name": "Is this free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, no account or install required." }
+      "name": "Why is a station not playing?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Streams come from a public, community-maintained directory of independently run stations — some go offline, get geo-restricted, or shut down without notice. That's outside this tool's control; try another station." }
     }
   ]
 }
@@ -94,46 +94,46 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="kicker">Free · Generated Locally · Nothing Uploaded</div>
-  <h1>📱 <span class="accent">QR Code</span> Generator</h1>
-  <p class="lede">Type or paste a URL, phone number, or any text and get a scannable QR code instantly — generated entirely in your browser, downloadable as a PNG.</p>
+  <div class="kicker">Free · Real Stations · No Account</div>
+  <h1>📻 <span class="accent">FM/AM</span> Internet Radio</h1>
+  <p class="lede">Search and stream thousands of real, live FM and AM radio stations from around the world — free, right in your browser, no account or app required.</p>
 
   <div class="cta-row">
-    <a class="cta-btn" href="index.html?mode=qrcode">Open QR Generator →</a>
-    <div class="cta-fine">Updates live as you type — no "generate" button to click</div>
+    <a class="cta-btn" href="index.html?mode=radio">Open Radio →</a>
+    <div class="cta-fine">Search by name, filter by country or band, and press play</div>
   </div>
 
   <section>
     <h2>What this actually is</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Type or paste anything — a URL, a phone number, wifi info, a note — into the box.</span></li>
-      <li><span class="num">2</span><span>The QR code renders instantly as you type, right there on the page.</span></li>
-      <li><span class="num">3</span><span>Adjust error correction or size if you want, then click Download PNG.</span></li>
+      <li><span class="num">1</span><span>Search for a station by name, or browse what's popular right now.</span></li>
+      <li><span class="num">2</span><span>Filter by country, or narrow to just FM or just AM stations.</span></li>
+      <li><span class="num">3</span><span>Click a station to start streaming instantly — adjust volume, switch stations, or stop anytime.</span></li>
     </ol>
   </section>
 
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">How do I make a QR code for free?</div>
-      <p class="faq-a">Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it.</p>
+      <div class="faq-q">Is this real radio, or something simulated?</div>
+      <p class="faq-a">Real, live radio — this plays the actual internet streams that real FM and AM stations broadcast, pulled from Radio Browser, a free public directory of thousands of stations worldwide.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Does this upload what I type anywhere?</div>
-      <p class="faq-a">No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server.</p>
+      <div class="faq-q">Do I need an account or app?</div>
+      <p class="faq-a">No. It's free, runs entirely in your browser, and doesn't require signing in, installing anything, or giving out any information.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">What's error correction level for?</div>
-      <p class="faq-a">It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses.</p>
+      <div class="faq-q">How does the FM/AM filter work?</div>
+      <p class="faq-a">It's a text match on the station's name (e.g. contains "FM" or "AM") — not a verified broadcast-band field from the directory. Most US-style terrestrial simulcasts follow that naming convention, so it works well for those, but it won't catch every station worldwide.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Is this free?</div>
-      <p class="faq-a">Yes, completely free, no account or install required.</p>
+      <div class="faq-q">Why is a station not playing?</div>
+      <p class="faq-a">Streams come from a public, community-maintained directory of independently run stations — some go offline, get geo-restricted, or shut down without notice. That's outside this tool's control; try another station.</p>
     </div>
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> the QR code is generated entirely in your browser using a local copy of a standard open-source encoder — nothing you type is ever sent anywhere. Very long text needs a larger/denser code; if generation fails, try shortening the text or lowering the error correction level.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> streams come from <a href="https://www.radio-browser.info/" target="_blank" rel="noopener" style="color:var(--teal);">Radio Browser</a>, a free, community-maintained public directory — this site doesn't host, upload, or control any of the audio, it's just a player for streams that already exist publicly. The FM/AM filter is a text match on the station name, not a verified broadcast-band field. Some stations may be temporarily offline or geo-restricted at any time.</div>
   </section>
 
   <section>
@@ -141,15 +141,15 @@
       <h2 style="margin-bottom:12px; font-size:18px;">Also on The Truth Button</h2>
       <ul>
         <li><a href="index.html?mode=photo">Check if a photo, video, or audio clip is AI-generated</a></li>
+        <li><a href="index.html?mode=downloader">Record music or audio from a browser tab, then download the MP3</a></li>
+        <li><a href="index.html?mode=stego">Hide a link invisibly inside a photo, then reveal it later</a></li>
+        <li><a href="index.html?mode=qrcode">Generate a QR code from any URL or text</a></li>
         <li><a href="index.html?mode=flock">Find Flock Safety / ALPR surveillance cameras near you</a></li>
         <li><a href="index.html?mode=datacenter">Look up data center facilities by state</a></li>
         <li><a href="index.html?mode=reviews">Real reviews on prices, work, and local experiences by state</a></li>
         <li><a href="index.html?mode=peptide">Peptide reconstitution &amp; dose calculator</a></li>
         <li><a href="index.html?mode=scanner">Scan a GitHub repo for infostealer patterns</a></li>
         <li><a href="index.html?mode=pdf">Merge, split, rotate, or watermark a PDF</a></li>
-        <li><a href="index.html?mode=downloader">Record music or audio from a browser tab, then download the MP3</a></li>
-        <li><a href="index.html?mode=stego">Hide a link invisibly inside a photo, then reveal it later</a></li>
-        <li><a href="index.html?mode=radio">Stream thousands of real FM/AM radio stations, free</a></li>
       </ul>
     </div>
   </section>
