@@ -1446,7 +1446,7 @@
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
-    <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FM/AM Radio</div>
+    <div class="mode-tab" data-mode="radio" id="tabRadio">📻 Silver Surfer Radio</div>
   </div>
 
   <div class="desk">
@@ -2491,7 +2491,7 @@
 
   <div class="lookup-panel" id="radioPanel">
     <div class="lookup-card">
-      <h3>📻 FM/AM Radio</h3>
+      <h3>📻 Silver Surfer Radio</h3>
       <div class="lc-sub">Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account, right in your browser.</div>
 
       <div id="radio-widget">
@@ -2544,6 +2544,14 @@
           #radio-widget .rd-player-meta{font-size:11px; color:var(--rd-text-dim); margin-top:2px;}
           #radio-widget .rd-on-air{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--rd-red); margin-right:6px; animation:rdPulse 1.4s infinite;}
           @keyframes rdPulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+          #radio-widget .rd-player{position:relative;}
+          #radio-widget .rd-player-close{
+            position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%;
+            background:none; border:1px solid var(--rd-border); color:var(--rd-text-dim);
+            font-size:12px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+            font-family:inherit; padding:0;
+          }
+          #radio-widget .rd-player-close:hover{border-color:var(--rd-red); color:var(--rd-red);}
           #radio-widget .rd-player-controls{display:flex; align-items:center; gap:10px;}
           #radio-widget button.rd-action{
             padding:9px 16px; background:var(--rd-accent); border:none;
@@ -2572,6 +2580,7 @@
         <div class="rd-list" id="rdList"></div>
 
         <div class="rd-player" id="rdPlayer">
+          <button class="rd-player-close" id="rdCloseBtn" type="button" title="Close player" aria-label="Close player">✕</button>
           <img class="rd-player-favicon" id="rdPlayerFavicon" alt="">
           <div class="rd-player-info">
             <div class="rd-player-name"><span class="rd-on-air"></span><span id="rdPlayerName"></span></div>
@@ -6315,7 +6324,7 @@ processSharedFileIfAny();
   });
 })();
 
-// --- FM/AM Radio: browses & streams real internet radio via the Radio Browser API ---
+// --- Silver Surfer Radio: browses & streams real internet radio via the Radio Browser API ---
 (function(){
   const root = document.getElementById('radio-widget');
   if (!root) return;
@@ -6442,14 +6451,18 @@ processSharedFileIfAny();
     fetch(RB_BASE + '/json/url/' + encodeURIComponent(s.stationuuid)).catch(() => {});
   }
 
-  stopBtn.addEventListener('click', () => {
+  function stopPlayback(){
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
     currentStationUuid = null;
     playerEl.classList.remove('show');
     renderList();
-  });
+  }
+  stopBtn.addEventListener('click', stopPlayback);
+
+  const closeBtn = document.getElementById('rdCloseBtn');
+  closeBtn.addEventListener('click', stopPlayback);
 
   volumeSlider.addEventListener('input', () => {
     audio.volume = volumeSlider.value / 100;
