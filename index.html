@@ -1445,7 +1445,7 @@
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
-    <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Hidden Link</div>
+    <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
   </div>
 
   <div class="desk">
@@ -2333,7 +2333,7 @@
 
   <div class="lookup-panel" id="stegoPanel">
     <div class="lookup-card">
-      <h3>🕵️ Hidden Link</h3>
+      <h3>🕵️ Pro Link Maker</h3>
       <div class="lc-sub">Hide a link invisibly inside a photo's pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.</div>
 
       <div id="stego-widget">
@@ -5785,7 +5785,7 @@ processSharedFileIfAny();
   });
 })();
 
-// --- Hidden Link: LSB image steganography, entirely client-side via Canvas ---
+// --- Pro Link Maker: LSB image steganography, entirely client-side via Canvas ---
 (function(){
   const root = document.getElementById('stego-widget');
   if (!root) return;
