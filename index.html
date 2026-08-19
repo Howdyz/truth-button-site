@@ -2438,6 +2438,12 @@
 
           <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Photo URL (must already be hosted somewhere public — Facebook has to be able to fetch it)</label>
           <textarea id="sgShareImage" placeholder="https://yoursite.com/photo.jpg" style="min-height:20px;"></textarea>
+          <div style="margin-top:8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button class="sg-action" id="sgUploadPhotoBtn" type="button" style="margin-top:0; padding:8px 14px;">📤 Don't have a URL? Upload a photo</button>
+            <span class="sg-capacity" id="sgUploadStatus" style="margin-top:0;"></span>
+          </div>
+          <input type="file" id="sgUploadFileInput" accept="image/*" style="display:none;">
+          <div class="sg-capacity" style="margin-top:6px;">Requires sign-in. Hosted on The Truth Button's server for 90 days, then auto-deleted — this is the one part of this tool that isn't purely local (see disclaimer below).</div>
 
           <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Title</label>
           <textarea id="sgShareTitle" placeholder="What shows as the headline on the card" style="min-height:20px;" maxlength="120"></textarea>
@@ -2466,7 +2472,7 @@
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> Hide/Reveal isn't cryptography — it's text stored in the least-significant bit of each pixel, invisible to the eye but not robust. The output MUST stay a PNG and be shared as-is: JPEG conversion, resizing, screenshotting, or most messaging apps (which recompress images) will destroy the hidden data. Anyone with this same tool can extract it, so don't use it for anything that needs real secrecy. The Share Page tool is a different mechanism entirely (Open Graph/Twitter Card tags, not steganography) — it only generates a static HTML file locally; you still have to host that file somewhere public yourself before a platform's crawler can read it. It works on Facebook, LinkedIn, X, Slack, Discord, Telegram, WhatsApp, iMessage, and Reddit, but not Instagram or TikTok, which don't support clickable links in regular posts regardless of what tags a page has.
+      <b>Being straight about this:</b> Hide/Reveal isn't cryptography — it's text stored in the least-significant bit of each pixel, invisible to the eye but not robust. The output MUST stay a PNG and be shared as-is: JPEG conversion, resizing, screenshotting, or most messaging apps (which recompress images) will destroy the hidden data. Anyone with this same tool can extract it, so don't use it for anything that needs real secrecy. The Share Page tool is a different mechanism entirely (Open Graph/Twitter Card tags, not steganography) — it only generates a static HTML file locally; you still have to host that file somewhere public yourself before a platform's crawler can read it. It works on Facebook, LinkedIn, X, Slack, Discord, Telegram, WhatsApp, iMessage, and Reddit, but not Instagram or TikTok, which don't support clickable links in regular posts regardless of what tags a page has. The "Upload a photo" button on that tab is the one part of this whole tool that isn't purely local — it requires signing in, and the photo is stored on The Truth Button's server for 90 days (then auto-deleted) so platforms have a real URL to fetch it from.
     </div>
   </div>
 
@@ -6041,6 +6047,75 @@ processSharedFileIfAny();
   function escapeJsString(str){
     return String(str).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/</g, '\\u003C');
   }
+
+  // ---- Upload a photo to get a URL (feeds the Photo URL field above) ----
+  const uploadBtn = document.getElementById('sgUploadPhotoBtn');
+  const uploadFileInput = document.getElementById('sgUploadFileInput');
+  const uploadStatusEl = document.getElementById('sgUploadStatus');
+  const UPLOAD_MAX_BASE64 = 1300000; // stay under the backend's 1.5MB cap with margin
+
+  function setUploadStatus(msg, cls){
+    uploadStatusEl.style.color = cls === 'error' ? 'var(--sg-red)' : (cls === 'ok' ? 'var(--sg-accent)' : '');
+    uploadStatusEl.textContent = msg;
+  }
+
+  function compressAtSize(sourceCanvas, maxDim, quality){
+    const scale = Math.min(1, maxDim / Math.max(sourceCanvas.width, sourceCanvas.height));
+    const w = Math.max(1, Math.round(sourceCanvas.width * scale));
+    const h = Math.max(1, Math.round(sourceCanvas.height * scale));
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(sourceCanvas, 0, 0, w, h);
+    return c.toDataURL('image/jpeg', quality);
+  }
+
+  function compressForUpload(sourceCanvas){
+    for (const dim of [1600, 1200, 900, 600]) {
+      for (let q = 0.85; q >= 0.5; q -= 0.15) {
+        const dataUrl = compressAtSize(sourceCanvas, dim, q);
+        if (dataUrl.length <= UPLOAD_MAX_BASE64) return dataUrl;
+      }
+    }
+    return null;
+  }
+
+  uploadBtn.addEventListener('click', () => uploadFileInput.click());
+  uploadFileInput.addEventListener('change', async () => {
+    const file = uploadFileInput.files[0];
+    uploadFileInput.value = '';
+    if (!file) return;
+
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      setUploadStatus('Sign in first to upload a photo.', 'error');
+      if (typeof openAuthModal === 'function') openAuthModal();
+      return;
+    }
+
+    uploadBtn.disabled = true;
+    setUploadStatus('Compressing…');
+    try {
+      const loaded = await loadImageToCanvas(file);
+      const dataUrl = compressForUpload(loaded.canvas);
+      if (!dataUrl) {
+        setUploadStatus('Could not compress this photo small enough to upload. Try a smaller or simpler image.', 'error');
+        uploadBtn.disabled = false;
+        return;
+      }
+      setUploadStatus('Uploading…');
+      const res = await fetch(apiUrl('/api/photos'), { method: 'POST', headers: apiHeaders(true), body: JSON.stringify({ dataUrl }) });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadStatus(data.error || 'Upload failed.', 'error');
+        uploadBtn.disabled = false;
+        return;
+      }
+      shareImage.value = data.url;
+      setUploadStatus('✓ Uploaded — URL filled in above (hosted for ' + data.expiresInDays + ' days).', 'ok');
+    } catch (err) {
+      setUploadStatus('Could not reach the server.', 'error');
+    }
+    uploadBtn.disabled = false;
+  });
 
   shareGenBtn.addEventListener('click', () => {
     setShareStatus('');
