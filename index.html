@@ -2373,6 +2373,12 @@
           }
           #stego-widget button.sg-action:hover{opacity:0.88;}
           #stego-widget button.sg-action:disabled{opacity:.5; cursor:default;}
+          #stego-widget button.sg-reset-btn{
+            padding:8px 14px; background:none; border:1px solid var(--sg-border); margin-top:0;
+            border-radius:5px; color:var(--sg-text-dim); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit;
+          }
+          #stego-widget button.sg-reset-btn:hover{border-color:var(--sg-accent); color:var(--sg-accent);}
           #stego-widget .sg-preview-wrap{display:none; margin-top:16px; text-align:center;}
           #stego-widget .sg-preview-wrap.show{display:block;}
           #stego-widget .sg-preview-wrap img{max-width:100%; max-height:280px; border-radius:6px; border:1px solid var(--sg-border);}
@@ -2467,6 +2473,10 @@
             <div class="sg-result-box" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               <a id="sgShareResultLink" href="#" target="_blank" rel="noopener" style="color:var(--sg-accent); word-break:break-all; flex:1; min-width:200px;"></a>
               <button class="sg-action" id="sgShareCopyBtn" type="button" style="margin-top:0; padding:8px 14px;">📋 Copy</button>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+              <button class="sg-reset-btn" id="sgShareResetBtn" type="button">🔁 Reset / Create Another</button>
+              <button class="sg-reset-btn" id="sgShareCloseBtn" type="button">✕ Close</button>
             </div>
           </div>
         </div>
@@ -6168,6 +6178,25 @@ processSharedFileIfAny();
       shareCopyBtn.textContent = '✓ Copied';
       setTimeout(() => { shareCopyBtn.textContent = restore; }, 2000);
     }).catch(() => {});
+  });
+
+  const shareResetBtn = document.getElementById('sgShareResetBtn');
+  shareResetBtn.addEventListener('click', () => {
+    shareDest.value = '';
+    shareImage.value = '';
+    shareTitle.value = '';
+    shareDesc.value = '';
+    shareOutput.style.display = 'none';
+    sharePreviewCard.style.display = 'none';
+    setShareStatus('');
+    shareDest.focus();
+  });
+
+  const shareCloseBtn = document.getElementById('sgShareCloseBtn');
+  shareCloseBtn.addEventListener('click', () => {
+    shareOutput.style.display = 'none';
+    sharePreviewCard.style.display = 'none';
+    setShareStatus('');
   });
 })();
 </script>
