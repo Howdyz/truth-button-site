@@ -2806,6 +2806,12 @@ const LOOKUP_TAGLINES = {
 };
 
 function setMode(newMode){
+  // Radio keeps playing via a plain <audio> element regardless of which panel is
+  // visible, since nothing else would ever tell it to stop — leaving the tab
+  // otherwise leaves music playing in the background indefinitely.
+  if (mode === 'radio' && newMode !== 'radio' && typeof window.__stopRadioPlayback === 'function') {
+    window.__stopRadioPlayback();
+  }
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
@@ -6525,6 +6531,11 @@ processSharedFileIfAny();
         });
     } catch (err) { /* country filter just stays as "All countries" */ }
   }
+
+  // Exposed so setMode() can stop playback when the user navigates to a different
+  // tool — otherwise the audio element has no idea the panel it lives in is hidden
+  // and just keeps playing in the background indefinitely.
+  window.__stopRadioPlayback = stopPlayback;
 
   loadCountries();
   fetchStations();
