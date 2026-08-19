@@ -6017,7 +6017,14 @@ processSharedFileIfAny();
       const message = new TextDecoder('utf-8', { fatal: true }).decode(msgBytes);
 
       if (isValidHttpUrl(message)) {
-        resultBox.innerHTML = '🔗 Hidden link found: <a href="' + message.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" style="color:var(--sg-accent);">' + message.replace(/</g, '&lt;') + '</a>';
+        resultBox.textContent = '🔗 Hidden link found: ';
+        const resultLink = document.createElement('a');
+        resultLink.href = message;
+        resultLink.target = '_blank';
+        resultLink.rel = 'noopener';
+        resultLink.style.color = 'var(--sg-accent)';
+        resultLink.textContent = message;
+        resultBox.appendChild(resultLink);
         revealPreviewImg.style.cursor = 'pointer';
         revealPreviewImg.title = 'Click to open the hidden link';
         revealPreviewImg.onclick = () => window.open(message, '_blank', 'noopener');
