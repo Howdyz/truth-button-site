@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Social Media Cropper — Exact Ratios for Facebook, Instagram, Pinterest &amp; More | The Truth Button</title>
-<meta name="description" content="Capture your screen and crop it to the exact recommended ratio for Facebook/LinkedIn/X link cards, Instagram, Stories, Pinterest, or YouTube thumbnails. Free, nothing uploaded.">
+<meta name="description" content="Upload a photo or paste an image URL and crop it to the exact recommended ratio for Facebook/LinkedIn/X link cards, Instagram, Stories, Pinterest, or YouTube thumbnails. Free, nothing uploaded.">
 <link rel="canonical" href="https://projectsilverbeam.com/screenshot-cropper.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://projectsilverbeam.com/screenshot-cropper.html">
 <meta property="og:title" content="Social Media Cropper — Exact Ratios for Facebook, Instagram, Pinterest & More">
-<meta property="og:description" content="Capture your screen and crop it to the exact recommended ratio for Facebook, Instagram, Stories, Pinterest, or YouTube thumbnails — free, nothing uploaded.">
+<meta property="og:description" content="Upload a photo or paste an image URL and crop it to the exact recommended ratio for Facebook, Instagram, Stories, Pinterest, or YouTube thumbnails — free, nothing uploaded.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Social Media Cropper — Exact Ratios for Facebook, Instagram, Pinterest & More">
-<meta name="twitter:description" content="Capture your screen and crop it to the exact recommended ratio for Facebook, Instagram, Stories, Pinterest, or YouTube thumbnails — free, nothing uploaded.">
+<meta name="twitter:description" content="Upload a photo or paste an image URL and crop it to the exact recommended ratio for Facebook, Instagram, Stories, Pinterest, or YouTube thumbnails — free, nothing uploaded.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -31,18 +31,23 @@
     },
     {
       "@type": "Question",
-      "name": "Why does my screenshot look badly cropped when I share it?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Most screenshots are whatever shape your screen or window happened to be, not the 1.91:1 (or other) ratio a platform expects. The platform center-crops it to fit automatically, which often cuts off exactly the part you wanted visible. Cropping it yourself first, to the exact target ratio, fixes this." }
+      "name": "Why does my photo look badly cropped when I share it?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Most photos aren't already the 1.91:1 (or other) ratio a platform expects. The platform center-crops it to fit automatically, which often cuts off exactly the part you wanted visible. Cropping it yourself first, to the exact target ratio, fixes this." }
     },
     {
       "@type": "Question",
-      "name": "Does this upload my screen capture anywhere?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. The capture uses your browser's own screen-share permission, and the crop and export happen entirely locally. Nothing is sent to this site or anywhere else." }
+      "name": "Does this upload my photo anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A file you choose is read locally and never leaves your device. A URL you paste is fetched directly by your browser from wherever it's hosted, same as opening it in a new tab — that request is visible to that image's host, not to this site. Either way, the crop and export happen entirely locally." }
     },
     {
       "@type": "Question",
       "name": "Does this work on mobile?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No — screen capture (getDisplayMedia) is a desktop browser capability (Chrome, Edge, or Firefox). It isn't available on mobile browsers at all; that's a platform limitation, not something this tool can work around." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — uploading a photo or pasting a URL both work fine on mobile browsers, unlike an earlier version of this tool that relied on desktop-only screen capture." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why did loading my image URL fail?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Some image hosts block cross-origin access, which stops a browser from reading the image's pixel data even though it can display it. If pasting a URL fails, download the file and use \"Choose a Photo\" instead — that always works regardless of the source." }
     }
   ]
 }
@@ -100,17 +105,17 @@
 <div class="wrap">
   <div class="kicker">Free · Runs Locally · Nothing Uploaded</div>
   <h1>📐 <span class="accent">Social Media Cropper</span></h1>
-  <p class="lede">Every platform wants a different shape. Capture your screen once, then crop it to the exact ratio Facebook, Instagram, Pinterest, or YouTube actually renders — instead of letting them chop it up for you.</p>
+  <p class="lede">Every platform wants a different shape. Upload a photo or paste an image URL, then crop it to the exact ratio Facebook, Instagram, Pinterest, or YouTube actually renders — instead of letting them chop it up for you.</p>
 
   <div class="cta-row">
     <a class="cta-btn" href="index.html?mode=cropper">Open Social Media Cropper →</a>
-    <div class="cta-fine">Capture once, pick a platform, drag to frame it, download</div>
+    <div class="cta-fine">Upload or paste a link, pick a platform, drag to frame it, download</div>
   </div>
 
   <section>
     <h2>How it works</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Click <b>Capture From Screen</b> and choose the screen, window, or tab you want to grab — same permission prompt used elsewhere on this site.</span></li>
+      <li><span class="num">1</span><span>Click <b>Choose a Photo</b> to upload a file, or paste a direct image URL and click <b>Load from URL</b>.</span></li>
       <li><span class="num">2</span><span>Pick a platform preset — the frame instantly locks to that exact ratio.</span></li>
       <li><span class="num">3</span><span>Drag to reposition, use the slider to zoom in or out, until the part you want is framed.</span></li>
       <li><span class="num">4</span><span>Download — you get a PNG at the platform's exact recommended pixel size, not just the right shape.</span></li>
@@ -137,21 +142,25 @@
       <p class="faq-a">1200×630 pixels, a 1.91:1 ratio — this is also what LinkedIn, X/Twitter, Reddit, and Slack use for their link preview cards, so one crop covers all of them.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Why does my screenshot look badly cropped when I share it?</div>
-      <p class="faq-a">Most screenshots are whatever shape your screen or window happened to be, not the 1.91:1 (or other) ratio a platform expects. The platform center-crops it to fit automatically, which often cuts off exactly the part you wanted visible. Cropping it yourself first, to the exact target ratio, fixes this.</p>
+      <div class="faq-q">Why does my photo look badly cropped when I share it?</div>
+      <p class="faq-a">Most photos aren't already the 1.91:1 (or other) ratio a platform expects. The platform center-crops it to fit automatically, which often cuts off exactly the part you wanted visible. Cropping it yourself first, to the exact target ratio, fixes this.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Does this upload my screen capture anywhere?</div>
-      <p class="faq-a">No. The capture uses your browser's own screen-share permission, and the crop and export happen entirely locally. Nothing is sent to this site or anywhere else.</p>
+      <div class="faq-q">Does this upload my photo anywhere?</div>
+      <p class="faq-a">A file you choose is read locally and never leaves your device. A URL you paste is fetched directly by your browser from wherever it's hosted, same as opening it in a new tab — that request is visible to that image's host, not to this site. Either way, the crop and export happen entirely locally.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Does this work on mobile?</div>
-      <p class="faq-a">No — screen capture (getDisplayMedia) is a desktop browser capability (Chrome, Edge, or Firefox). It isn't available on mobile browsers at all; that's a platform limitation, not something this tool can work around.</p>
+      <p class="faq-a">Yes — uploading a photo or pasting a URL both work fine on mobile browsers, unlike an earlier version of this tool that relied on desktop-only screen capture.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why did loading my image URL fail?</div>
+      <p class="faq-a">Some image hosts block cross-origin access, which stops a browser from reading the image's pixel data even though it can display it. If pasting a URL fails, download the file and use "Choose a Photo" instead — that always works regardless of the source.</p>
     </div>
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> this captures whatever screen, window, or tab you choose via your browser's own screen-share permission — nothing is uploaded, the capture and crop happen entirely locally. Exports are generated at each platform's exact recommended pixel dimensions with high-quality smoothing, but a low-resolution or heavily zoomed-in source will still look softer than a genuinely high-resolution capture. Requires a Chromium-based browser (Chrome, Edge) or Firefox on desktop — not available on mobile browsers at all.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> a file you choose is read locally and never leaves your device. A URL you paste is fetched directly by your browser from wherever it's hosted — visible to that image's host, not to this site — and some hosts block that entirely, which will make loading-by-URL fail with a clear error (download the file and upload it instead in that case). Exports are generated at each platform's exact recommended pixel dimensions with high-quality smoothing, but a low-resolution source will still look softer than a genuinely high-resolution one. Works on both desktop and mobile browsers.</div>
   </section>
 
   <section>

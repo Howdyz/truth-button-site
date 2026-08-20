@@ -2652,9 +2652,25 @@
           #crop-widget .cw-dims{font-size:11px; color:var(--cw-text-dim); text-align:center; margin-top:10px;}
           #crop-widget .cw-hint{font-size:11.5px; color:var(--cw-text-dim); text-align:center; margin-top:6px;}
           #crop-widget .cw-actions-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;}
+          #crop-widget .cw-input-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center;}
+          #crop-widget .cw-or{font-size:11px; color:var(--cw-text-dim); text-transform:uppercase; letter-spacing:0.05em;}
+          #crop-widget .cw-url-row{display:flex; gap:8px; max-width:480px; margin:12px auto 0; flex-wrap:wrap; justify-content:center;}
+          #crop-widget input[type=text]{
+            flex:1; min-width:220px; padding:10px 12px; background:var(--cw-bg); border:1px solid var(--cw-border);
+            border-radius:5px; color:var(--cw-text); font-size:13px; font-family:inherit;
+          }
+          #crop-widget input[type=file]{display:none;}
         </style>
 
-        <button class="cw-action" id="cwCaptureBtn" type="button">📸 Capture From Screen</button>
+        <div class="cw-input-row">
+          <button class="cw-action" id="cwChooseBtn" type="button">📁 Choose a Photo</button>
+          <span class="cw-or">or</span>
+        </div>
+        <div class="cw-url-row">
+          <input type="text" id="cwUrlInput" placeholder="Paste an image URL…">
+          <button class="cw-secondary" id="cwLoadUrlBtn" type="button">Load from URL</button>
+        </div>
+        <input type="file" id="cwFileInput" accept="image/*">
         <div class="cw-status" id="cwStatus"></div>
 
         <div class="cw-presets" id="cwPresets">
@@ -2679,14 +2695,14 @@
           <div class="cw-dims" id="cwDims"></div>
           <div class="cw-actions-row">
             <a class="cw-action" id="cwDownloadBtn" download="screenshot-crop.png" style="text-decoration:none;">⬇ Download PNG</a>
-            <button class="cw-secondary" id="cwRecaptureBtn" type="button">🔄 New Screenshot</button>
+            <button class="cw-secondary" id="cwRecaptureBtn" type="button">🔄 Choose Another Photo</button>
           </div>
         </div>
       </div>
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> this captures whatever screen, window, or tab you choose via your browser's own screen-share permission — same mechanism as the Capture From Screen feature in the Photo tool. Nothing is uploaded anywhere; the capture, crop, and export all happen locally in your browser. Exports are generated at each platform's exact recommended pixel dimensions, scaled up from your crop selection with high-quality smoothing — but a low-resolution or heavily zoomed-in source screenshot will still look softer than a genuinely high-resolution source. Screen capture requires a Chromium-based browser (Chrome, Edge) or Firefox on desktop — it isn't available on mobile browsers at all, that's a platform limitation, not something this tool can work around.
+      <b>Being straight about this:</b> a file you choose is read locally and never leaves your device. A URL you paste is a different story — your browser fetches it directly from wherever it's hosted, same as opening it in a new tab, so that request is visible to that image's host (not to this site). Some hosts block cross-origin access entirely, which will make loading-by-URL fail with a clear error — download the file and use "Choose a Photo" instead in that case. Exports are generated at each platform's exact recommended pixel dimensions, scaled up from your crop selection with high-quality smoothing — but a low-resolution or heavily zoomed-in source will still look softer than a genuinely high-resolution one. Works on both desktop and mobile browsers, unlike the old screen-capture version of this tool.
     </div>
   </div>
 
@@ -6641,7 +6657,10 @@ processSharedFileIfAny();
     'youtube':    { label: 'YouTube Thumbnail',        w: 1280, h: 720 }
   };
 
-  const captureBtn = document.getElementById('cwCaptureBtn');
+  const chooseBtn = document.getElementById('cwChooseBtn');
+  const fileInput = document.getElementById('cwFileInput');
+  const urlInput = document.getElementById('cwUrlInput');
+  const loadUrlBtn = document.getElementById('cwLoadUrlBtn');
   const statusEl = document.getElementById('cwStatus');
   const presetsEl = document.getElementById('cwPresets');
   const editorEl = document.getElementById('cwEditor');
@@ -6759,26 +6778,54 @@ processSharedFileIfAny();
     downloadBtn.href = outCanvas.toDataURL('image/png');
   });
 
-  function loadCaptured(dataUrl){
+  function loadPhoto(dataUrl){
     const img = new Image();
     img.onload = () => {
       capturedImg = img;
-      setStatus('✓ Captured (' + img.width + '×' + img.height + ') — pick a platform below.', 'ok');
+      setStatus('✓ Loaded (' + img.width + '×' + img.height + ') — pick a platform below.', 'ok');
       presetsEl.classList.add('show');
       selectPreset(currentPresetId || 'fb');
     };
-    img.onerror = () => setStatus('Could not load the captured frame — try again.', 'error');
+    img.onerror = () => setStatus('Could not load that image — try a different file or URL.', 'error');
     img.src = dataUrl;
   }
 
-  captureBtn.addEventListener('click', () => {
-    setStatus('Choose what to share in the permission prompt…');
-    openScreenCapture(loadCaptured);
+  function loadFromFile(file){
+    if (!file) return;
+    setStatus('Loading…');
+    const reader = new FileReader();
+    reader.onload = () => loadPhoto(reader.result);
+    reader.onerror = () => setStatus('Could not read that file.', 'error');
+    reader.readAsDataURL(file);
+  }
+
+  // Uses fetch() rather than a plain <img src=url> so a cross-origin-blocked source
+  // fails cleanly right here, with a clear message — instead of the image quietly
+  // loading/displaying fine but then tainting the canvas and only failing later,
+  // silently, when the user tries to export their crop.
+  async function loadFromUrl(url){
+    if (!url) { setStatus('Paste an image URL first.', 'error'); return; }
+    if (!/^https?:\/\//i.test(url)) { setStatus('That doesn\'t look like a valid http(s) URL.', 'error'); return; }
+    setStatus('Loading…');
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      if (!blob.type.startsWith('image/')) throw new Error('not an image');
+      loadPhoto(URL.createObjectURL(blob));
+    } catch (err) {
+      setStatus('Could not load that image — its host may not allow cross-origin access, or the URL isn\'t a direct image link. Try "Choose a Photo" and download it first instead.', 'error');
+    }
+  }
+
+  chooseBtn.addEventListener('click', () => fileInput.click());
+  recaptureBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    loadFromFile(fileInput.files[0]);
+    fileInput.value = '';
   });
-  recaptureBtn.addEventListener('click', () => {
-    setStatus('Choose what to share in the permission prompt…');
-    openScreenCapture(loadCaptured);
-  });
+  loadUrlBtn.addEventListener('click', () => loadFromUrl(urlInput.value.trim()));
+  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadFromUrl(urlInput.value.trim()); });
 
   window.addEventListener('resize', () => {
     if (currentPresetId && capturedImg) selectPreset(currentPresetId);
