@@ -40,9 +40,18 @@ self.addEventListener('fetch', (event) => {
   // Network-first for the app shell, falling back to cache — stays fresh
   // whenever online, and is what actually makes the page (and every
   // fully-client-side tool on it) load with zero network once offline.
+  //
+  // { cache: 'no-store' } is required here, not optional — GitHub Pages sends
+  // Cache-Control: max-age=600 on index.html, so a plain fetch() can be
+  // silently answered by the BROWSER's own HTTP cache for up to 10 minutes
+  // after a real deploy, without ever reaching the network at all. That
+  // defeats "network-first" entirely: the service worker code runs, calls
+  // fetch(), and gets back stale HTML anyway. no-store forces an actual
+  // network round-trip every time, so a fresh deploy is visible immediately
+  // instead of on whatever schedule the HTTP cache happens to expire.
   if (event.request.method === 'GET' && SHELL_FILES.includes(url.pathname)) {
     event.respondWith(
-      fetch(event.request).then((response) => {
+      fetch(event.request, { cache: 'no-store' }).then((response) => {
         if (response.ok) {
           const copy = response.clone();
           caches.open(SHELL_CACHE).then((cache) => cache.put(event.request, copy));
