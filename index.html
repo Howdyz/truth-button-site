@@ -2156,6 +2156,14 @@
           }
           #lightning-downloader-widget button.ld-unlock:hover{opacity:0.88;}
           #lightning-downloader-widget button.ld-unlock:disabled{opacity:.5; cursor:default;}
+          #lightning-downloader-widget .ld-autostop-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; font-size:12.5px; color:var(--ld-text-dim);}
+          #lightning-downloader-widget .ld-autostop-row input[type="number"]{
+            width:52px; padding:6px 8px; border-radius:5px; border:1px solid var(--ld-border);
+            background:var(--ld-bg); color:var(--ld-text); font-family:inherit; font-size:12.5px; text-align:center;
+          }
+          #lightning-downloader-widget .ld-autostop-row input[type="number"]:disabled{opacity:.5;}
+          #lightning-downloader-widget .ld-autostop-row input[type="number"]:focus{outline:none; border-color:var(--ld-accent);}
+          #lightning-downloader-widget .ld-autostop-hint{font-size:11px; color:var(--ld-text-dim); flex-basis:100%;}
         </style>
 
         <div class="ld-trial-note" id="ldTrialNote"></div>
@@ -2177,6 +2185,12 @@
 
         <div id="ldDesktopControls">
           <div class="ld-desc">Share a browser tab, window, or your whole screen playing music or audio — make sure to check "Share tab audio" / "Share system audio" in the picker, or there won't be any sound to record. Captured in full stereo, exported as 320kbps MP3.</div>
+          <div class="ld-autostop-row">
+            <span>⏱ Auto-stop after</span>
+            <input type="number" id="ldAutoStopMin" min="0" max="180" value="0" inputmode="numeric" aria-label="Auto-stop minutes"> min
+            <input type="number" id="ldAutoStopSec" min="0" max="59" value="0" inputmode="numeric" aria-label="Auto-stop seconds"> sec
+            <span class="ld-autostop-hint">Leave at 0 to record with no time limit — recording stops automatically once this is reached, same as the free trial cutoff.</span>
+          </div>
           <button class="ld-action" id="ldTabBtn" type="button">🖥️ Share Tab / System Audio</button>
         </div>
 
@@ -5917,6 +5931,8 @@ processSharedFileIfAny();
   const signInPromptBtn = document.getElementById('ldSignInPromptBtn');
   const unlockBtn = document.getElementById('ldUnlockBtn');
   const recheckBtn = document.getElementById('ldRecheckBtn');
+  const autoStopMinEl = document.getElementById('ldAutoStopMin');
+  const autoStopSecEl = document.getElementById('ldAutoStopSec');
 
   let ldStream = null;         // shared tab/system audio track, kept for the 'ended' listener
   let ldRecorder = null;
@@ -5928,6 +5944,7 @@ processSharedFileIfAny();
   let ldStartTime = 0;
   let ldObjectUrl = null;
   let ldTrialCutoffMs = null; // set when a recording starts, if the trial will run out mid-recording
+  let ldUserStopCutoffMs = null; // set when a recording starts, from the auto-stop timer inputs (null = no limit)
 
   // ---- 5-minute free trial, then a one-time $10 unlock tied to the account ----
   // Trial usage is tracked in localStorage — a determined user can clear it, but
@@ -6148,6 +6165,12 @@ processSharedFileIfAny();
     ldRecorder.start();
     ldStartTime = Date.now();
     ldTrialCutoffMs = isDownloaderUnlocked() ? null : trialMsRemaining();
+    const autoStopMin = Math.max(0, parseInt(autoStopMinEl.value, 10) || 0);
+    const autoStopSec = Math.max(0, Math.min(59, parseInt(autoStopSecEl.value, 10) || 0));
+    const requestedStopMs = (autoStopMin * 60 + autoStopSec) * 1000;
+    ldUserStopCutoffMs = requestedStopMs > 0 ? requestedStopMs : null;
+    autoStopMinEl.disabled = true;
+    autoStopSecEl.disabled = true;
     timerEl.classList.add('show');
     timerEl.textContent = '00:00';
     ldTimerInterval = setInterval(() => {
@@ -6155,6 +6178,9 @@ processSharedFileIfAny();
       timerEl.textContent = formatTime(elapsed);
       if (ldTrialCutoffMs !== null && elapsed >= ldTrialCutoffMs) {
         setStatus('Free trial ran out mid-recording — here\'s what got captured so far. Unlock for unlimited recording.', 'ok');
+        stopRecording();
+      } else if (ldUserStopCutoffMs !== null && elapsed >= ldUserStopCutoffMs) {
+        setStatus('Auto-stop timer reached — recording saved.', 'ok');
         stopRecording();
       }
     }, 250);
@@ -6167,6 +6193,8 @@ processSharedFileIfAny();
     if (ldRecorder && ldRecorder.state === 'recording') ldRecorder.stop();
     clearInterval(ldTimerInterval);
     ldTimerInterval = null;
+    autoStopMinEl.disabled = false;
+    autoStopSecEl.disabled = false;
   }
 
   function floatTo16BitPCM(float32Array){
