@@ -3167,6 +3167,7 @@
           #scamid-widget .sci-status{font-size:12.5px; color:var(--sci-text-dim); margin-top:10px; min-height:16px;}
           #scamid-widget .sci-status.error{color:var(--sci-red);}
           #scamid-widget .sci-results{margin-top:18px; display:flex; flex-direction:column; gap:14px;}
+          #scamid-widget .sci-reset-row{display:flex; gap:10px; flex-wrap:wrap;}
           #scamid-widget .sci-card{background:var(--sci-panel); border:1px solid var(--sci-border); border-radius:8px; padding:16px;}
           #scamid-widget .sci-card h4{margin:0 0 10px; font-size:13px; color:var(--sci-text);}
           #scamid-widget .sci-stat-row{display:flex; gap:24px; margin-bottom:10px;}
@@ -3201,6 +3202,11 @@
         <div class="sci-status" id="sciStatus"></div>
 
         <div class="sci-results" id="sciResults" style="display:none;">
+          <div class="sci-reset-row">
+            <button class="sci-secondary" id="sciResetBtn" type="button">🔁 Reset / Look Up Another</button>
+            <button class="sci-secondary" id="sciCloseBtn" type="button">✕ Close</button>
+          </div>
+
           <div class="sci-card">
             <h4>📋 FTC Complaint Data (last 180 days)</h4>
             <div id="sciFtcBody"></div>
@@ -3241,6 +3247,8 @@
           const sciReportTag = document.getElementById('sciReportTag');
           const sciReportNote = document.getElementById('sciReportNote');
           const sciReportBtn = document.getElementById('sciReportBtn');
+          const sciResetBtn = document.getElementById('sciResetBtn');
+          const sciCloseBtn = document.getElementById('sciCloseBtn');
 
           let sciCurrentNumber = null;
 
@@ -3373,6 +3381,21 @@
               alert(err.message);
             }
             sciReportBtn.disabled = false;
+          });
+
+          sciResetBtn.addEventListener('click', () => {
+            sciNumberInput.value = '';
+            sciCurrentNumber = null;
+            sciResults.style.display = 'none';
+            sciStatus.textContent = '';
+            sciStatus.className = 'sci-status';
+            sciNumberInput.focus();
+          });
+
+          sciCloseBtn.addEventListener('click', () => {
+            sciResults.style.display = 'none';
+            sciStatus.textContent = '';
+            sciStatus.className = 'sci-status';
           });
         })();
         </script>
