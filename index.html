@@ -6178,11 +6178,49 @@ processSharedFileIfAny();
     return out;
   }
 
-  // Decodes the recorded webm/opus blob back to PCM, then encodes that PCM
-  // to MP3 with lamejs (self-hosted, lame.min.js) — browsers' MediaRecorder
-  // has no MP3 output option, so this transcode step is the only way to get
-  // an actual .mp3 file without sending audio to a server.
-  async function encodeToMp3(sourceBlob){
+  // Runs the actual lamejs encoding in a Web Worker (mp3-encoder-worker.js)
+  // instead of on the main thread — that loop is CPU-heavy enough on a
+  // multi-minute recording to freeze the whole page (no clicks, no
+  // scrolling, nothing repaints) for the entire encode otherwise. Reports
+  // progress back via onProgress so the UI can show real movement.
+  function runMp3EncodeWorker(left, right, sampleRate, channels, onProgress){
+    return new Promise((resolve, reject) => {
+      let worker;
+      try {
+        worker = new Worker('mp3-encoder-worker.js');
+      } catch (err) {
+        reject(err);
+        return;
+      }
+      worker.onmessage = (e) => {
+        const msg = e.data;
+        if (msg.type === 'progress') {
+          if (onProgress) onProgress(msg.percent);
+        } else if (msg.type === 'done') {
+          worker.terminate();
+          resolve(msg.chunks);
+        } else if (msg.type === 'error') {
+          worker.terminate();
+          reject(new Error(msg.message));
+        }
+      };
+      worker.onerror = (err) => {
+        worker.terminate();
+        reject(err instanceof Error ? err : new Error(err && err.message ? err.message : 'MP3 encoder worker failed'));
+      };
+      const transferList = [left.buffer];
+      if (right) transferList.push(right.buffer);
+      worker.postMessage({ left, right, sampleRate, channels }, transferList);
+    });
+  }
+
+  // Decodes the recorded webm/opus blob back to PCM, then hands that PCM off
+  // to a worker to encode as MP3 with lamejs (self-hosted, lame.min.js) —
+  // browsers' MediaRecorder has no MP3 output option, so this transcode step
+  // is the only way to get an actual .mp3 file without sending audio to a
+  // server. Decoding stays on the main thread (native, fast); only the slow
+  // pure-JS encode loop moves off it.
+  async function encodeToMp3(sourceBlob, onProgress){
     const arrayBuffer = await sourceBlob.arrayBuffer();
     const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
     let audioBuffer;
@@ -6193,22 +6231,10 @@ processSharedFileIfAny();
     }
 
     const channels = Math.min(audioBuffer.numberOfChannels, 2);
-    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 320);
-    const blockSize = 1152;
     const left = floatTo16BitPCM(audioBuffer.getChannelData(0));
     const right = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
-    const mp3Chunks = [];
 
-    for (let i = 0; i < left.length; i += blockSize) {
-      const leftChunk = left.subarray(i, i + blockSize);
-      const buf = right
-        ? encoder.encodeBuffer(leftChunk, right.subarray(i, i + blockSize))
-        : encoder.encodeBuffer(leftChunk);
-      if (buf.length > 0) mp3Chunks.push(buf);
-    }
-    const endBuf = encoder.flush();
-    if (endBuf.length > 0) mp3Chunks.push(endBuf);
-
+    const mp3Chunks = await runMp3EncodeWorker(left, right, audioBuffer.sampleRate, channels, onProgress);
     return new Blob(mp3Chunks, { type: 'audio/mpeg' });
   }
 
@@ -6229,9 +6255,11 @@ processSharedFileIfAny();
     let mp3Error = null;
 
     if (window.lamejs) {
-      setStatus('Encoding to MP3…', 'ok');
+      setStatus('Encoding to MP3… 0%', 'ok');
       try {
-        finalBlob = await encodeToMp3(rawBlob);
+        finalBlob = await encodeToMp3(rawBlob, (percent) => {
+          setStatus('Encoding to MP3… ' + percent + '%', 'ok');
+        });
         ext = 'mp3';
       } catch (err) {
         finalBlob = rawBlob; // fall back to the original recording rather than losing the take
