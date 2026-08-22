@@ -1449,6 +1449,7 @@
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FlashBackMan Radio</div>
     <div class="mode-tab" data-mode="cropper" id="tabCropper">📐 Social Media Cropper</div>
     <div class="mode-tab" data-mode="mp3library" id="tabMp3Library">🎵 Offline MP3 Library</div>
+    <div class="mode-tab" data-mode="scamid" id="tabScamId">🚨 Scam Caller ID</div>
   </div>
 
   <div class="desk">
@@ -3132,6 +3133,257 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="scamidPanel">
+    <div class="lookup-card">
+      <h3>🚨 Scam Caller ID</h3>
+      <div class="lc-sub">Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users. Free, and honest about what it actually knows — this isn't a certified identity database.</div>
+
+      <div id="scamid-widget">
+        <style>
+          #scamid-widget {
+            --sci-bg: #14110F; --sci-panel: #1C1814; --sci-border: rgba(242,237,225,0.14);
+            --sci-text: #F2EDE1; --sci-text-dim: #8C8377; --sci-accent: #2F8F7A; --sci-red: #E8402C; --sci-gold: #E8C23C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--sci-text); margin-top: 16px;
+          }
+          #scamid-widget *{box-sizing:border-box;}
+          #scamid-widget .sci-search-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #scamid-widget input[type="tel"], #scamid-widget input[type="text"]{
+            padding:10px 12px; border-radius:5px; border:1px solid var(--sci-border);
+            background:var(--sci-bg); color:var(--sci-text); font-family:inherit; font-size:13px; outline:none;
+          }
+          #scamid-widget input:focus{border-color:var(--sci-accent);}
+          #scamid-widget #sciNumberInput{flex:1; min-width:180px;}
+          #scamid-widget button.sci-action{
+            padding:10px 18px; background:var(--sci-accent); border:none; border-radius:5px; color:var(--sci-bg);
+            font-weight:700; font-size:12.5px; cursor:pointer; font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #scamid-widget button.sci-action:hover{opacity:0.88;}
+          #scamid-widget button.sci-action:disabled{opacity:.5; cursor:default;}
+          #scamid-widget button.sci-secondary{
+            padding:9px 16px; background:none; border:1px solid var(--sci-border); color:var(--sci-text-dim);
+            border-radius:5px; font-size:12px; cursor:pointer; font-family:inherit;
+          }
+          #scamid-widget button.sci-secondary:hover{border-color:var(--sci-accent); color:var(--sci-accent);}
+          #scamid-widget .sci-status{font-size:12.5px; color:var(--sci-text-dim); margin-top:10px; min-height:16px;}
+          #scamid-widget .sci-status.error{color:var(--sci-red);}
+          #scamid-widget .sci-results{margin-top:18px; display:flex; flex-direction:column; gap:14px;}
+          #scamid-widget .sci-card{background:var(--sci-panel); border:1px solid var(--sci-border); border-radius:8px; padding:16px;}
+          #scamid-widget .sci-card h4{margin:0 0 10px; font-size:13px; color:var(--sci-text);}
+          #scamid-widget .sci-stat-row{display:flex; gap:24px; margin-bottom:10px;}
+          #scamid-widget .sci-stat{display:flex; flex-direction:column;}
+          #scamid-widget .sci-stat b{font-size:22px; color:var(--sci-accent); line-height:1.1;}
+          #scamid-widget .sci-stat span{font-size:11px; color:var(--sci-text-dim); text-transform:uppercase; letter-spacing:0.04em;}
+          #scamid-widget .sci-label{font-size:11.5px; color:var(--sci-text-dim); margin-top:8px;}
+          #scamid-widget ul.sci-subjects{margin:4px 0 0; padding-left:18px; font-size:12.5px; color:var(--sci-text);}
+          #scamid-widget .sci-hint{font-size:11px; color:var(--sci-text-dim); margin-top:8px; line-height:1.5;}
+          #scamid-widget .sci-error{font-size:12.5px; color:var(--sci-red);}
+          #scamid-widget .sci-empty{font-size:12.5px; color:var(--sci-text-dim);}
+          #scamid-widget .sci-report{padding:10px 0; border-bottom:1px solid var(--sci-border); font-size:12.5px;}
+          #scamid-widget .sci-report:last-child{border-bottom:none;}
+          #scamid-widget .sci-tag-badge{
+            display:inline-block; padding:3px 9px; border-radius:20px; background:var(--sci-bg);
+            border:1px solid var(--sci-border); font-size:11px; color:var(--sci-text); margin-right:8px;
+          }
+          #scamid-widget .sci-report-note{color:var(--sci-text);}
+          #scamid-widget .sci-report-meta{color:var(--sci-text-dim); font-size:11px;}
+          #scamid-widget .sci-report-form{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--sci-border);}
+          #scamid-widget select{
+            padding:10px 12px; border-radius:5px; border:1px solid var(--sci-border);
+            background:var(--sci-bg); color:var(--sci-text); font-family:inherit; font-size:12.5px;
+          }
+          #scamid-widget #sciReportNote{flex:1; min-width:160px;}
+        </style>
+
+        <div class="sci-search-row">
+          <input type="tel" id="sciNumberInput" placeholder="(555) 123-4567" autocomplete="off">
+          <button class="sci-action" id="sciLookupBtn" type="button">🔍 Look Up</button>
+        </div>
+        <div class="sci-status" id="sciStatus"></div>
+
+        <div class="sci-results" id="sciResults" style="display:none;">
+          <div class="sci-card">
+            <h4>📋 FTC Complaint Data (last 180 days)</h4>
+            <div id="sciFtcBody"></div>
+          </div>
+
+          <div class="sci-card">
+            <h4>📇 Caller Name (optional)</h4>
+            <div id="sciCnamBody"></div>
+          </div>
+
+          <div class="sci-card">
+            <h4>🗣️ Community Reports</h4>
+            <div id="sciReportsList"></div>
+            <div class="sci-report-form">
+              <select id="sciReportTag">
+                <option value="scam">🚩 Scam</option>
+                <option value="robocall">🤖 Robocall</option>
+                <option value="telemarketer">📢 Telemarketer</option>
+                <option value="legit-business">✅ Legit Business</option>
+                <option value="personal">👤 Personal</option>
+                <option value="unknown">❓ Unknown / Other</option>
+              </select>
+              <input type="text" id="sciReportNote" placeholder="Optional note (e.g. who it actually was)" maxlength="300">
+              <button class="sci-action" id="sciReportBtn" type="button">Report This Number</button>
+            </div>
+          </div>
+        </div>
+
+        <script>
+        (function(){
+          const sciNumberInput = document.getElementById('sciNumberInput');
+          const sciLookupBtn = document.getElementById('sciLookupBtn');
+          const sciStatus = document.getElementById('sciStatus');
+          const sciResults = document.getElementById('sciResults');
+          const sciFtcBody = document.getElementById('sciFtcBody');
+          const sciCnamBody = document.getElementById('sciCnamBody');
+          const sciReportsList = document.getElementById('sciReportsList');
+          const sciReportTag = document.getElementById('sciReportTag');
+          const sciReportNote = document.getElementById('sciReportNote');
+          const sciReportBtn = document.getElementById('sciReportBtn');
+
+          let sciCurrentNumber = null;
+
+          function sciEscapeHtml(str){
+            return String(str).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+          }
+
+          function sciResetCnam(){
+            sciCnamBody.innerHTML = '<button class="sci-secondary" id="sciCnamBtn" type="button">Try to Find a Caller Name</button>' +
+              '<div class="sci-hint">Often blank or generic for mobile numbers — looks up official Caller ID (CNAM) data, a small real cost the site covers per lookup, which is why it\'s a separate opt-in button rather than automatic.</div>';
+            document.getElementById('sciCnamBtn').addEventListener('click', sciTryCnam);
+          }
+
+          async function sciTryCnam(){
+            if (typeof currentUser === 'undefined' || !currentUser) { openAuthModal(); return; }
+            sciCnamBody.innerHTML = '<div class="sci-hint">Looking up…</div>';
+            try {
+              const resp = await fetch(apiUrl('/api/scamid/cnam/' + sciCurrentNumber), { headers: apiHeaders(true) });
+              const data = await resp.json();
+              if (!resp.ok) {
+                sciCnamBody.innerHTML = '<div class="sci-empty">' + sciEscapeHtml(data.error || 'Caller name lookup unavailable.') + '</div>';
+                return;
+              }
+              sciCnamBody.innerHTML = data.callerName
+                ? '<div class="sci-stat-row"><div class="sci-stat"><b style="font-size:16px;">' + sciEscapeHtml(data.callerName) + '</b><span>' + sciEscapeHtml(data.callerType || '') + '</span></div></div>'
+                : '<div class="sci-empty">No caller name on file for this number.</div>';
+            } catch (err) {
+              sciCnamBody.innerHTML = '<div class="sci-error">Lookup failed.</div>';
+            }
+          }
+
+          function sciRenderFtc(data){
+            if (data.ftcError) {
+              sciFtcBody.innerHTML = '<div class="sci-error">FTC data temporarily unavailable.</div>';
+              return;
+            }
+            if (data.reportCount === 0) {
+              sciFtcBody.innerHTML = '<div class="sci-empty">No FTC robocall/scam complaints found for this number in the last ' + data.windowDays + ' days. (No news isn\'t proof it\'s safe — just that nobody has reported it recently.)</div>';
+              return;
+            }
+            const subjectsHtml = data.subjects.slice(0, 5).map((s) =>
+              '<li>' + sciEscapeHtml(s.subject) + ' — ' + s.count + '×</li>'
+            ).join('');
+            const statesHtml = data.statesReportingFrom.slice(0, 8).map((s) => sciEscapeHtml(s)).join(', ');
+            sciFtcBody.innerHTML =
+              '<div class="sci-stat-row">' +
+                '<div class="sci-stat"><b>' + data.reportCount + '</b><span>complaint' + (data.reportCount === 1 ? '' : 's') + '</span></div>' +
+                '<div class="sci-stat"><b>' + data.robocallCount + '</b><span>robocalls</span></div>' +
+              '</div>' +
+              (subjectsHtml ? '<div class="sci-label">Reported as:</div><ul class="sci-subjects">' + subjectsHtml + '</ul>' : '') +
+              (statesHtml ? '<div class="sci-label">Reported from: ' + statesHtml + '</div>' : '') +
+              (data.mostRecentComplaintDate ? '<div class="sci-label">Most recent: ' + sciEscapeHtml(data.mostRecentComplaintDate) + '</div>' : '') +
+              (data.truncated ? '<div class="sci-hint">This area code has a high complaint volume — showing the most recent batch only, older matches may exist and not be reflected here.</div>' : '');
+          }
+
+          const SCI_TAG_LABELS = { scam: '🚩 Scam', robocall: '🤖 Robocall', telemarketer: '📢 Telemarketer', 'legit-business': '✅ Legit Business', personal: '👤 Personal', unknown: '❓ Unknown' };
+
+          function sciRenderReports(data){
+            if (!data.reports.length) {
+              sciReportsList.innerHTML = '<div class="sci-empty">No community reports yet — be the first.</div>';
+              return;
+            }
+            sciReportsList.innerHTML = data.reports.map((r) =>
+              '<div class="sci-report">' +
+                '<span class="sci-tag-badge">' + (SCI_TAG_LABELS[r.tag] || sciEscapeHtml(r.tag)) + '</span>' +
+                (r.note ? '<span class="sci-report-note">' + sciEscapeHtml(r.note) + '</span> ' : '') +
+                '<span class="sci-report-meta">— ' + sciEscapeHtml(r.username) + '</span>' +
+              '</div>'
+            ).join('');
+          }
+
+          async function sciLoadReports(number){
+            try {
+              const resp = await fetch(apiUrl('/api/scamid/reports/' + number));
+              const data = await resp.json();
+              sciRenderReports(data);
+            } catch (err) {
+              sciReportsList.innerHTML = '<div class="sci-error">Could not load reports.</div>';
+            }
+          }
+
+          async function sciLookup(){
+            const digits = sciNumberInput.value.replace(/\D/g, '').replace(/^1(\d{10})$/, '$1');
+            if (!/^[2-9]\d{9}$/.test(digits)) {
+              sciStatus.textContent = 'Enter a valid 10-digit US phone number.';
+              sciStatus.className = 'sci-status error';
+              return;
+            }
+            sciCurrentNumber = digits;
+            sciResults.style.display = 'none';
+            sciStatus.textContent = 'Checking FTC complaint data…';
+            sciStatus.className = 'sci-status';
+            sciLookupBtn.disabled = true;
+
+            try {
+              const resp = await fetch(apiUrl('/api/scamid/lookup/' + digits));
+              const data = await resp.json();
+              if (!resp.ok) throw new Error(data.error || 'Lookup failed.');
+              sciRenderFtc(data);
+            } catch (err) {
+              sciFtcBody.innerHTML = '<div class="sci-error">Could not load FTC data: ' + sciEscapeHtml(err.message) + '</div>';
+            }
+
+            sciResetCnam();
+            await sciLoadReports(digits);
+
+            sciResults.style.display = 'flex';
+            sciStatus.textContent = '';
+            sciLookupBtn.disabled = false;
+          }
+
+          sciLookupBtn.addEventListener('click', sciLookup);
+          sciNumberInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sciLookup(); });
+
+          sciReportBtn.addEventListener('click', async () => {
+            if (!sciCurrentNumber) return;
+            if (typeof currentUser === 'undefined' || !currentUser) { openAuthModal(); return; }
+            sciReportBtn.disabled = true;
+            try {
+              const resp = await fetch(apiUrl('/api/scamid/reports/' + sciCurrentNumber), {
+                method: 'POST',
+                headers: apiHeaders(true),
+                body: JSON.stringify({ tag: sciReportTag.value, note: sciReportNote.value })
+              });
+              const data = await resp.json();
+              if (!resp.ok) throw new Error(data.error || 'Could not submit report.');
+              sciReportNote.value = '';
+              await sciLoadReports(sciCurrentNumber);
+            } catch (err) {
+              alert(err.message);
+            }
+            sciReportBtn.disabled = false;
+          });
+        })();
+        </script>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> FTC complaint data is self-reported by consumers and unverified — a match means other people flagged this number, not proof of anything, and it only covers the most recent complaints (last 180 days, capped per lookup) for that number's area code, so an older or extremely high-volume number's full history may not be reflected. Caller-name lookup uses official Caller ID (CNAM) data, which is frequently blank or generic ("Wireless Caller") for mobile numbers specifically — that's a real limitation of the underlying telecom data, not a bug here. Community reports are user-submitted and not independently verified either. Toll-free (1-800/833/844/855/866/877/888) numbers aren't covered by caller-name lookup at all — they use a separate registry that doesn't expose subscriber identity.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -3321,6 +3573,7 @@ const stegoPanel = document.getElementById('stegoPanel');
 const radioPanel = document.getElementById('radioPanel');
 const cropperPanel = document.getElementById('cropperPanel');
 const mp3libraryPanel = document.getElementById('mp3libraryPanel');
+const scamidPanel = document.getElementById('scamidPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -3337,7 +3590,8 @@ const LOOKUP_TAGLINES = {
   stego: 'Hide a link invisibly inside a photo\'s pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.',
   radio: 'Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account.',
   cropper: 'Capture your screen, then crop it to the exact ratio each platform actually wants — Facebook/LinkedIn/X, Instagram, Stories, Pinterest, YouTube. Nothing is ever uploaded.',
-  mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.'
+  mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.',
+  scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.'
 };
 
 function setMode(newMode){
@@ -3347,7 +3601,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -3367,6 +3621,7 @@ function setMode(newMode){
   radioPanel.classList.toggle('show', newMode === 'radio');
   cropperPanel.classList.toggle('show', newMode === 'cropper');
   mp3libraryPanel.classList.toggle('show', newMode === 'mp3library');
+  scamidPanel.classList.toggle('show', newMode === 'scamid');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -3394,6 +3649,7 @@ document.getElementById('tabStego').addEventListener('click', () => setMode('ste
 document.getElementById('tabRadio').addEventListener('click', () => setMode('radio'));
 document.getElementById('tabCropper').addEventListener('click', () => setMode('cropper'));
 document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
+document.getElementById('tabScamId').addEventListener('click', () => setMode('scamid'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -5893,7 +6149,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
