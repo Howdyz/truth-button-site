@@ -2909,7 +2909,7 @@
           // ---------- state ----------
           let mlTracks = [];
           let mlFiltered = [];
-          let mlCurrentIndex = -1;
+          let mlNowPlayingId = null;
           let mlCurrentObjectUrl = null;
           let mlSeeking = false;
 
@@ -2952,33 +2952,33 @@
           // ---------- rendering ----------
           // Play order is an explicit, user-editable `order` field per track (not
           // alphabetical) — this is what makes "number the songs, loop from the
-          // last back to the first" possible. Sorted fresh each time rather than
-          // cached, since it changes whenever a track is added, deleted, or moved.
-          function mlGetOrderedTracks(){
-            return [...mlTracks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          // last back to the first" possible. The play-order NUMBER is just a
+          // label on each track — editing it does NOT move the track in the
+          // visible list (which always stays alphabetical); it only changes
+          // which position that track plays in. Playback (Next/Prev/auto-loop)
+          // walks a separate queue built by sorting the current (filtered) view
+          // by that number — computed fresh each time rather than cached, since
+          // it can change whenever a track is added, deleted, or renumbered.
+          function mlGetPlaybackQueue(){
+            return [...mlFiltered].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
           }
           function mlApplyFilter(){
             const q = mlSearchInput.value.trim().toLowerCase();
-            mlFiltered = mlGetOrderedTracks().filter(t => !q || t.name.toLowerCase().includes(q));
+            mlFiltered = mlTracks
+              .filter(t => !q || t.name.toLowerCase().includes(q))
+              .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
           }
-          // Moves a track to a new 1-based position within the FULL library order
-          // (independent of any active search filter, so "position 3" always means
-          // the same thing whether or not you're currently searching), then
-          // renumbers everything sequentially and persists the changed ones.
-          async function mlMoveTrackToPosition(trackId, newPosition1Based){
-            const ordered = mlGetOrderedTracks();
-            const fromIdx = ordered.findIndex(t => t.id === trackId);
-            if (fromIdx === -1) return;
-            const toIdx = Math.max(0, Math.min(ordered.length - 1, Math.round(newPosition1Based) - 1));
-            if (toIdx === fromIdx) { mlRender(); return; }
-            const [moved] = ordered.splice(fromIdx, 1);
-            ordered.splice(toIdx, 0, moved);
-            const puts = [];
-            ordered.forEach((t, i) => {
-              const newOrder = i + 1;
-              if (t.order !== newOrder) { t.order = newOrder; puts.push(mlDbPut(t)); }
-            });
-            await Promise.all(puts);
+          // Sets a track's play-order number directly — no shifting or
+          // renumbering of any other track, and the track's position in the
+          // visible (alphabetical) list never changes. Duplicate numbers across
+          // tracks are allowed; the playback queue breaks ties by name.
+          async function mlSetPlayOrder(trackId, newOrder){
+            const track = mlTracks.find(t => t.id === trackId);
+            if (!track) return;
+            const clamped = Math.max(1, Math.round(newOrder));
+            if (track.order === clamped) { mlRender(); return; }
+            track.order = clamped;
+            await mlDbPut(track);
             mlRender();
           }
           function mlUpdateStats(){
@@ -2986,7 +2986,7 @@
             mlStatsEl.textContent = `${mlTracks.length} track${mlTracks.length === 1 ? '' : 's'} • ${mlFormatBytes(totalBytes)}`;
           }
           function mlCurrentTrackId(){
-            return (mlCurrentIndex >= 0 && mlFiltered[mlCurrentIndex]) ? mlFiltered[mlCurrentIndex].id : null;
+            return mlNowPlayingId;
           }
           function mlRender(){
             mlApplyFilter();
@@ -3000,12 +3000,10 @@
               mlListEl.innerHTML = `<div class="ml-empty">No tracks match "${mlEscapeHtml(mlSearchInput.value)}".</div>`;
               return;
             }
-            const ordered = mlGetOrderedTracks();
-            const positionById = new Map(ordered.map((t, i) => [t.id, i + 1]));
             const playingId = mlCurrentTrackId();
-            for (const track of mlFiltered) mlListEl.appendChild(mlBuildRow(track, track.id === playingId, positionById.get(track.id), ordered.length));
+            for (const track of mlFiltered) mlListEl.appendChild(mlBuildRow(track, track.id === playingId));
           }
-          function mlBuildRow(track, isPlaying, position, totalCount){
+          function mlBuildRow(track, isPlaying){
             const li = document.createElement('li');
             li.className = 'ml-track' + (isPlaying ? ' playing' : '');
 
@@ -3013,12 +3011,11 @@
             posInput.type = 'number';
             posInput.className = 'ml-pos-input';
             posInput.min = '1';
-            posInput.max = String(totalCount);
-            posInput.value = String(position);
-            posInput.title = 'Play order — change this number to move the track';
+            posInput.value = String(track.order ?? 1);
+            posInput.title = 'Play order — sets when this track plays, without moving it in this list';
             posInput.addEventListener('change', () => {
               const val = parseInt(posInput.value, 10);
-              if (!isNaN(val)) mlMoveTrackToPosition(track.id, val);
+              if (!isNaN(val) && val >= 1) mlSetPlayOrder(track.id, val);
               else mlRender();
             });
             // A plain <input> outside a <form> doesn't reliably fire 'change' on
@@ -3128,13 +3125,11 @@
 
           // ---------- playback ----------
           function mlPlayTrackById(id){
-            const idx = mlFiltered.findIndex(t => t.id === id);
-            if (idx !== -1) mlPlayAt(idx);
+            const track = mlTracks.find(t => t.id === id);
+            if (track) mlPlayTrack(track);
           }
-          function mlPlayAt(idx){
-            if (idx < 0 || idx >= mlFiltered.length) return;
-            mlCurrentIndex = idx;
-            const track = mlFiltered[idx];
+          function mlPlayTrack(track){
+            mlNowPlayingId = track.id;
             if (mlCurrentObjectUrl) URL.revokeObjectURL(mlCurrentObjectUrl);
             mlCurrentObjectUrl = URL.createObjectURL(track.blob);
             mlAudioEl.src = mlCurrentObjectUrl;
@@ -3148,7 +3143,7 @@
             mlAudioEl.removeAttribute('src');
             mlAudioEl.load();
             if (mlCurrentObjectUrl) { URL.revokeObjectURL(mlCurrentObjectUrl); mlCurrentObjectUrl = null; }
-            mlCurrentIndex = -1;
+            mlNowPlayingId = null;
             mlNowPlayingEl.textContent = 'Nothing playing';
             mlCurrentTimeEl.textContent = '0:00';
             mlDurationEl.textContent = '0:00';
@@ -3157,12 +3152,14 @@
           }
           mlAudioEl.addEventListener('play', () => { mlPlayPauseBtn.textContent = '⏸'; mlRender(); });
           mlAudioEl.addEventListener('pause', () => { mlPlayPauseBtn.textContent = '▶'; mlRender(); });
-          // Loops back to the first track after the last one finishes, and keeps
-          // going until the user actually pauses — a continuous playlist, not a
-          // one-pass-then-stop list.
+          // Loops back to the first track (by play-order number) after the last
+          // one finishes, and keeps going until the user actually pauses — a
+          // continuous playlist, not a one-pass-then-stop list.
           mlAudioEl.addEventListener('ended', () => {
-            if (mlFiltered.length === 0) { mlPlayPauseBtn.textContent = '▶'; return; }
-            mlPlayAt((mlCurrentIndex + 1) % mlFiltered.length);
+            const queue = mlGetPlaybackQueue();
+            if (queue.length === 0) { mlPlayPauseBtn.textContent = '▶'; return; }
+            const curIdx = queue.findIndex(t => t.id === mlNowPlayingId);
+            mlPlayTrack(queue[(curIdx + 1) % queue.length]);
           });
           mlAudioEl.addEventListener('loadedmetadata', () => { mlDurationEl.textContent = mlFormatTime(mlAudioEl.duration); });
           mlAudioEl.addEventListener('timeupdate', () => {
@@ -3170,11 +3167,22 @@
             mlCurrentTimeEl.textContent = mlFormatTime(mlAudioEl.currentTime);
           });
           mlPlayPauseBtn.addEventListener('click', () => { if (!mlAudioEl.src) return; mlAudioEl.paused ? mlAudioEl.play() : mlAudioEl.pause(); });
+          // Next/Prev walk the play-order queue, not the visible (alphabetical)
+          // list — same queue the auto-loop above uses, so pressing Next lands on
+          // the same track auto-advance would have gone to.
           mlPrevBtn.addEventListener('click', () => {
-            if (mlCurrentIndex > 0) mlPlayAt(mlCurrentIndex - 1);
+            const queue = mlGetPlaybackQueue();
+            if (queue.length === 0) return;
+            const curIdx = queue.findIndex(t => t.id === mlNowPlayingId);
+            if (curIdx > 0) mlPlayTrack(queue[curIdx - 1]);
             else if (mlAudioEl.src) mlAudioEl.currentTime = 0;
           });
-          mlNextBtn.addEventListener('click', () => { if (mlCurrentIndex + 1 < mlFiltered.length) mlPlayAt(mlCurrentIndex + 1); });
+          mlNextBtn.addEventListener('click', () => {
+            const queue = mlGetPlaybackQueue();
+            if (queue.length === 0) return;
+            const curIdx = queue.findIndex(t => t.id === mlNowPlayingId);
+            if (curIdx + 1 < queue.length) mlPlayTrack(queue[curIdx + 1]);
+          });
           mlSeekEl.addEventListener('input', () => { mlSeeking = true; });
           mlSeekEl.addEventListener('change', () => {
             if (mlAudioEl.duration) mlAudioEl.currentTime = (mlSeekEl.value / 100) * mlAudioEl.duration;
