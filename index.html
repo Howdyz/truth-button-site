@@ -1448,6 +1448,7 @@
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FlashBackMan Radio</div>
     <div class="mode-tab" data-mode="cropper" id="tabCropper">📐 Social Media Cropper</div>
+    <div class="mode-tab" data-mode="mp3library" id="tabMp3Library">🎵 Offline MP3 Library</div>
   </div>
 
   <div class="desk">
@@ -2711,6 +2712,412 @@
     </div>
   </div>
 
+  <div class="lookup-panel" id="mp3libraryPanel">
+    <div class="lookup-card">
+      <h3>🎵 Offline MP3 Library</h3>
+      <div class="lc-sub">Import your MP3 files once and play them anytime — even with no internet connection. Everything is stored right here on this device; nothing is ever uploaded.</div>
+
+      <div id="mp3lib-widget">
+        <style>
+          #mp3lib-widget {
+            --ml-bg: #14110F; --ml-panel: #1C1814; --ml-border: rgba(242,237,225,0.14);
+            --ml-text: #F2EDE1; --ml-text-dim: #8C8377; --ml-accent: #2F8F7A; --ml-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--ml-text); margin-top: 16px;
+          }
+          #mp3lib-widget *{box-sizing:border-box;}
+          #mp3lib-widget .ml-controls{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+          #mp3lib-widget .ml-search{flex:1; min-width:180px;}
+          #mp3lib-widget input[type="search"]{
+            width:100%; padding:10px 12px; border-radius:5px; border:1px solid var(--ml-border);
+            background:var(--ml-bg); color:var(--ml-text); font-family:inherit; font-size:13px; outline:none;
+          }
+          #mp3lib-widget input[type="search"]:focus{border-color:var(--ml-accent);}
+          #mp3lib-widget button.ml-action{
+            padding:11px 20px; background:var(--ml-accent); border:none;
+            border-radius:5px; color:var(--ml-bg); font-weight:700; font-size:13px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #mp3lib-widget button.ml-action:hover{opacity:0.88;}
+          #mp3lib-widget .ml-stats{font-size:11.5px; color:var(--ml-text-dim); margin-bottom:14px;}
+          #mp3lib-widget .ml-dropzone.dragover{outline:2px dashed var(--ml-accent); outline-offset:-6px; border-radius:8px;}
+          #mp3lib-widget ul.ml-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+          #mp3lib-widget .ml-track{
+            display:flex; align-items:center; gap:12px; padding:10px 12px;
+            background:var(--ml-bg); border:1px solid var(--ml-border); border-radius:6px;
+          }
+          #mp3lib-widget .ml-track.playing{border-color:var(--ml-accent); background:rgba(47,143,122,0.1);}
+          #mp3lib-widget .ml-play-btn{
+            flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--ml-panel);
+            border:1px solid var(--ml-border); display:flex; align-items:center; justify-content:center;
+            padding:0; font-size:13px; cursor:pointer; color:var(--ml-text);
+          }
+          #mp3lib-widget .ml-track.playing .ml-play-btn{background:var(--ml-accent); color:var(--ml-bg); border-color:var(--ml-accent);}
+          #mp3lib-widget .ml-track-main{flex:1; min-width:0;}
+          #mp3lib-widget .ml-track-name{font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:text;}
+          #mp3lib-widget .ml-track-meta{font-size:11px; color:var(--ml-text-dim); margin-top:2px;}
+          #mp3lib-widget .ml-rename-input{
+            width:100%; font:inherit; background:var(--ml-panel); color:var(--ml-text);
+            border:1px solid var(--ml-accent); border-radius:4px; padding:4px 6px; font-size:13.5px;
+          }
+          #mp3lib-widget .ml-icon-btn{
+            width:30px; height:30px; padding:0; border-radius:5px; background:transparent; border:none;
+            font-size:13px; color:var(--ml-text-dim); cursor:pointer;
+          }
+          #mp3lib-widget .ml-icon-btn:hover{background:var(--ml-panel); color:var(--ml-text);}
+          #mp3lib-widget .ml-empty{text-align:center; color:var(--ml-text-dim); padding:36px 14px; font-size:13px; line-height:1.7;}
+          #mp3lib-widget .ml-player{
+            margin-top:18px; padding:14px 16px; background:var(--ml-panel); border:1px solid var(--ml-border);
+            border-radius:8px; display:none; flex-direction:column; gap:10px;
+          }
+          #mp3lib-widget .ml-player.active{display:flex;}
+          #mp3lib-widget .ml-now-playing{font-size:12.5px; color:var(--ml-text); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+          #mp3lib-widget .ml-seek-row{display:flex; align-items:center; gap:8px;}
+          #mp3lib-widget .ml-time{font-size:11px; color:var(--ml-text-dim); min-width:32px; text-align:center;}
+          #mp3lib-widget input[type="range"]{-webkit-appearance:none; appearance:none; flex:1; height:4px; border-radius:2px; background:var(--ml-border); outline:none;}
+          #mp3lib-widget input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--ml-accent); cursor:pointer;}
+          #mp3lib-widget input[type="range"]::-moz-range-thumb{width:13px; height:13px; border-radius:50%; background:var(--ml-accent); border:none; cursor:pointer;}
+          #mp3lib-widget .ml-transport-row{display:flex; align-items:center; justify-content:center; gap:14px;}
+          #mp3lib-widget .ml-transport-btn{
+            width:38px; height:38px; border-radius:50%; background:var(--ml-bg); border:1px solid var(--ml-border);
+            display:flex; align-items:center; justify-content:center; font-size:14px; padding:0; cursor:pointer; color:var(--ml-text);
+          }
+          #mp3lib-widget #mlPlayPauseBtn{width:46px; height:46px; background:var(--ml-accent); color:var(--ml-bg); border-color:var(--ml-accent); font-size:16px;}
+          #mp3lib-widget .ml-volume-row{display:flex; align-items:center; gap:8px; justify-content:center;}
+          #mp3lib-widget .ml-volume-row input[type="range"]{max-width:120px;}
+        </style>
+
+        <div class="ml-controls">
+          <div class="ml-search"><input type="search" id="mlSearchInput" placeholder="Search by name…" autocomplete="off"></div>
+          <button class="ml-action" id="mlAddBtn" type="button">＋ Add Music</button>
+        </div>
+        <div class="ml-stats" id="mlStats">0 tracks • 0 B</div>
+
+        <div class="ml-dropzone" id="mlDropZone">
+          <ul class="ml-list" id="mlList"></ul>
+        </div>
+
+        <div class="ml-player" id="mlPlayer">
+          <div class="ml-now-playing" id="mlNowPlaying">Nothing playing</div>
+          <div class="ml-seek-row">
+            <span class="ml-time" id="mlCurrentTime">0:00</span>
+            <input type="range" id="mlSeek" min="0" max="100" value="0">
+            <span class="ml-time" id="mlDuration">0:00</span>
+          </div>
+          <div class="ml-transport-row">
+            <button class="ml-transport-btn" id="mlPrevBtn" type="button" title="Previous" aria-label="Previous">⏮</button>
+            <button class="ml-transport-btn" id="mlPlayPauseBtn" type="button" title="Play/Pause" aria-label="Play or pause">▶</button>
+            <button class="ml-transport-btn" id="mlNextBtn" type="button" title="Next" aria-label="Next">⏭</button>
+          </div>
+          <div class="ml-volume-row">
+            <span>🔉</span>
+            <input type="range" id="mlVolume" min="0" max="100" value="80">
+          </div>
+        </div>
+
+        <input type="file" id="mlFileInput" accept="audio/mpeg,.mp3" multiple hidden>
+        <audio id="mlAudioEl" preload="metadata"></audio>
+
+        <script>
+        (() => {
+          'use strict';
+
+          // ---------- IndexedDB ----------
+          const ML_DB_NAME = 'offline-mp3-library';
+          const ML_DB_VERSION = 1;
+          const ML_STORE = 'tracks';
+
+          function mlOpenDB(){
+            return new Promise((resolve, reject) => {
+              const req = indexedDB.open(ML_DB_NAME, ML_DB_VERSION);
+              req.onupgradeneeded = () => {
+                const db = req.result;
+                if (!db.objectStoreNames.contains(ML_STORE)) db.createObjectStore(ML_STORE, { keyPath: 'id' });
+              };
+              req.onsuccess = () => resolve(req.result);
+              req.onerror = () => reject(req.error);
+            });
+          }
+          async function mlDbAll(){
+            const db = await mlOpenDB();
+            return new Promise((resolve, reject) => {
+              const req = db.transaction(ML_STORE, 'readonly').objectStore(ML_STORE).getAll();
+              req.onsuccess = () => resolve(req.result);
+              req.onerror = () => reject(req.error);
+            });
+          }
+          async function mlDbPut(record){
+            const db = await mlOpenDB();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(ML_STORE, 'readwrite');
+              tx.objectStore(ML_STORE).put(record);
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+          }
+          async function mlDbDelete(id){
+            const db = await mlOpenDB();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(ML_STORE, 'readwrite');
+              tx.objectStore(ML_STORE).delete(id);
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+          }
+
+          // ---------- state ----------
+          let mlTracks = [];
+          let mlFiltered = [];
+          let mlCurrentIndex = -1;
+          let mlCurrentObjectUrl = null;
+          let mlSeeking = false;
+
+          // ---------- elements ----------
+          const mlListEl = document.getElementById('mlList');
+          const mlStatsEl = document.getElementById('mlStats');
+          const mlSearchInput = document.getElementById('mlSearchInput');
+          const mlAddBtn = document.getElementById('mlAddBtn');
+          const mlFileInput = document.getElementById('mlFileInput');
+          const mlDropZone = document.getElementById('mlDropZone');
+          const mlPlayerEl = document.getElementById('mlPlayer');
+          const mlNowPlayingEl = document.getElementById('mlNowPlaying');
+          const mlAudioEl = document.getElementById('mlAudioEl');
+          const mlSeekEl = document.getElementById('mlSeek');
+          const mlCurrentTimeEl = document.getElementById('mlCurrentTime');
+          const mlDurationEl = document.getElementById('mlDuration');
+          const mlPlayPauseBtn = document.getElementById('mlPlayPauseBtn');
+          const mlPrevBtn = document.getElementById('mlPrevBtn');
+          const mlNextBtn = document.getElementById('mlNextBtn');
+          const mlVolumeEl = document.getElementById('mlVolume');
+
+          // ---------- helpers ----------
+          function mlFormatBytes(bytes){
+            if (bytes < 1024) return bytes + ' B';
+            const units = ['KB','MB','GB'];
+            let val = bytes, i = -1;
+            do { val /= 1024; i++; } while (val >= 1024 && i < units.length - 1);
+            return val.toFixed(1) + ' ' + units[i];
+          }
+          function mlFormatTime(s){
+            if (!isFinite(s) || s < 0) return '0:00';
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60).toString().padStart(2, '0');
+            return `${m}:${sec}`;
+          }
+          function mlEscapeHtml(str){
+            return String(str).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+          }
+
+          // ---------- rendering ----------
+          function mlApplyFilter(){
+            const q = mlSearchInput.value.trim().toLowerCase();
+            mlFiltered = mlTracks
+              .filter(t => !q || t.name.toLowerCase().includes(q))
+              .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          }
+          function mlUpdateStats(){
+            const totalBytes = mlTracks.reduce((sum, t) => sum + t.size, 0);
+            mlStatsEl.textContent = `${mlTracks.length} track${mlTracks.length === 1 ? '' : 's'} • ${mlFormatBytes(totalBytes)}`;
+          }
+          function mlCurrentTrackId(){
+            return (mlCurrentIndex >= 0 && mlFiltered[mlCurrentIndex]) ? mlFiltered[mlCurrentIndex].id : null;
+          }
+          function mlRender(){
+            mlApplyFilter();
+            mlUpdateStats();
+            mlListEl.innerHTML = '';
+            if (mlTracks.length === 0) {
+              mlListEl.innerHTML = `<div class="ml-empty">Your library is empty. Add MP3 files to get started — they're stored right here on this device, so you can play them again anytime, even with no internet connection.</div>`;
+              return;
+            }
+            if (mlFiltered.length === 0) {
+              mlListEl.innerHTML = `<div class="ml-empty">No tracks match "${mlEscapeHtml(mlSearchInput.value)}".</div>`;
+              return;
+            }
+            const playingId = mlCurrentTrackId();
+            for (const track of mlFiltered) mlListEl.appendChild(mlBuildRow(track, track.id === playingId));
+          }
+          function mlBuildRow(track, isPlaying){
+            const li = document.createElement('li');
+            li.className = 'ml-track' + (isPlaying ? ' playing' : '');
+
+            const playBtn = document.createElement('button');
+            playBtn.type = 'button';
+            playBtn.className = 'ml-play-btn';
+            playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+            playBtn.textContent = isPlaying && !mlAudioEl.paused ? '⏸' : '▶';
+            playBtn.addEventListener('click', () => {
+              if (isPlaying) { mlAudioEl.paused ? mlAudioEl.play() : mlAudioEl.pause(); }
+              else { mlPlayTrackById(track.id); }
+            });
+
+            const main = document.createElement('div');
+            main.className = 'ml-track-main';
+            const nameEl = document.createElement('div');
+            nameEl.className = 'ml-track-name';
+            nameEl.textContent = track.name;
+            nameEl.title = 'Click to rename';
+            nameEl.addEventListener('click', () => mlStartRename(track, nameEl));
+            const metaEl = document.createElement('div');
+            metaEl.className = 'ml-track-meta';
+            metaEl.textContent = mlFormatBytes(track.size);
+            main.appendChild(nameEl);
+            main.appendChild(metaEl);
+
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'ml-icon-btn';
+            delBtn.setAttribute('aria-label', 'Delete');
+            delBtn.title = 'Delete';
+            delBtn.textContent = '🗑';
+            delBtn.addEventListener('click', () => mlDeleteTrack(track));
+
+            li.appendChild(playBtn);
+            li.appendChild(main);
+            li.appendChild(delBtn);
+            return li;
+          }
+          function mlStartRename(track, nameEl){
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'ml-rename-input';
+            input.value = track.name;
+            nameEl.replaceWith(input);
+            input.focus();
+            input.select();
+            let done = false;
+            const commit = async () => {
+              if (done) return;
+              done = true;
+              const newName = input.value.trim();
+              if (newName && newName !== track.name) { track.name = newName; await mlDbPut(track); }
+              mlRender();
+            };
+            input.addEventListener('blur', commit);
+            input.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') input.blur();
+              if (e.key === 'Escape') { input.value = track.name; input.blur(); }
+            });
+          }
+          async function mlDeleteTrack(track){
+            if (!confirm(`Delete "${track.name}"? This can't be undone.`)) return;
+            const wasPlaying = mlCurrentTrackId() === track.id;
+            await mlDbDelete(track.id);
+            mlTracks = mlTracks.filter(t => t.id !== track.id);
+            if (wasPlaying) mlStopPlayback();
+            mlRender();
+          }
+
+          // ---------- import ----------
+          function mlIsMp3(file){ return file.type === 'audio/mpeg' || /\.mp3$/i.test(file.name); }
+          async function mlImportFiles(fileList){
+            const files = Array.from(fileList || []).filter(mlIsMp3);
+            for (const file of files) {
+              const record = {
+                id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                name: file.name.replace(/\.mp3$/i, ''),
+                type: file.type || 'audio/mpeg',
+                size: file.size,
+                addedAt: Date.now(),
+                blob: file
+              };
+              await mlDbPut(record);
+              mlTracks.push(record);
+            }
+            mlRender();
+          }
+          mlAddBtn.addEventListener('click', () => mlFileInput.click());
+          mlFileInput.addEventListener('change', (e) => { mlImportFiles(e.target.files); mlFileInput.value = ''; });
+          ['dragenter', 'dragover'].forEach(evt => mlDropZone.addEventListener(evt, (e) => { e.preventDefault(); mlDropZone.classList.add('dragover'); }));
+          ['dragleave', 'drop'].forEach(evt => mlDropZone.addEventListener(evt, (e) => { e.preventDefault(); mlDropZone.classList.remove('dragover'); }));
+          mlDropZone.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) mlImportFiles(e.dataTransfer.files); });
+          mlSearchInput.addEventListener('input', mlRender);
+
+          // ---------- playback ----------
+          function mlPlayTrackById(id){
+            const idx = mlFiltered.findIndex(t => t.id === id);
+            if (idx !== -1) mlPlayAt(idx);
+          }
+          function mlPlayAt(idx){
+            if (idx < 0 || idx >= mlFiltered.length) return;
+            mlCurrentIndex = idx;
+            const track = mlFiltered[idx];
+            if (mlCurrentObjectUrl) URL.revokeObjectURL(mlCurrentObjectUrl);
+            mlCurrentObjectUrl = URL.createObjectURL(track.blob);
+            mlAudioEl.src = mlCurrentObjectUrl;
+            mlAudioEl.play().catch(() => {});
+            mlNowPlayingEl.textContent = track.name;
+            mlPlayerEl.classList.add('active');
+            mlRender();
+          }
+          function mlStopPlayback(){
+            mlAudioEl.pause();
+            mlAudioEl.removeAttribute('src');
+            mlAudioEl.load();
+            if (mlCurrentObjectUrl) { URL.revokeObjectURL(mlCurrentObjectUrl); mlCurrentObjectUrl = null; }
+            mlCurrentIndex = -1;
+            mlNowPlayingEl.textContent = 'Nothing playing';
+            mlCurrentTimeEl.textContent = '0:00';
+            mlDurationEl.textContent = '0:00';
+            mlSeekEl.value = 0;
+            mlPlayerEl.classList.remove('active');
+          }
+          mlAudioEl.addEventListener('play', () => { mlPlayPauseBtn.textContent = '⏸'; mlRender(); });
+          mlAudioEl.addEventListener('pause', () => { mlPlayPauseBtn.textContent = '▶'; mlRender(); });
+          mlAudioEl.addEventListener('ended', () => {
+            if (mlCurrentIndex + 1 < mlFiltered.length) mlPlayAt(mlCurrentIndex + 1);
+            else mlPlayPauseBtn.textContent = '▶';
+          });
+          mlAudioEl.addEventListener('loadedmetadata', () => { mlDurationEl.textContent = mlFormatTime(mlAudioEl.duration); });
+          mlAudioEl.addEventListener('timeupdate', () => {
+            if (!mlSeeking && mlAudioEl.duration) mlSeekEl.value = (mlAudioEl.currentTime / mlAudioEl.duration) * 100;
+            mlCurrentTimeEl.textContent = mlFormatTime(mlAudioEl.currentTime);
+          });
+          mlPlayPauseBtn.addEventListener('click', () => { if (!mlAudioEl.src) return; mlAudioEl.paused ? mlAudioEl.play() : mlAudioEl.pause(); });
+          mlPrevBtn.addEventListener('click', () => {
+            if (mlCurrentIndex > 0) mlPlayAt(mlCurrentIndex - 1);
+            else if (mlAudioEl.src) mlAudioEl.currentTime = 0;
+          });
+          mlNextBtn.addEventListener('click', () => { if (mlCurrentIndex + 1 < mlFiltered.length) mlPlayAt(mlCurrentIndex + 1); });
+          mlSeekEl.addEventListener('input', () => { mlSeeking = true; });
+          mlSeekEl.addEventListener('change', () => {
+            if (mlAudioEl.duration) mlAudioEl.currentTime = (mlSeekEl.value / 100) * mlAudioEl.duration;
+            mlSeeking = false;
+          });
+          const mlSavedVolume = localStorage.getItem('tb-mp3lib-volume');
+          mlAudioEl.volume = mlSavedVolume !== null ? Number(mlSavedVolume) / 100 : 0.8;
+          mlVolumeEl.value = Math.round(mlAudioEl.volume * 100);
+          mlVolumeEl.addEventListener('input', () => {
+            mlAudioEl.volume = mlVolumeEl.value / 100;
+            localStorage.setItem('tb-mp3lib-volume', mlVolumeEl.value);
+          });
+
+          // Spacebar toggles play/pause, but only while this tool's tab is active and
+          // focus isn't in a text field — avoids hijacking spacebar on other tabs/tools.
+          document.addEventListener('keydown', (e) => {
+            if (!mp3libraryPanel.classList.contains('show')) return;
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+              e.preventDefault();
+              mlPlayPauseBtn.click();
+            }
+          });
+
+          // ---------- boot ----------
+          (async function mlInit(){
+            try { mlTracks = await mlDbAll(); }
+            catch (err) { console.error('Failed to load MP3 library from IndexedDB:', err); mlTracks = []; }
+            mlRender();
+          })();
+        })();
+        </script>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> your library lives in this browser's local storage on this device only — it does not sync across devices or browsers, and clearing this browser's site data (or using a different browser/computer) will erase it, same as any other local app data. There's no cloud backup. Storage space depends on your device's free disk space, which browsers typically make several gigabytes of available for local site storage. Once you've opened this page and added tracks, playback works with zero internet connection from then on.
+    </div>
+  </div>
+
   <video id="hiddenVideo" style="display:none;" muted playsinline></video>
 
   <div class="capture-overlay" id="captureOverlay" style="display:none;">
@@ -2899,6 +3306,7 @@ const qrcodePanel = document.getElementById('qrcodePanel');
 const stegoPanel = document.getElementById('stegoPanel');
 const radioPanel = document.getElementById('radioPanel');
 const cropperPanel = document.getElementById('cropperPanel');
+const mp3libraryPanel = document.getElementById('mp3libraryPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -2914,7 +3322,8 @@ const LOOKUP_TAGLINES = {
   qrcode: 'Type or paste anything and get a scannable QR code instantly — generated entirely in your browser, nothing sent anywhere.',
   stego: 'Hide a link invisibly inside a photo\'s pixels and reveal it later, or generate a share page so a photo posted on Facebook is clickable straight to your site. Nothing is ever uploaded.',
   radio: 'Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account.',
-  cropper: 'Capture your screen, then crop it to the exact ratio each platform actually wants — Facebook/LinkedIn/X, Instagram, Stories, Pinterest, YouTube. Nothing is ever uploaded.'
+  cropper: 'Capture your screen, then crop it to the exact ratio each platform actually wants — Facebook/LinkedIn/X, Instagram, Stories, Pinterest, YouTube. Nothing is ever uploaded.',
+  mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.'
 };
 
 function setMode(newMode){
@@ -2924,7 +3333,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -2943,6 +3352,7 @@ function setMode(newMode){
   stegoPanel.classList.toggle('show', newMode === 'stego');
   radioPanel.classList.toggle('show', newMode === 'radio');
   cropperPanel.classList.toggle('show', newMode === 'cropper');
+  mp3libraryPanel.classList.toggle('show', newMode === 'mp3library');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -2969,6 +3379,7 @@ document.getElementById('tabQrCode').addEventListener('click', () => setMode('qr
 document.getElementById('tabStego').addEventListener('click', () => setMode('stego'));
 document.getElementById('tabRadio').addEventListener('click', () => setMode('radio'));
 document.getElementById('tabCropper').addEventListener('click', () => setMode('cropper'));
+document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -5468,7 +5879,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
