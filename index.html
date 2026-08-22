@@ -3251,6 +3251,11 @@
           const sciCloseBtn = document.getElementById('sciCloseBtn');
 
           let sciCurrentNumber = null;
+          // Bumped on every new lookup, and on Reset/Close — lets an in-flight lookup
+          // notice it's been superseded (by a newer search, a Reset, or a Close) and
+          // skip re-opening the results panel when its response finally arrives late
+          // (e.g. during a Render cold-start delay after the user already moved on).
+          let sciRequestId = 0;
 
           function sciEscapeHtml(str){
             return String(str).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3338,6 +3343,7 @@
               return;
             }
             sciCurrentNumber = digits;
+            const myRequestId = ++sciRequestId;
             sciResults.style.display = 'none';
             sciStatus.textContent = 'Checking FTC complaint data…';
             sciStatus.className = 'sci-status';
@@ -3347,13 +3353,16 @@
               const resp = await fetch(apiUrl('/api/scamid/lookup/' + digits));
               const data = await resp.json();
               if (!resp.ok) throw new Error(data.error || 'Lookup failed.');
-              sciRenderFtc(data);
+              if (myRequestId === sciRequestId) sciRenderFtc(data);
             } catch (err) {
-              sciFtcBody.innerHTML = '<div class="sci-error">Could not load FTC data: ' + sciEscapeHtml(err.message) + '</div>';
+              if (myRequestId === sciRequestId) sciFtcBody.innerHTML = '<div class="sci-error">Could not load FTC data: ' + sciEscapeHtml(err.message) + '</div>';
             }
+
+            if (myRequestId !== sciRequestId) return; // superseded by a newer lookup, a Reset, or a Close while this was in flight
 
             sciResetCnam();
             await sciLoadReports(digits);
+            if (myRequestId !== sciRequestId) return;
 
             sciResults.style.display = 'flex';
             sciStatus.textContent = '';
@@ -3384,16 +3393,20 @@
           });
 
           sciResetBtn.addEventListener('click', () => {
+            sciRequestId++; // invalidate any in-flight lookup so a late response can't reopen this
             sciNumberInput.value = '';
             sciCurrentNumber = null;
             sciResults.style.display = 'none';
             sciStatus.textContent = '';
             sciStatus.className = 'sci-status';
+            sciLookupBtn.disabled = false;
             sciNumberInput.focus();
           });
 
           sciCloseBtn.addEventListener('click', () => {
+            sciRequestId++; // invalidate any in-flight lookup so a late response can't reopen this
             sciResults.style.display = 'none';
+            sciLookupBtn.disabled = false;
             sciStatus.textContent = '';
             sciStatus.className = 'sci-status';
           });
