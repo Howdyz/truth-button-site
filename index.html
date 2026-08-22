@@ -3021,6 +3021,14 @@
               if (!isNaN(val)) mlMoveTrackToPosition(track.id, val);
               else mlRender();
             });
+            // A plain <input> outside a <form> doesn't reliably fire 'change' on
+            // Enter alone — the typed number just sat there uncommitted until the
+            // next re-render reverted it, which is exactly what looked like "the
+            // numbers change back." Forcing a blur makes Enter commit it, same
+            // fix already used for the rename input above.
+            posInput.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') posInput.blur();
+            });
 
             const playBtn = document.createElement('button');
             playBtn.type = 'button';
