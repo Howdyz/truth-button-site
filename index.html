@@ -2761,6 +2761,12 @@
             background:var(--ml-bg); border:1px solid var(--ml-border); border-radius:6px;
           }
           #mp3lib-widget .ml-track.playing{border-color:var(--ml-accent); background:rgba(47,143,122,0.1);}
+          #mp3lib-widget .ml-pos-input{
+            width:34px; height:30px; flex:0 0 auto; text-align:center; padding:0;
+            border-radius:5px; border:1px solid var(--ml-border); background:var(--ml-panel);
+            color:var(--ml-text); font-family:inherit; font-size:12px;
+          }
+          #mp3lib-widget .ml-pos-input:focus{outline:none; border-color:var(--ml-accent);}
           #mp3lib-widget .ml-play-btn{
             flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--ml-panel);
             border:1px solid var(--ml-border); display:flex; align-items:center; justify-content:center;
@@ -2799,7 +2805,28 @@
           #mp3lib-widget #mlPlayPauseBtn{width:46px; height:46px; background:var(--ml-accent); color:var(--ml-bg); border-color:var(--ml-accent); font-size:16px;}
           #mp3lib-widget .ml-volume-row{display:flex; align-items:center; gap:8px; justify-content:center;}
           #mp3lib-widget .ml-volume-row input[type="range"]{max-width:120px;}
+          #mp3lib-widget .ml-howto{
+            background:var(--ml-panel); border:1px solid var(--ml-border); border-radius:6px;
+            padding:2px 14px; margin-bottom:14px; font-size:12px; color:var(--ml-text-dim);
+          }
+          #mp3lib-widget .ml-howto summary{padding:10px 0; cursor:pointer; color:var(--ml-text); font-weight:600; list-style:none;}
+          #mp3lib-widget .ml-howto summary::-webkit-details-marker{display:none;}
+          #mp3lib-widget .ml-howto summary::before{content:"▸ "; color:var(--ml-accent);}
+          #mp3lib-widget .ml-howto[open] summary::before{content:"▾ "; color:var(--ml-accent);}
+          #mp3lib-widget .ml-howto ol{margin:0 0 12px; padding-left:18px; line-height:1.7;}
+          #mp3lib-widget .ml-howto li{margin-bottom:4px;}
         </style>
+
+        <details class="ml-howto">
+          <summary>How to use this</summary>
+          <ol>
+            <li><b>Add your music</b> — click "＋ Add Music" or drag and drop MP3 files onto the page. They're copied into your browser's storage on this device — nothing is uploaded anywhere.</li>
+            <li><b>Set the play order</b> — each track has a number next to it. Type a new number to move it anywhere in the list — everything else shifts automatically.</li>
+            <li><b>Press play</b> — click any track, or use the ⏮ ⏸ ⏭ controls. When the last track finishes, it loops back to #1 and keeps playing until you hit pause.</li>
+            <li><b>Search, rename, or delete</b> — use the search box to filter by name, click a track's name to rename it, or tap 🗑 to remove it.</li>
+            <li><b>Come back anytime</b> — once you've opened the page once, your library and play order are saved right here on this device — no internet connection needed, no account required.</li>
+          </ol>
+        </details>
 
         <div class="ml-controls">
           <div class="ml-search"><input type="search" id="mlSearchInput" placeholder="Search by name…" autocomplete="off"></div>
@@ -2923,11 +2950,36 @@
           }
 
           // ---------- rendering ----------
+          // Play order is an explicit, user-editable `order` field per track (not
+          // alphabetical) — this is what makes "number the songs, loop from the
+          // last back to the first" possible. Sorted fresh each time rather than
+          // cached, since it changes whenever a track is added, deleted, or moved.
+          function mlGetOrderedTracks(){
+            return [...mlTracks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          }
           function mlApplyFilter(){
             const q = mlSearchInput.value.trim().toLowerCase();
-            mlFiltered = mlTracks
-              .filter(t => !q || t.name.toLowerCase().includes(q))
-              .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+            mlFiltered = mlGetOrderedTracks().filter(t => !q || t.name.toLowerCase().includes(q));
+          }
+          // Moves a track to a new 1-based position within the FULL library order
+          // (independent of any active search filter, so "position 3" always means
+          // the same thing whether or not you're currently searching), then
+          // renumbers everything sequentially and persists the changed ones.
+          async function mlMoveTrackToPosition(trackId, newPosition1Based){
+            const ordered = mlGetOrderedTracks();
+            const fromIdx = ordered.findIndex(t => t.id === trackId);
+            if (fromIdx === -1) return;
+            const toIdx = Math.max(0, Math.min(ordered.length - 1, Math.round(newPosition1Based) - 1));
+            if (toIdx === fromIdx) { mlRender(); return; }
+            const [moved] = ordered.splice(fromIdx, 1);
+            ordered.splice(toIdx, 0, moved);
+            const puts = [];
+            ordered.forEach((t, i) => {
+              const newOrder = i + 1;
+              if (t.order !== newOrder) { t.order = newOrder; puts.push(mlDbPut(t)); }
+            });
+            await Promise.all(puts);
+            mlRender();
           }
           function mlUpdateStats(){
             const totalBytes = mlTracks.reduce((sum, t) => sum + t.size, 0);
@@ -2948,12 +3000,27 @@
               mlListEl.innerHTML = `<div class="ml-empty">No tracks match "${mlEscapeHtml(mlSearchInput.value)}".</div>`;
               return;
             }
+            const ordered = mlGetOrderedTracks();
+            const positionById = new Map(ordered.map((t, i) => [t.id, i + 1]));
             const playingId = mlCurrentTrackId();
-            for (const track of mlFiltered) mlListEl.appendChild(mlBuildRow(track, track.id === playingId));
+            for (const track of mlFiltered) mlListEl.appendChild(mlBuildRow(track, track.id === playingId, positionById.get(track.id), ordered.length));
           }
-          function mlBuildRow(track, isPlaying){
+          function mlBuildRow(track, isPlaying, position, totalCount){
             const li = document.createElement('li');
             li.className = 'ml-track' + (isPlaying ? ' playing' : '');
+
+            const posInput = document.createElement('input');
+            posInput.type = 'number';
+            posInput.className = 'ml-pos-input';
+            posInput.min = '1';
+            posInput.max = String(totalCount);
+            posInput.value = String(position);
+            posInput.title = 'Play order — change this number to move the track';
+            posInput.addEventListener('change', () => {
+              const val = parseInt(posInput.value, 10);
+              if (!isNaN(val)) mlMoveTrackToPosition(track.id, val);
+              else mlRender();
+            });
 
             const playBtn = document.createElement('button');
             playBtn.type = 'button';
@@ -2986,6 +3053,7 @@
             delBtn.textContent = '🗑';
             delBtn.addEventListener('click', () => mlDeleteTrack(track));
 
+            li.appendChild(posInput);
             li.appendChild(playBtn);
             li.appendChild(main);
             li.appendChild(delBtn);
@@ -3026,13 +3094,16 @@
           function mlIsMp3(file){ return file.type === 'audio/mpeg' || /\.mp3$/i.test(file.name); }
           async function mlImportFiles(fileList){
             const files = Array.from(fileList || []).filter(mlIsMp3);
+            let nextOrder = mlTracks.reduce((max, t) => Math.max(max, t.order || 0), 0);
             for (const file of files) {
+              nextOrder++;
               const record = {
                 id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
                 name: file.name.replace(/\.mp3$/i, ''),
                 type: file.type || 'audio/mpeg',
                 size: file.size,
                 addedAt: Date.now(),
+                order: nextOrder,
                 blob: file
               };
               await mlDbPut(record);
@@ -3078,9 +3149,12 @@
           }
           mlAudioEl.addEventListener('play', () => { mlPlayPauseBtn.textContent = '⏸'; mlRender(); });
           mlAudioEl.addEventListener('pause', () => { mlPlayPauseBtn.textContent = '▶'; mlRender(); });
+          // Loops back to the first track after the last one finishes, and keeps
+          // going until the user actually pauses — a continuous playlist, not a
+          // one-pass-then-stop list.
           mlAudioEl.addEventListener('ended', () => {
-            if (mlCurrentIndex + 1 < mlFiltered.length) mlPlayAt(mlCurrentIndex + 1);
-            else mlPlayPauseBtn.textContent = '▶';
+            if (mlFiltered.length === 0) { mlPlayPauseBtn.textContent = '▶'; return; }
+            mlPlayAt((mlCurrentIndex + 1) % mlFiltered.length);
           });
           mlAudioEl.addEventListener('loadedmetadata', () => { mlDurationEl.textContent = mlFormatTime(mlAudioEl.duration); });
           mlAudioEl.addEventListener('timeupdate', () => {
@@ -3121,6 +3195,16 @@
           (async function mlInit(){
             try { mlTracks = await mlDbAll(); }
             catch (err) { console.error('Failed to load MP3 library from IndexedDB:', err); mlTracks = []; }
+
+            // One-time migration: tracks imported before play-order existed have
+            // no `order` field. Give them one now (alphabetical starting point)
+            // so an existing library gets a sensible default instead of every
+            // track sorting as position 0.
+            if (mlTracks.some((t) => typeof t.order !== 'number')) {
+              const alphabetical = [...mlTracks].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+              await Promise.all(alphabetical.map((t, i) => { t.order = i + 1; return mlDbPut(t); }));
+            }
+
             mlRender();
           })();
         })();
