@@ -1444,6 +1444,7 @@
     <div class="mode-tab" data-mode="scanner" id="tabScanner">🛡️ Repo Scanner</div>
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
+    <div class="mode-tab" data-mode="videodl" id="tabVideoDl">🌩️ Thunder Video Downloader</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FlashBackMan Radio</div>
@@ -2212,6 +2213,94 @@
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> this records audio from a tab/screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. It's built for capturing music or audio playing in your browser, not your microphone. Everything is captured and saved locally; nothing is ever sent to a server. You're responsible for only recording audio you actually have the right to record.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="videodlPanel">
+    <div class="lookup-card">
+      <h3>🌩️ Thunder Video Downloader</h3>
+      <div class="lc-sub">Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.</div>
+
+      <div id="video-downloader-widget">
+        <style>
+          #video-downloader-widget {
+            --vd-bg: #14110F; --vd-panel: #1C1814; --vd-border: rgba(242,237,225,0.14);
+            --vd-text: #F2EDE1; --vd-text-dim: #8C8377; --vd-accent: #2F8F7A; --vd-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--vd-text); margin-top: 16px;
+          }
+          #video-downloader-widget *{box-sizing:border-box;}
+          #video-downloader-widget .vd-desc{font-size:12.5px; color:var(--vd-text-dim); line-height:1.6; margin-bottom:12px;}
+          #video-downloader-widget .vd-mobile-notice{display:none; background:var(--vd-panel); border:1px solid var(--vd-border); border-radius:8px; padding:16px;}
+          #video-downloader-widget .vd-mobile-notice.show{display:block;}
+          #video-downloader-widget .vd-mobile-notice h4{margin:0 0 8px; font-size:14px; color:var(--vd-text);}
+          #video-downloader-widget .vd-mobile-notice p{margin:0; font-size:12.5px; color:var(--vd-text-dim); line-height:1.6;}
+          #video-downloader-widget button.vd-action{
+            padding:10px 16px; background:var(--vd-accent); border:none;
+            border-radius:5px; color:var(--vd-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #video-downloader-widget button.vd-action:hover{opacity:0.88;}
+          #video-downloader-widget button.vd-action:disabled{opacity:.5; cursor:default;}
+          #video-downloader-widget button.vd-action.recording{background:var(--vd-red);}
+          #video-downloader-widget .vd-preview-wrap{display:none; background:#000; border-radius:8px; overflow:hidden; margin:14px 0; max-width:480px;}
+          #video-downloader-widget .vd-preview-wrap.show{display:block;}
+          #video-downloader-widget video{width:100%; display:block; max-height:320px; background:#000;}
+          #video-downloader-widget .vd-meter-wrap{background:var(--vd-bg); border:1px solid var(--vd-border); border-radius:5px; height:10px; margin:10px 0; overflow:hidden; display:none; max-width:480px;}
+          #video-downloader-widget .vd-meter-wrap.show{display:block;}
+          #video-downloader-widget .vd-meter{height:100%; width:0%; background:linear-gradient(90deg, var(--vd-accent), #E8C23C); transition:width .05s linear;}
+          #video-downloader-widget .vd-timer{font-size:20px; font-weight:700; color:var(--vd-text); margin:10px 0; display:none;}
+          #video-downloader-widget .vd-timer.show{display:block;}
+          #video-downloader-widget .vd-status{font-size:12.5px; color:var(--vd-text-dim); margin-top:10px; min-height:18px;}
+          #video-downloader-widget .vd-status.error{color:var(--vd-red);}
+          #video-downloader-widget .vd-status.ok{color:var(--vd-accent);}
+          #video-downloader-widget .vd-result{display:none; margin-top:16px; background:var(--vd-bg); border:1px solid var(--vd-border); border-radius:8px; padding:14px;}
+          #video-downloader-widget .vd-result.show{display:block;}
+          #video-downloader-widget .vd-result video{width:100%; max-width:480px; margin-bottom:10px; border-radius:6px;}
+          #video-downloader-widget .vd-result-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #video-downloader-widget a.vd-download{
+            padding:10px 16px; background:#E8C23C; border:none; border-radius:5px; color:var(--vd-bg);
+            font-weight:700; font-size:12.5px; text-decoration:none; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #video-downloader-widget a.vd-download:hover{opacity:0.88;}
+          #video-downloader-widget button.vd-reset{
+            padding:10px 16px; background:none; border:1px solid var(--vd-border); color:var(--vd-text-dim);
+            border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
+          }
+          #video-downloader-widget button.vd-reset:hover{border-color:var(--vd-accent); color:var(--vd-accent);}
+          #video-downloader-widget .vd-progress-wrap{background:var(--vd-bg); border:1px solid var(--vd-border); border-radius:5px; height:10px; margin:10px 0; overflow:hidden; display:none; max-width:480px;}
+          #video-downloader-widget .vd-progress-wrap.show{display:block;}
+          #video-downloader-widget .vd-progress{height:100%; width:0%; background:linear-gradient(90deg, var(--vd-accent), #E8C23C); transition:width .15s linear;}
+        </style>
+
+        <div class="vd-mobile-notice" id="vdMobileNotice">
+          <h4>🖥️ Desktop Only, For Now</h4>
+          <p>Phones don't support tab/system screen capture — it's a limitation of the mobile browser platforms themselves, not something a website can work around. Open this page in Chrome or Edge on a computer to use it.</p>
+        </div>
+
+        <div id="vdDesktopControls">
+          <div class="vd-desc">Share a browser tab, window, or your whole screen — check "Share tab audio" / "Share system audio" in the picker if you want sound in the recording. Captured as-is, then converted to MP4 entirely on your device (nothing uploaded). Conversion runs after you stop recording and can take a while for longer or higher-resolution recordings — keep this tab open until it finishes.</div>
+          <button class="vd-action" id="vdTabBtn" type="button">🖥️ Share Tab / Window / Screen</button>
+        </div>
+
+        <div class="vd-preview-wrap" id="vdPreviewWrap"><video id="vdLivePreview" muted autoplay playsinline></video></div>
+        <div class="vd-meter-wrap" id="vdMeterWrap"><div class="vd-meter" id="vdMeter"></div></div>
+        <div class="vd-timer" id="vdTimer">00:00</div>
+        <button class="vd-action" id="vdRecordBtn" type="button" style="display:none;">⏺ Start Recording</button>
+        <div class="vd-progress-wrap" id="vdProgressWrap"><div class="vd-progress" id="vdProgress"></div></div>
+        <div class="vd-status" id="vdStatus"></div>
+
+        <div class="vd-result" id="vdResult">
+          <video controls id="vdVideoPreview"></video>
+          <div class="vd-result-row">
+            <a class="vd-download" id="vdDownloadLink" download="thunder-video-downloader-recording.mp4">⬇ Download MP4</a>
+            <button class="vd-reset" id="vdResetBtn" type="button">Record Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> this records video/audio from a tab, window, or screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. Everything is captured and converted to MP4 locally in your browser; nothing is ever sent to a server. You're responsible for only recording video you actually have the right to record.
     </div>
   </div>
 
@@ -3710,6 +3799,7 @@ const radioPanel = document.getElementById('radioPanel');
 const cropperPanel = document.getElementById('cropperPanel');
 const mp3libraryPanel = document.getElementById('mp3libraryPanel');
 const scamidPanel = document.getElementById('scamidPanel');
+const videodlPanel = document.getElementById('videodlPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -3727,7 +3817,8 @@ const LOOKUP_TAGLINES = {
   radio: 'Search and stream thousands of real, live FM and AM radio stations from around the world — free, no account.',
   cropper: 'Capture your screen, then crop it to the exact ratio each platform actually wants — Facebook/LinkedIn/X, Instagram, Stories, Pinterest, YouTube. Nothing is ever uploaded.',
   mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.',
-  scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.'
+  scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
+  videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.'
 };
 
 function setMode(newMode){
@@ -3737,7 +3828,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -3758,6 +3849,7 @@ function setMode(newMode){
   cropperPanel.classList.toggle('show', newMode === 'cropper');
   mp3libraryPanel.classList.toggle('show', newMode === 'mp3library');
   scamidPanel.classList.toggle('show', newMode === 'scamid');
+  videodlPanel.classList.toggle('show', newMode === 'videodl');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -6285,7 +6377,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -6711,6 +6803,295 @@ processSharedFileIfAny();
     resultEl.classList.remove('show');
     if (ldObjectUrl) { URL.revokeObjectURL(ldObjectUrl); ldObjectUrl = null; }
     audioPreview.removeAttribute('src');
+    tabBtn.disabled = false;
+    recordBtn.textContent = '⏺ Start Recording';
+    recordBtn.classList.remove('recording');
+    recordBtn.style.display = 'none';
+    timerEl.textContent = '00:00';
+    setStatus('');
+  });
+})();
+
+// --- Thunder Video Downloader: record shared tab/window/screen (video+audio), convert to MP4 locally via ffmpeg.wasm ---
+(function(){
+  const root = document.getElementById('video-downloader-widget');
+  if (!root) return;
+
+  // Screen/tab capture (getDisplayMedia) doesn't exist on mobile browsers —
+  // same platform limitation as Lightning Downloader, same reasoning for
+  // just saying so upfront rather than offering a degraded substitute.
+  if (typeof isMobileDevice !== 'undefined' && isMobileDevice) {
+    document.getElementById('vdMobileNotice').classList.add('show');
+    document.getElementById('vdDesktopControls').style.display = 'none';
+    return;
+  }
+
+  const tabBtn = document.getElementById('vdTabBtn');
+  const recordBtn = document.getElementById('vdRecordBtn');
+  const previewWrap = document.getElementById('vdPreviewWrap');
+  const livePreview = document.getElementById('vdLivePreview');
+  const meterWrap = document.getElementById('vdMeterWrap');
+  const meter = document.getElementById('vdMeter');
+  const timerEl = document.getElementById('vdTimer');
+  const progressWrap = document.getElementById('vdProgressWrap');
+  const progressBar = document.getElementById('vdProgress');
+  const statusEl = document.getElementById('vdStatus');
+  const resultEl = document.getElementById('vdResult');
+  const videoPreview = document.getElementById('vdVideoPreview');
+  const downloadLink = document.getElementById('vdDownloadLink');
+  const resetBtn = document.getElementById('vdResetBtn');
+
+  let vdStream = null;
+  let vdRecorder = null;
+  let vdChunks = [];
+  let vdAnalyser = null;
+  let vdAudioCtx = null;
+  let vdMeterRaf = null;
+  let vdTimerInterval = null;
+  let vdStartTime = 0;
+  let vdObjectUrl = null;
+  let vdFileCounter = 0;
+
+  function setStatus(msg, cls){
+    statusEl.className = 'vd-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function formatTime(ms){
+    const totalSec = Math.floor(ms / 1000);
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  function startMeter(stream){
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) return;
+    vdAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (vdAudioCtx.state === 'suspended') vdAudioCtx.resume();
+    const source = vdAudioCtx.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+    vdAnalyser = vdAudioCtx.createAnalyser();
+    vdAnalyser.fftSize = 512;
+    source.connect(vdAnalyser);
+
+    const data = new Uint8Array(vdAnalyser.frequencyBinCount);
+    meterWrap.classList.add('show');
+    const tick = () => {
+      vdAnalyser.getByteTimeDomainData(data);
+      let sumSq = 0;
+      for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sumSq += v * v; }
+      const rms = Math.sqrt(sumSq / data.length);
+      meter.style.width = Math.min(100, rms * 220) + '%';
+      vdMeterRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  function stopMeter(){
+    if (vdMeterRaf) cancelAnimationFrame(vdMeterRaf);
+    vdMeterRaf = null;
+    meterWrap.classList.remove('show');
+    meter.style.width = '0%';
+    if (vdAudioCtx) { vdAudioCtx.close().catch(function(){}); vdAudioCtx = null; }
+    vdAnalyser = null;
+  }
+
+  function streamReady(){
+    tabBtn.disabled = true;
+    recordBtn.style.display = '';
+    previewWrap.classList.add('show');
+    livePreview.srcObject = vdStream;
+    startMeter(vdStream);
+    setStatus('Video source ready — click "Start Recording" when you\'re set.', 'ok');
+
+    vdStream.getVideoTracks()[0].addEventListener('ended', () => {
+      if (vdRecorder && vdRecorder.state === 'recording') stopRecording();
+      teardownStream();
+      setStatus('Video source disconnected.', 'error');
+    });
+  }
+
+  // Same reasoning as Lightning Downloader's audio constraints: ask explicitly
+  // for unprocessed stereo audio (music/video-call-style processing is wrong
+  // for arbitrary tab/screen audio), falling back to plain `audio: true`.
+  async function requestTabVideo(){
+    try {
+      return await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 30, max: 30 } },
+        audio: {
+          channelCount: { ideal: 2 },
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+    } catch (err) {
+      return await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    }
+  }
+
+  tabBtn.addEventListener('click', async () => {
+    setStatus('');
+    let stream;
+    try {
+      stream = await requestTabVideo();
+    } catch (err) {
+      setStatus('Permission wasn\'t granted, or your browser doesn\'t support screen sharing (try Chrome or Edge on desktop).', 'error');
+      return;
+    }
+    vdStream = stream;
+    streamReady();
+  });
+
+  function pickMimeType(){
+    const candidates = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    for (const c of candidates) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c)) return c; }
+    return '';
+  }
+
+  recordBtn.addEventListener('click', () => {
+    if (vdRecorder && vdRecorder.state === 'recording') { stopRecording(); return; }
+    vdChunks = [];
+    const mimeType = pickMimeType();
+    try {
+      vdRecorder = mimeType ? new MediaRecorder(vdStream, { mimeType }) : new MediaRecorder(vdStream);
+    } catch (err) {
+      setStatus('This browser can\'t record video (MediaRecorder unsupported).', 'error');
+      return;
+    }
+    vdRecorder.addEventListener('dataavailable', (e) => { if (e.data.size > 0) vdChunks.push(e.data); });
+    vdRecorder.addEventListener('stop', () => { onRecordingStopped(); });
+    vdRecorder.start();
+    vdStartTime = Date.now();
+    timerEl.classList.add('show');
+    timerEl.textContent = '00:00';
+    vdTimerInterval = setInterval(() => {
+      timerEl.textContent = formatTime(Date.now() - vdStartTime);
+    }, 250);
+    recordBtn.textContent = '⏹ Stop Recording';
+    recordBtn.classList.add('recording');
+    setStatus('Recording…', 'ok');
+  });
+
+  function stopRecording(){
+    if (vdRecorder && vdRecorder.state === 'recording') vdRecorder.stop();
+    clearInterval(vdTimerInterval);
+    vdTimerInterval = null;
+  }
+
+  // ---- MP4 conversion via ffmpeg.wasm (self-hosted, single-threaded core —
+  // no SharedArrayBuffer/COOP-COEP headers needed, which GitHub Pages can't
+  // set anyway). Browsers' MediaRecorder only outputs WebM, so this transcode
+  // step is the only way to get a real .mp4 without sending video to a
+  // server. ffmpeg.wasm runs its own internal Worker, so this never blocks
+  // the main thread even though it's the slow/heavy part of the whole flow. ----
+  let ffmpegInstance = null;
+  let ffmpegLoadPromise = null;
+  let ffmpegScriptPromise = null;
+
+  function loadFfmpegScript(){
+    if (ffmpegScriptPromise) return ffmpegScriptPromise;
+    ffmpegScriptPromise = new Promise((resolve, reject) => {
+      if (window.FFmpegWASM) { resolve(); return; }
+      const script = document.createElement('script');
+      script.src = 'ffmpeg.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('ffmpeg.js failed to load'));
+      document.head.appendChild(script);
+    });
+    return ffmpegScriptPromise;
+  }
+
+  async function getFfmpeg(onProgress){
+    if (ffmpegInstance) return ffmpegInstance;
+    if (!ffmpegLoadPromise) {
+      ffmpegLoadPromise = (async () => {
+        await loadFfmpegScript();
+        const ffmpeg = new FFmpegWASM.FFmpeg();
+        ffmpeg.on('progress', ({ progress }) => {
+          if (onProgress && typeof progress === 'number' && isFinite(progress)) {
+            onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
+          }
+        });
+        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL: 'ffmpeg-core.wasm' });
+        ffmpegInstance = ffmpeg;
+        return ffmpeg;
+      })();
+    }
+    return ffmpegLoadPromise;
+  }
+
+  function setProgress(percent){
+    progressWrap.classList.add('show');
+    progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  }
+
+  async function convertToMp4(webmBlob){
+    const inputName = 'input_' + vdFileCounter + '.webm';
+    const outputName = 'output_' + vdFileCounter + '.mp4';
+    vdFileCounter++;
+
+    setStatus('Loading video converter (one-time, ~30MB — hang tight)…', 'ok');
+    const ffmpeg = await getFfmpeg((percent) => {
+      setProgress(percent);
+      setStatus('Converting to MP4… ' + percent + '% (can take a while for longer/higher-res recordings)', 'ok');
+    });
+
+    setStatus('Converting to MP4… 0% (can take a while for longer/higher-res recordings)', 'ok');
+    setProgress(0);
+    const inputData = new Uint8Array(await webmBlob.arrayBuffer());
+    await ffmpeg.writeFile(inputName, inputData);
+    await ffmpeg.exec(['-i', inputName, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-movflags', '+faststart', outputName]);
+    const outputData = await ffmpeg.readFile(outputName);
+    await ffmpeg.deleteFile(inputName);
+    await ffmpeg.deleteFile(outputName);
+    return new Blob([outputData.buffer], { type: 'video/mp4' });
+  }
+
+  async function onRecordingStopped(){
+    const mimeType = vdRecorder.mimeType || 'video/webm';
+    const rawBlob = new Blob(vdChunks, { type: mimeType });
+    recordBtn.style.display = 'none';
+    timerEl.classList.remove('show');
+    teardownStream();
+
+    let finalBlob = rawBlob;
+    let ext = 'webm';
+    let mp4Error = null;
+
+    try {
+      finalBlob = await convertToMp4(rawBlob);
+      ext = 'mp4';
+    } catch (err) {
+      finalBlob = rawBlob; // fall back to the original recording rather than losing the take
+      mp4Error = (err && err.message) ? err.message : String(err);
+      console.error('Thunder Video Downloader MP4 conversion failed:', err);
+    }
+    progressWrap.classList.remove('show');
+    progressBar.style.width = '0%';
+
+    if (vdObjectUrl) URL.revokeObjectURL(vdObjectUrl);
+    vdObjectUrl = URL.createObjectURL(finalBlob);
+    videoPreview.src = vdObjectUrl;
+    downloadLink.href = vdObjectUrl;
+    downloadLink.download = 'thunder-video-downloader-' + Date.now() + '.' + ext;
+    resultEl.classList.add('show');
+    setStatus(ext === 'mp4'
+      ? 'Recording converted to MP4 below — preview it, then download.'
+      : 'Saved as .' + ext + ' — MP4 conversion failed (' + mp4Error + ').', ext === 'mp4' ? 'ok' : 'error');
+  }
+
+  function teardownStream(){
+    stopMeter();
+    previewWrap.classList.remove('show');
+    livePreview.srcObject = null;
+    if (vdStream) { vdStream.getTracks().forEach(t => t.stop()); vdStream = null; }
+  }
+
+  resetBtn.addEventListener('click', () => {
+    resultEl.classList.remove('show');
+    if (vdObjectUrl) { URL.revokeObjectURL(vdObjectUrl); vdObjectUrl = null; }
+    videoPreview.removeAttribute('src');
     tabBtn.disabled = false;
     recordBtn.textContent = '⏺ Start Recording';
     recordBtn.classList.remove('recording');
