@@ -2331,7 +2331,8 @@
           #video-blur-editor-widget .vb-editor.show{display:block;}
           #video-blur-editor-widget .vb-canvas-wrap{position:relative; display:inline-block; max-width:100%; line-height:0;}
           #video-blur-editor-widget .vb-canvas-wrap video{max-width:100%; height:auto; display:block; border-radius:6px; background:#000;}
-          #video-blur-editor-widget .vb-canvas-wrap canvas{position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair; border-radius:6px;}
+          #video-blur-editor-widget .vb-canvas-wrap canvas{position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair; border-radius:6px; pointer-events:none;}
+          #video-blur-editor-widget .vb-canvas-wrap canvas.vb-draw-active{pointer-events:auto;}
           #video-blur-editor-widget .vb-hint{font-size:12px; color:var(--vb-text-dim); margin:10px 0; line-height:1.5;}
           #video-blur-editor-widget .vb-timing{font-size:12.5px; color:var(--vb-accent); margin-bottom:4px; min-height:18px; font-weight:600;}
           #video-blur-editor-widget .vb-controls-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
@@ -2342,6 +2343,7 @@
           }
           #video-blur-editor-widget button.vb-action:hover{opacity:0.88;}
           #video-blur-editor-widget button.vb-action:disabled{opacity:.5; cursor:default;}
+          #video-blur-editor-widget button.vb-action.active{background:#E8C23C;}
           #video-blur-editor-widget button.vb-reset{
             padding:10px 16px; background:none; border:1px solid var(--vb-border); color:var(--vb-text-dim);
             border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
@@ -2378,9 +2380,10 @@
             <video id="vbVideoPreview" muted controls playsinline></video>
             <canvas id="vbOverlayCanvas"></canvas>
           </div>
-          <div class="vb-hint">1) Play the video and pause where you want the blur to start. 2) Click and drag on the frame to draw a box over what you want hidden — that sets the start point. 3) Press play again; when the video reaches where the blur should stop, click "End Blur Here." Leave it unset to blur through to the end of the video.</div>
+          <div class="vb-hint">1) Play the video using its normal controls and pause where you want the blur to start. 2) Click "Draw Blur Box," then click and drag on the frame over what you want hidden — that sets the start point. 3) Press play again; when the video reaches where the blur should stop, click "End Blur Here." Leave it unset to blur through to the end of the video.</div>
           <div class="vb-timing" id="vbTimingLabel"></div>
           <div class="vb-controls-row">
+            <button class="vb-action" id="vbDrawModeBtn" type="button">✏️ Draw Blur Box</button>
             <button class="vb-reset" id="vbEndHereBtn" type="button" disabled>⏹ End Blur Here</button>
             <button class="vb-reset" id="vbClearEndBtn" type="button" style="display:none;">Clear End Point</button>
             <button class="vb-reset" id="vbClearBoxBtn" type="button">Clear Box</button>
@@ -7250,6 +7253,7 @@ processSharedFileIfAny();
   const canvasWrap = document.getElementById('vbCanvasWrap');
   const video = document.getElementById('vbVideoPreview');
   const overlay = document.getElementById('vbOverlayCanvas');
+  const drawModeBtn = document.getElementById('vbDrawModeBtn');
   const exportBtn = document.getElementById('vbExportBtn');
   const clearBoxBtn = document.getElementById('vbClearBoxBtn');
   const endHereBtn = document.getElementById('vbEndHereBtn');
@@ -7313,6 +7317,7 @@ processSharedFileIfAny();
     exportBtn.disabled = true;
     endHereBtn.disabled = true;
     clearEndBtn.style.display = 'none';
+    disarmDrawMode();
     updateTimingLabel();
   }
 
@@ -7351,6 +7356,25 @@ processSharedFileIfAny();
     return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
   }
 
+  // The overlay canvas sits directly on top of the video, including its
+  // native play/pause/scrub controls — if it captured clicks all the time,
+  // none of those controls would ever be reachable (you'd only be able to
+  // draw a box, never actually play the video to find where to put one).
+  // It defaults to pointer-events:none and only becomes clickable while
+  // "Draw Blur Box" mode is armed, auto-disarming itself the moment a box
+  // is finished so the video's own controls immediately work again.
+  drawModeBtn.addEventListener('click', () => {
+    overlay.classList.add('vb-draw-active');
+    drawModeBtn.classList.add('active');
+    drawModeBtn.textContent = '✏️ Click & drag on the video…';
+  });
+
+  function disarmDrawMode(){
+    overlay.classList.remove('vb-draw-active');
+    drawModeBtn.classList.remove('active');
+    drawModeBtn.textContent = '✏️ Draw Blur Box';
+  }
+
   overlay.addEventListener('mousedown', (e) => { vbDragStart = canvasCoords(e); });
   overlay.addEventListener('mousemove', (e) => {
     if (!vbDragStart) return;
@@ -7366,6 +7390,7 @@ processSharedFileIfAny();
   window.addEventListener('mouseup', (e) => {
     if (!vbDragStart) return;
     vbDragStart = null;
+    disarmDrawMode();
     if (vbBox && (vbBox.w < 8 || vbBox.h < 8)) { vbBox = null; redrawOverlay(); }
     exportBtn.disabled = !vbBox;
     endHereBtn.disabled = !vbBox;
@@ -7560,6 +7585,7 @@ processSharedFileIfAny();
     resultEl.classList.remove('show');
     endHereBtn.disabled = true;
     clearEndBtn.style.display = 'none';
+    disarmDrawMode();
     updateTimingLabel();
     setStatus('');
   }
