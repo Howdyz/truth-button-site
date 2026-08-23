@@ -4,7 +4,6 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const zlib = require('zlib');
 const { execFileSync } = require('child_process');
 const AdmZip = require('adm-zip');
 
@@ -71,16 +70,21 @@ function safeExtractZip(buffer, destDir, limits = {}) {
     validated.push({ entry, targetPath });
   }
 
-  // Inflate for real and enforce the size cap against actual output, one entry at a
+  // Extract for real and enforce the size cap against actual output, one entry at a
   // time, writing immediately rather than trusting entry.header.size upfront. That
   // declared size lives inside the zip itself and is attacker-controlled — it can
   // understate how large an entry really inflates to (the classic zip-bomb trick: a
   // tiny compressed stream that expands to gigabytes), so checking it before
-  // extraction, as this used to do, can be bypassed entirely. zlib's maxOutputLength
-  // throws the instant real decompressed output would cross the remaining budget,
-  // before that memory is fully allocated. A thrown/rejected entry still leaves any
-  // already-written files in destDir — harmless, since the caller always deletes the
-  // whole temp dir in its `finally` block regardless of success or failure here.
+  // extraction, as this used to do, can be bypassed entirely.
+  //
+  // The installed adm-zip already hardened its own inflater (its fix for
+  // CVE-2026-39244) to cap real decompressed output at entry.header.size instead of
+  // eagerly pre-allocating that many bytes upfront — but that cap is still whatever
+  // the attacker declared, which doesn't help if they simply declare a huge number
+  // instead of a small one. Overwriting header.size with our own remaining budget
+  // right before calling the real entry.getData() makes adm-zip's own (already
+  // patched) inflater enforce OUR fixed, non-attacker-controlled ceiling instead of
+  // theirs, without needing to hand-roll inflate/CRC handling ourselves.
   let totalUncompressed = 0;
   for (const { entry, targetPath } of validated) {
     if (entry.isDirectory) {
@@ -91,11 +95,10 @@ function safeExtractZip(buffer, destDir, limits = {}) {
     if (remaining <= 0) {
       throw new RejectedInput('zip would extract to more than the allowed size limit');
     }
+    if (entry.header.method === 8) entry.header.size = remaining;
     let data;
     try {
-      data = entry.header.method === 0
-        ? entry.getCompressedData() // stored — already raw bytes, no inflate needed
-        : zlib.inflateRawSync(entry.getCompressedData(), { maxOutputLength: remaining });
+      data = entry.getData();
     } catch (e) {
       throw new RejectedInput('zip would extract to more than the allowed size limit');
     }
