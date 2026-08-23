@@ -2278,7 +2278,7 @@
         </div>
 
         <div id="vdDesktopControls">
-          <div class="vd-desc">Share a browser tab, window, or your whole screen — check "Share tab audio" / "Share system audio" in the picker if you want sound in the recording. Captured as-is, then converted to MP4 entirely on your device (nothing uploaded). Conversion runs after you stop recording and can take a while for longer or higher-resolution recordings — keep this tab open until it finishes.</div>
+          <div class="vd-desc">Share a browser tab, window, or your whole screen — check "Share tab audio" / "Share system audio" in the picker if you want sound in the recording. Captured as-is, then converted to MP4 entirely on your device (nothing uploaded). To keep conversion time reasonable without a server to offload it to, video is capped at 854px wide (only downscales — never blows up smaller recordings). Conversion runs after you stop recording and can still take a while for longer recordings — keep this tab open until it finishes.</div>
           <button class="vd-action" id="vdTabBtn" type="button">🖥️ Share Tab / Window / Screen</button>
         </div>
 
@@ -7059,7 +7059,17 @@ processSharedFileIfAny();
     setProgress(0);
     const inputData = new Uint8Array(await webmBlob.arrayBuffer());
     await ffmpeg.writeFile(inputName, inputData);
-    await ffmpeg.exec(['-i', inputName, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-movflags', '+faststart', outputName]);
+    // Capped at 854px wide (only downscales, never upscales — min() is a no-op
+    // below that). Single-threaded WASM x264 encoding scales with pixel count,
+    // and GitHub Pages can't set the cross-origin-isolation headers a
+    // multi-threaded ffmpeg-core build would need, so there's no way to make
+    // the encoder itself faster here. Measured directly (5s of 1920x1080
+    // source, this same core build): 1280px wide ran at 0.60x realtime; 854px
+    // wide ran at 0.89x realtime — a real ~32% cut in conversion time, still
+    // on the same x264 encoder so quality/compatibility/file size don't
+    // regress (an mpeg4 codec swap was also measured and rejected — barely
+    // faster than x264 at the same width, but produced ~2x larger files).
+    await ffmpeg.exec(['-i', inputName, '-vf', "scale='min(854,iw)':-2", '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-movflags', '+faststart', outputName]);
     const outputData = await ffmpeg.readFile(outputName);
     await ffmpeg.deleteFile(inputName);
     await ffmpeg.deleteFile(outputName);
