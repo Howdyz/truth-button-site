@@ -419,6 +419,53 @@
   }
   .freedom-intro p b{color:var(--ink); font-weight:600;}
 
+  /* savings intro */
+  .savings-intro{
+    border:1px solid rgba(47,143,122,0.35);
+    background:linear-gradient(180deg, rgba(47,143,122,0.08), transparent 60%);
+    border-radius:8px;
+    padding:22px 24px;
+    margin-bottom:28px;
+  }
+  .savings-intro .si-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:10px;
+  }
+  .savings-intro p{
+    font-size:14.5px;
+    line-height:1.7;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .savings-intro p b{color:var(--ink); font-weight:600;}
+  .savings-intro ul{
+    margin:16px 0 4px;
+    padding:0;
+    list-style:none;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 24px;
+  }
+  @media (max-width:640px){.savings-intro ul{grid-template-columns:1fr;}}
+  .savings-intro li{
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    padding-left:18px;
+    position:relative;
+  }
+  .savings-intro li::before{
+    content:"→";
+    position:absolute;
+    left:0;
+    color:var(--teal);
+  }
+  .savings-intro li b{color:var(--ink); font-weight:600;}
+
   /* donate */
   .donate-card{
     background:linear-gradient(135deg, rgba(232,64,44,0.10), rgba(47,143,122,0.06));
@@ -1353,9 +1400,23 @@
     </div>
   </div>
 
-  <div class="freedom-intro">
-    <div class="fi-label">Why this exists</div>
-    <p>Surveillance infrastructure doesn't arrive as tyranny — it arrives as convenience. A camera for traffic safety. A database for efficiency. Every regime in modern history that consolidated total control did it gradually, and every one of them relied on the same raw material: knowing where people were, who they talked to, and what they did, all the time. Automated license plate readers — a <b>120,000+ camera network and growing</b> — and the data centers built to store everything they capture are exactly that kind of infrastructure. Not because any specific operator intends to misuse it today, but because once permanent, searchable tracking exists, <b>the only thing standing between surveillance and control is who gets to use it next</b>. History doesn't prove any one system will be abused. It proves that infrastructure like this never stays neutral for long.</p>
+  <div class="savings-intro">
+    <div class="si-label">What this saves you</div>
+    <p>You're probably already paying monthly for two or three of these. Every tool on this site runs <b>entirely in your browser</b> — no upload, no account, no watermark, no "upgrade to unlock." There's no free-tier catch, because there's no tier. Free actually means free.</p>
+    <ul>
+      <li><b>PDF Editor</b> — skip Adobe Acrobat Pro (~$20/mo) to merge, split, rotate, watermark, or compress</li>
+      <li><b>Screenshot / Social Cropper</b> — skip Canva Pro (~$13/mo) for exact platform crop ratios</li>
+      <li><b>Thunder Video Downloader</b> — skip screen recorders that watermark or cap your MP4</li>
+      <li><b>Lightning Downloader</b> — skip paid audio-ripping apps for a clean 320kbps MP3</li>
+      <li><b>AI Detector</b> — skip $15–30/mo AI-detection subscriptions</li>
+      <li><b>Video Blur Out Editor</b> — skip redaction software to blur a face or plate</li>
+      <li><b>Scam Caller ID</b> — skip Truecaller Premium or a $20+ paid lookup</li>
+      <li><b>Offline MP3 Library</b> — skip streaming subscriptions for music you already own</li>
+      <li><b>QR Code Generator</b> — skip QR tools that paywall the PNG or force "dynamic" plans</li>
+      <li><b>Pro Link Maker</b> — skip Linktree-style paid tiers for a clickable photo link</li>
+      <li><b>Repo Scanner</b> — skip enterprise security-scanner pricing to vet a sketchy repo</li>
+      <li><b>FlashBackMan Radio</b> — thousands of live FM/AM stations worldwide, free</li>
+    </ul>
   </div>
 
   <header>
@@ -1544,6 +1605,11 @@
 </div>
 
   <div class="lookup-panel" id="flockPanel">
+    <div class="freedom-intro">
+      <div class="fi-label">Why this exists</div>
+      <p>Surveillance infrastructure doesn't arrive as tyranny — it arrives as convenience. A camera for traffic safety. A database for efficiency. Every regime in modern history that consolidated total control did it gradually, and every one of them relied on the same raw material: knowing where people were, who they talked to, and what they did, all the time. Automated license plate readers — a <b>120,000+ camera network and growing</b> — and the data centers built to store everything they capture are exactly that kind of infrastructure. Not because any specific operator intends to misuse it today, but because once permanent, searchable tracking exists, <b>the only thing standing between surveillance and control is who gets to use it next</b>. History doesn't prove any one system will be abused. It proves that infrastructure like this never stays neutral for long.</p>
+    </div>
+
     <div class="lookup-card">
       <h3>Find Flock / ALPR cameras near you</h3>
       <div class="lc-sub">There's no official public database of Flock Safety camera locations — Flock doesn't publish one, and has even sent a cease-and-desist to the main volunteer mapping project over it (EFF pushed back on First Amendment grounds). What exists is community-crowdsourced data. Pick a state to jump to real, live reporting.</div>
@@ -3887,7 +3953,7 @@ const videodlPanel = document.getElementById('videodlPanel');
 const vidblurPanel = document.getElementById('vidblurPanel');
 
 const LOOKUP_TAGLINES = {
-  flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
+  flock: 'More tools are already cooking. This toolbox keeps growing — free, always.',
   flockupdates: 'Who owns Flock Safety, who backs them, and what\'s happening with their police contracts right now — sourced from independent reporting.',
   datacenter: 'Look up documented data center facilities by state — pulled from a real third-party directory, not a private database.',
   datacenterupdates: 'How data center land gets bought through shell LLCs and NDAs, and the 2026 rollback of federal shell-company transparency rules — sourced from independent reporting.',
