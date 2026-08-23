@@ -7002,18 +7002,34 @@ processSharedFileIfAny();
     return ffmpegScriptPromise;
   }
 
+  // ffmpeg-core.wasm is ~31MB uncompressed, which is too large to host as a
+  // plain file through some deploy paths (e.g. GitHub's web upload caps a
+  // single file at 25MB). It's shipped here pre-gzipped instead (~10MB) and
+  // decompressed in-browser via the native DecompressionStream API before
+  // being handed to ffmpeg.wasm as a blob: URL — ffmpeg.wasm just fetches
+  // whatever URL it's given, so a blob: URL is a drop-in replacement for a
+  // plain .wasm URL.
+  async function fetchDecompressedWasmUrl(){
+    const res = await fetch('ffmpeg-core.wasm.gz');
+    if (!res.ok) throw new Error('ffmpeg-core.wasm.gz failed to load (HTTP ' + res.status + ')');
+    const decompressedStream = res.body.pipeThrough(new DecompressionStream('gzip'));
+    const wasmBlob = await new Response(decompressedStream).blob();
+    return URL.createObjectURL(new Blob([wasmBlob], { type: 'application/wasm' }));
+  }
+
   async function getFfmpeg(onProgress){
     if (ffmpegInstance) return ffmpegInstance;
     if (!ffmpegLoadPromise) {
       ffmpegLoadPromise = (async () => {
         await loadFfmpegScript();
+        const wasmURL = await fetchDecompressedWasmUrl();
         const ffmpeg = new FFmpegWASM.FFmpeg();
         ffmpeg.on('progress', ({ progress }) => {
           if (onProgress && typeof progress === 'number' && isFinite(progress)) {
             onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
           }
         });
-        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL: 'ffmpeg-core.wasm' });
+        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
         ffmpegInstance = ffmpeg;
         return ffmpeg;
       })();
@@ -7031,7 +7047,7 @@ processSharedFileIfAny();
     const outputName = 'output_' + vdFileCounter + '.mp4';
     vdFileCounter++;
 
-    setStatus('Loading video converter (one-time, ~30MB — hang tight)…', 'ok');
+    setStatus('Loading video converter (one-time, ~10MB — hang tight)…', 'ok');
     const ffmpeg = await getFfmpeg((percent) => {
       setProgress(percent);
       setStatus('Converting to MP4… ' + percent + '% (can take a while for longer/higher-res recordings)', 'ok');

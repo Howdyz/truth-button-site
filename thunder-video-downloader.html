@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scam Caller ID — Free Robocall &amp; Scam Number Lookup | The Truth Button</title>
-<meta name="description" content="Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users. Free — no account required to search.">
-<link rel="canonical" href="https://projectsilverbeam.com/scam-caller-id.html">
+<title>Free Screen &amp; Video Recorder — Record Any Browser Tab, Save as MP4 | The Truth Button</title>
+<meta name="description" content="Thunder Video Downloader: record any browser tab, window, or your screen — including audio — and save it as an MP4. No app to install, nothing uploaded — captured and converted entirely locally in your browser.">
+<link rel="canonical" href="https://projectsilverbeam.com/thunder-video-downloader.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://projectsilverbeam.com/scam-caller-id.html">
-<meta property="og:title" content="Scam Caller ID — Free Robocall & Scam Number Lookup">
-<meta property="og:description" content="Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users. Free — no account required to search.">
+<meta property="og:url" content="https://projectsilverbeam.com/thunder-video-downloader.html">
+<meta property="og:title" content="Free Screen &amp; Video Recorder — Record Any Browser Tab, Save as MP4">
+<meta property="og:description" content="Record any browser tab, window, or your screen — including audio — and save it as an MP4. No app, nothing uploaded.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Scam Caller ID — Free Robocall & Scam Number Lookup">
-<meta name="twitter:description" content="Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users. Free — no account required to search.">
+<meta name="twitter:title" content="Free Screen &amp; Video Recorder — Record Any Browser Tab, Save as MP4">
+<meta name="twitter:description" content="Record any browser tab, window, or your screen — including audio — and save it as an MP4. No app, nothing uploaded.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,35 +26,35 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Where does the scam/robocall data come from?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The FTC's public Do Not Call complaint data — a real, official, free government dataset of consumer-reported robocalls and scam calls, updated daily. It's self-reported and unverified, same as any complaint database, but it's real official data, not a guess." }
+      "name": "How do I record a browser tab, window, or my screen?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Open Thunder Video Downloader and click the share button, then pick the tab, window, or screen in your browser's own sharing dialog — check \"Share tab audio\" or \"Share system audio\" if you want sound in the recording. Once the source is ready, click Start Recording." }
     },
     {
       "@type": "Question",
-      "name": "Will this tell me the caller's actual name?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Optionally, via a separate \"Try to Find a Caller Name\" button using official Caller ID (CNAM) data. It's frequently blank or generic (\"Wireless Caller\") for mobile numbers specifically — that's a real limitation of the underlying telecom data, not a bug here." }
+      "name": "What format does it save as?",
+      "acceptedAnswer": { "@type": "Answer", "text": "MP4 (H.264 video, AAC audio), converted locally in your browser right after you stop recording — no server-side conversion, and no separate app or upload step." }
     },
     {
       "@type": "Question",
-      "name": "Does this cover 1-800 / toll-free numbers?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The FTC complaint data can cover them if reported. Caller-name lookup cannot — toll-free numbers use a separate national registry that doesn't expose subscriber identity through this kind of lookup." }
+      "name": "Does this upload my recording anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Recording and MP4 conversion both happen locally in your browser (the conversion uses ffmpeg compiled to WebAssembly). Nothing is sent to a server — the file only exists on your device until you download it." }
     },
     {
       "@type": "Question",
-      "name": "Why does it only check the last 180 days?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Older complaint data gets less useful over time, since phone numbers get reassigned to new subscribers — a five-year-old complaint may be about someone who no longer has that number. Recency matters more than raw completeness here." }
+      "name": "Why does the MP4 conversion take a while?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Browsers only record video as WebM natively, so converting to MP4 requires real video encoding, done entirely on your own device rather than a server. Longer recordings or higher screen resolutions take proportionally longer — keep the tab open until it finishes." }
     },
     {
       "@type": "Question",
-      "name": "Can I report a number myself?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes — sign in and tag any number (scam, robocall, telemarketer, legit business, personal, or unknown) with an optional note. Reports are public and unverified, same as any user-submitted content." }
+      "name": "Is this free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, no account or install required." }
     }
   ]
 }
 </script>
 <style>
   :root{
-    --void:#14110F; --void-2:#1C1814; --red:#E8402C; --teal:#2F8F7A;
+    --void:#14110F; --void-2:#1C1814; --red:#E8402C; --teal:#2F8F7A; --bolt:#E8C23C;
     --ink:#F2EDE1; --ink-soft:#C9C0AE; --muted:#8C8377; --line: rgba(242,237,225,0.14);
     --font-stamp:'Special Elite', monospace; --font-body:'IBM Plex Sans', sans-serif; --font-mono:'IBM Plex Mono', monospace;
   }
@@ -99,51 +99,55 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="kicker">Free · Real FTC Data · No Account Needed To Search</div>
-  <h1>🚨 <span class="accent">Scam Caller ID</span></h1>
-  <p class="lede">Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, and honest that this isn't a certified identity database.</p>
+  <div class="kicker">Free · Converts Locally · Nothing Uploaded</div>
+  <h1>🌩️ <span class="accent">Thunder Video Downloader</span><br>Screen &amp; Tab Recorder</h1>
+  <p class="lede">Record any browser tab, window, or your screen — including audio — and save it as an MP4. No app to install, no account, nothing ever leaves your browser.</p>
 
   <div class="cta-row">
-    <a class="cta-btn" href="index.html?mode=scamid">Open Scam Caller ID →</a>
-    <div class="cta-fine">Type a number, see what's actually been reported about it</div>
+    <a class="cta-btn" href="index.html?mode=videodl">Open Thunder Video Downloader →</a>
+    <div class="cta-fine">Tab / window / screen capture, converted straight to MP4</div>
   </div>
 
   <section>
-    <h2>How it works</h2>
+    <h2>What this actually is</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Type a 10-digit US phone number and click Look Up.</span></li>
-      <li><span class="num">2</span><span>See real FTC Do Not Call complaint data for that number — how often it's been reported, whether it's a robocall, and what the complaints were about.</span></li>
-      <li><span class="num">3</span><span>Optionally try a caller-name lookup (official Caller ID / CNAM data), and see what other users have reported about the same number.</span></li>
-      <li><span class="num">4</span><span>Sign in to add your own report if you know who it actually was.</span></li>
+      <li><span class="num">1</span><span>Click the share button and pick a browser tab, window, or your whole screen — via your browser's own sharing dialog. Check "Share tab audio" or "Share system audio" if you want sound in the recording.</span></li>
+      <li><span class="num">2</span><span>Click Start Recording. A live preview and level meter confirm it's capturing the right source.</span></li>
+      <li><span class="num">3</span><span>Click Stop. It's automatically converted to MP4 right there in your browser — no upload, no app — then previewed and ready to download.</span></li>
     </ol>
+  </section>
+
+  <section>
+    <h2>Why conversion happens on your device</h2>
+    <p>Browsers only record video natively as WebM, not MP4. Rather than upload your recording to a server to convert it — which would mean your screen recording briefly leaving your device — Thunder Video Downloader runs a real video encoder (ffmpeg, compiled to WebAssembly) directly in your browser. It's slower than a server with dedicated hardware would be, especially for longer or higher-resolution recordings, but nothing about what you recorded ever has to leave your computer.</p>
   </section>
 
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">Where does the scam/robocall data come from?</div>
-      <p class="faq-a">The FTC's public Do Not Call complaint data — a real, official, free government dataset of consumer-reported robocalls and scam calls, updated daily. It's self-reported and unverified, same as any complaint database, but it's real official data, not a guess.</p>
+      <div class="faq-q">How do I record a browser tab, window, or my screen?</div>
+      <p class="faq-a">Open Thunder Video Downloader, click the share button, then pick the tab, window, or screen in your browser's own sharing dialog — check "Share tab audio" or "Share system audio" if you want sound in the recording. Once the source is ready, click Start Recording.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Will this tell me the caller's actual name?</div>
-      <p class="faq-a">Optionally, via a separate "Try to Find a Caller Name" button using official Caller ID (CNAM) data. It's frequently blank or generic ("Wireless Caller") for mobile numbers specifically — that's a real limitation of the underlying telecom data, not a bug here.</p>
+      <div class="faq-q">What format does it save as?</div>
+      <p class="faq-a">MP4 (H.264 video, AAC audio), converted locally in your browser right after you stop recording — no server-side conversion, and no separate app or upload step.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Does this cover 1-800 / toll-free numbers?</div>
-      <p class="faq-a">The FTC complaint data can cover them if reported. Caller-name lookup cannot — toll-free numbers use a separate national registry that doesn't expose subscriber identity through this kind of lookup.</p>
+      <div class="faq-q">Does this upload my recording anywhere?</div>
+      <p class="faq-a">No. Recording and MP4 conversion both happen locally in your browser (the conversion uses ffmpeg compiled to WebAssembly). Nothing is sent to a server — the file only exists on your device until you download it.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Why does it only check the last 180 days?</div>
-      <p class="faq-a">Older complaint data gets less useful over time, since phone numbers get reassigned to new subscribers — a five-year-old complaint may be about someone who no longer has that number. Recency matters more than raw completeness here.</p>
+      <div class="faq-q">Why does the MP4 conversion take a while?</div>
+      <p class="faq-a">Browsers only record video as WebM natively, so converting to MP4 requires real video encoding, done entirely on your own device rather than a server. Longer recordings or higher screen resolutions take proportionally longer — keep the tab open until it finishes.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Can I report a number myself?</div>
-      <p class="faq-a">Yes — sign in and tag any number (scam, robocall, telemarketer, legit business, personal, or unknown) with an optional note. Reports are public and unverified, same as any user-submitted content.</p>
+      <div class="faq-q">Is this free?</div>
+      <p class="faq-a">Yes, completely free, no account or install required.</p>
     </div>
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> FTC complaint data is self-reported and unverified, and only covers a recent, bounded window per number — a real but incomplete picture, not proof either way. Caller-name lookup is frequently blank for mobile numbers. Community reports aren't independently verified either. This tool tells you what's been reported, not a certified identity.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> this records video/audio from a tab, window, or screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. It works best in Chrome or Edge on desktop; screen capture isn't supported on most mobile browsers. You're responsible for only recording video you actually have the right to record.</div>
   </section>
 
   <section>
@@ -163,7 +167,7 @@
         <li><a href="index.html?mode=radio">Stream thousands of real FM/AM radio stations, free</a></li>
         <li><a href="index.html?mode=cropper">Crop a screenshot to the exact ratio each platform wants</a></li>
         <li><a href="index.html?mode=mp3library">Play your MP3 library with no internet connection</a></li>
-        <li><a href="index.html?mode=videodl">Record a browser tab, window, or your screen, and save it as an MP4</a></li>
+        <li><a href="index.html?mode=scamid">Check a phone number against real FTC scam/robocall complaint data</a></li>
       </ul>
     </div>
   </section>
