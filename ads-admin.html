@@ -143,6 +143,29 @@
   .ad-row-actions button:hover{border-color:var(--teal); color:var(--teal);}
   .ad-row-actions button.danger:hover{border-color:var(--red); color:var(--red);}
   .empty-note{color:var(--muted); font-size:12px;}
+  .review-row{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .review-row-top{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  .review-row-subject{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .review-row-badges{font-size:11px; color:var(--muted);}
+  .review-row-text{font-size:12px; color:var(--ink-soft); margin:6px 0;}
+  .review-row-meta{font-size:11px; color:var(--muted); margin-top:8px;}
+  .review-row-actions{margin-top:10px; display:flex; gap:8px;}
+  .review-row-actions button{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:6px 12px;
+    border-radius:5px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    cursor:pointer;
+  }
+  .review-row-actions button:hover{border-color:var(--red); color:var(--red);}
 </style>
 </head>
 <body>
@@ -179,6 +202,11 @@
     <div class="panel">
       <h2>Existing Ads</h2>
       <div id="adsList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Reviews (moderation)</h2>
+      <div id="reviewsList"></div>
     </div>
   </div>
 </div>
@@ -218,11 +246,67 @@ async function loadAds(){
     renderAds(data.ads || []);
     gate.classList.add('hidden');
     dashboard.classList.remove('hidden');
+    loadReviews();
   } catch (e) {
     gateError.textContent = 'Could not load ads: ' + e.message;
     gateError.classList.remove('hidden');
   }
 }
+
+async function loadReviews(){
+  // GET /api/reviews is public and needs no secret, but this is only ever called
+  // once the admin secret has already unlocked the dashboard above.
+  try {
+    const res = await fetch(API_BASE + '/api/reviews');
+    if (!res.ok) throw new Error('Server error (' + res.status + ')');
+    const data = await res.json();
+    renderReviews(data.reviews || []);
+  } catch (e) {
+    document.getElementById('reviewsList').innerHTML = '<div class="empty-note">Could not load reviews: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function renderReviews(reviews){
+  const list = document.getElementById('reviewsList');
+  if (!reviews.length) {
+    list.innerHTML = '<div class="empty-note">No reviews yet.</div>';
+    return;
+  }
+  list.innerHTML = reviews.map(function(r){
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const priceLine = (r.priceThen || r.priceNow) ? (' · ' + escapeHtml(r.priceThen) + ' → ' + escapeHtml(r.priceNow)) : '';
+    return '' +
+      '<div class="review-row">' +
+        '<div class="review-row-top">' +
+          '<div class="review-row-subject">' + escapeHtml(r.subject) + '</div>' +
+          '<div class="review-row-badges">' + escapeHtml(r.category) + (r.sportType ? ' · ' + escapeHtml(r.sportType) : '') + ' · ' + escapeHtml(r.state) + ' · ' + stars + '</div>' +
+        '</div>' +
+        '<div class="review-row-text">' + escapeHtml(r.text) + '</div>' +
+        '<div class="review-row-meta">' + escapeHtml(r.name) + priceLine + ' · ' + r.likes + ' likes · ' + (r.replies ? r.replies.length : 0) + ' replies · ' + new Date(r.timestamp).toLocaleDateString() + '</div>' +
+        '<div class="review-row-actions">' +
+          '<button data-action="delete-review" data-id="' + escapeHtml(r.id) + '">Delete</button>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+document.getElementById('reviewsList').addEventListener('click', async function(e){
+  const btn = e.target.closest('button');
+  if (!btn || btn.getAttribute('data-action') !== 'delete-review') return;
+  const id = btn.getAttribute('data-id');
+  if (!confirm('Delete this review permanently? This also removes any replies on it.')) return;
+  btn.disabled = true;
+  try {
+    await fetch(API_BASE + '/api/reviews/' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'x-admin-secret': getSecret() }
+    });
+    loadReviews();
+  } catch (e) {
+    alert('Could not reach the server.');
+    btn.disabled = false;
+  }
+});
 
 function renderAds(ads){
   const list = document.getElementById('adsList');
