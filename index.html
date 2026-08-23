@@ -118,6 +118,17 @@
     cursor:pointer;
   }
   .auth-bar-signout:hover{color:var(--red); border-color:var(--red);}
+  .auth-bar-danger{
+    background:transparent;
+    border:1px solid var(--red-dim);
+    color:var(--muted);
+    font-family:var(--font-mono);
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:5px;
+    cursor:pointer;
+  }
+  .auth-bar-danger:hover{color:var(--red); border-color:var(--red);}
 
   /* auth modal */
   .auth-modal-overlay{
@@ -1397,6 +1408,7 @@
     <div class="auth-bar-user" id="authBarUser" style="display:none;">
       <span id="authBarUsername"></span>
       <button class="auth-bar-signout" id="authSignOutBtn">Sign Out</button>
+      <button class="auth-bar-danger" id="authDeleteBtn" title="Permanently delete your account">Delete Account</button>
     </div>
   </div>
 
@@ -2540,6 +2552,20 @@
           #qr-generator-widget .qr-trackable-toggle b{color:var(--qr-text);}
           #qr-generator-widget .qr-trackable-panel{display:none; margin-top:10px;}
           #qr-generator-widget .qr-trackable-panel.show{display:block;}
+          #qr-generator-widget .qr-mylinks{margin-top:16px; padding-top:14px; border-top:1px solid var(--qr-border);}
+          #qr-generator-widget .qr-mylinks-head{display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:var(--qr-text-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;}
+          #qr-generator-widget .qr-mylinks-refresh{background:none; border:1px solid var(--qr-border); color:var(--qr-text-dim); font-family:inherit; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; text-transform:none; letter-spacing:normal;}
+          #qr-generator-widget .qr-mylinks-refresh:hover{border-color:var(--qr-accent); color:var(--qr-accent);}
+          #qr-generator-widget .qr-mylinks-empty{font-size:12px; color:var(--qr-text-dim);}
+          #qr-generator-widget .qr-mylinks-item{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--qr-border);}
+          #qr-generator-widget .qr-mylinks-item:last-child{border-bottom:none;}
+          #qr-generator-widget .qr-mylinks-info{flex:1; min-width:0;}
+          #qr-generator-widget .qr-mylinks-dest{font-size:12.5px; color:var(--qr-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+          #qr-generator-widget .qr-mylinks-short a{color:var(--qr-accent); text-decoration:none; font-size:11.5px;}
+          #qr-generator-widget .qr-mylinks-short a:hover{text-decoration:underline;}
+          #qr-generator-widget .qr-mylinks-meta{font-size:11px; color:var(--qr-text-dim); margin-top:2px;}
+          #qr-generator-widget .qr-mylinks-del{background:none; border:1px solid var(--qr-border); color:var(--qr-text-dim); font-family:inherit; font-size:11px; padding:6px 10px; border-radius:4px; cursor:pointer; flex-shrink:0;}
+          #qr-generator-widget .qr-mylinks-del:hover{border-color:var(--qr-red); color:var(--qr-red);}
           #qr-generator-widget button.qr-action{
             padding:10px 16px; background:var(--qr-accent); border:none;
             border-radius:5px; color:var(--qr-bg); font-weight:600; font-size:12.5px; cursor:pointer;
@@ -2589,6 +2615,14 @@
           <div class="qr-trackable-panel" id="qrTrackablePanel">
             <div class="qr-status" id="qrTrackableStatus"></div>
             <button class="qr-action" id="qrCreateTrackableBtn" type="button">Create Trackable QR Code</button>
+          </div>
+
+          <div class="qr-mylinks" id="qrMyLinksSection" style="display:none;">
+            <div class="qr-mylinks-head">
+              <span>🔗 My Trackable Links</span>
+              <button type="button" class="qr-mylinks-refresh" id="qrMyLinksRefreshBtn">↻ Refresh</button>
+            </div>
+            <div class="qr-mylinks-list" id="qrMyLinksList"></div>
           </div>
         </div>
 
@@ -2673,6 +2707,21 @@
             border-radius:6px; font-size:13px; color:var(--sg-text); word-break:break-word; text-align:left;
           }
           #stego-widget input[type=file]{display:none;}
+          #stego-widget .sg-myshares{margin-top:20px; padding-top:16px; border-top:1px solid var(--sg-border);}
+          #stego-widget .sg-myshares-head{display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:var(--sg-text-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;}
+          #stego-widget .sg-myshares-refresh{background:none; border:1px solid var(--sg-border); color:var(--sg-text-dim); font-family:inherit; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; text-transform:none; letter-spacing:normal;}
+          #stego-widget .sg-myshares-refresh:hover{border-color:var(--sg-accent); color:var(--sg-accent);}
+          #stego-widget .sg-myshares-empty{font-size:12px; color:var(--sg-text-dim);}
+          #stego-widget .sg-myshares-item{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--sg-border);}
+          #stego-widget .sg-myshares-item:last-child{border-bottom:none;}
+          #stego-widget .sg-myshares-thumb{width:44px; height:44px; border-radius:5px; object-fit:cover; flex-shrink:0; background:var(--sg-bg); border:1px solid var(--sg-border);}
+          #stego-widget .sg-myshares-info{flex:1; min-width:0;}
+          #stego-widget .sg-myshares-title{font-size:12.5px; color:var(--sg-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+          #stego-widget .sg-myshares-link a{color:var(--sg-accent); text-decoration:none; font-size:11.5px;}
+          #stego-widget .sg-myshares-link a:hover{text-decoration:underline;}
+          #stego-widget .sg-myshares-meta{font-size:11px; color:var(--sg-text-dim); margin-top:2px;}
+          #stego-widget .sg-myshares-del{background:none; border:1px solid var(--sg-border); color:var(--sg-text-dim); font-family:inherit; font-size:11px; padding:6px 10px; border-radius:4px; cursor:pointer; flex-shrink:0;}
+          #stego-widget .sg-myshares-del:hover{border-color:var(--sg-red); color:var(--sg-red);}
         </style>
 
         <div class="sg-tabs">
@@ -2758,6 +2807,14 @@
               <button class="sg-reset-btn" id="sgShareResetBtn" type="button">🔁 Reset / Create Another</button>
               <button class="sg-reset-btn" id="sgShareCloseBtn" type="button">✕ Close</button>
             </div>
+          </div>
+
+          <div class="sg-myshares" id="sgMySharesSection" style="display:none;">
+            <div class="sg-myshares-head">
+              <span>📤 My Share Pages</span>
+              <button type="button" class="sg-myshares-refresh" id="sgMySharesRefreshBtn">↻ Refresh</button>
+            </div>
+            <div class="sg-myshares-list" id="sgMySharesList"></div>
           </div>
         </div>
       </div>
@@ -4027,6 +4084,7 @@ document.getElementById('tabScanner').addEventListener('click', () => setMode('s
 document.getElementById('tabPdf').addEventListener('click', () => setMode('pdf'));
 document.getElementById('tabDownloader').addEventListener('click', () => setMode('downloader'));
 document.getElementById('tabQrCode').addEventListener('click', () => setMode('qrcode'));
+document.getElementById('tabQrCode').addEventListener('click', () => { if (typeof refreshQrMyLinksUI === 'function') refreshQrMyLinksUI(); });
 document.getElementById('tabStego').addEventListener('click', () => setMode('stego'));
 document.getElementById('tabRadio').addEventListener('click', () => setMode('radio'));
 document.getElementById('tabCropper').addEventListener('click', () => setMode('cropper'));
@@ -4447,6 +4505,29 @@ authSignOutBtn.addEventListener('click', async () => {
   renderAuthUI();
   if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
   if (typeof refreshDownloaderUnlockUI === 'function') refreshDownloaderUnlockUI();
+  if (typeof refreshQrMyLinksUI === 'function') refreshQrMyLinksUI();
+  if (typeof refreshMySharePagesUI === 'function') refreshMySharePagesUI();
+});
+
+document.getElementById('authDeleteBtn').addEventListener('click', async () => {
+  if (!currentUser) return;
+  const name = currentUser.username;
+  if (!confirm(`Permanently delete your account (${name})? This can't be undone. Reviews/replies you've posted will stay up under the name "${name}" (same as any other historical author record), but the account itself and your ability to sign in as it will be gone for good.`)) return;
+  try {
+    const res = await fetch(apiUrl('/api/auth/account'), { method: 'DELETE', headers: apiHeaders(true) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { alert(data.error || 'Could not delete your account.'); return; }
+    currentUser = null;
+    authToken = null;
+    renderAuthUI();
+    if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
+    if (typeof refreshDownloaderUnlockUI === 'function') refreshDownloaderUnlockUI();
+    if (typeof refreshQrMyLinksUI === 'function') refreshQrMyLinksUI();
+    if (typeof refreshMySharePagesUI === 'function') refreshMySharePagesUI();
+    alert('Your account has been deleted.');
+  } catch (e) {
+    alert('Could not reach the server.');
+  }
 });
 
 function onAuthSuccess(token, user){
@@ -4457,6 +4538,8 @@ function onAuthSuccess(token, user){
   renderAuthUI();
   if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
   if (typeof refreshDownloaderUnlockUI === 'function') refreshDownloaderUnlockUI();
+  if (typeof refreshQrMyLinksUI === 'function') refreshQrMyLinksUI();
+  if (typeof refreshMySharePagesUI === 'function') refreshMySharePagesUI();
 }
 
 function renderAuthUI(){
@@ -7805,6 +7888,7 @@ processSharedFileIfAny();
       } else {
         generate(data.shortUrl);
         setTrackableStatus('Trackable link created: ' + data.shortUrl, 'ok');
+        loadMyQrLinks();
       }
     } catch (err) {
       setTrackableStatus('Could not reach the server.', 'error');
@@ -7830,6 +7914,67 @@ processSharedFileIfAny();
     makeAnotherBtn.style.display = 'none';
     input.focus();
   });
+
+  // ---- My Trackable Links ----
+  const myLinksSection = document.getElementById('qrMyLinksSection');
+  const myLinksList = document.getElementById('qrMyLinksList');
+  const myLinksRefreshBtn = document.getElementById('qrMyLinksRefreshBtn');
+
+  function renderMyQrLinks(links){
+    if (!links.length) {
+      myLinksList.innerHTML = '<div class="qr-mylinks-empty">No trackable links yet — create one above.</div>';
+      return;
+    }
+    myLinksList.innerHTML = links.map(l => {
+      const shortUrl = REVIEWS_API_BASE.replace(/\/$/, '') + '/go/' + l.id;
+      return '<div class="qr-mylinks-item" data-id="' + escapeHtml(l.id) + '">' +
+        '<div class="qr-mylinks-info">' +
+          '<div class="qr-mylinks-dest" title="' + escapeHtml(l.destinationUrl) + '">' + escapeHtml(l.destinationUrl) + '</div>' +
+          '<div class="qr-mylinks-short"><a href="' + escapeHtml(shortUrl) + '" target="_blank" rel="noopener">' + escapeHtml(shortUrl) + '</a></div>' +
+          '<div class="qr-mylinks-meta">' + l.clicks + ' click' + (l.clicks === 1 ? '' : 's') + ' · ' + timeAgo(l.createdAt) + '</div>' +
+        '</div>' +
+        '<button class="qr-mylinks-del" type="button" data-id="' + escapeHtml(l.id) + '">🗑 Delete</button>' +
+      '</div>';
+    }).join('');
+
+    myLinksList.querySelectorAll('.qr-mylinks-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (!confirm('Delete this trackable link? Anyone who scanned or saved the QR code will get a broken link from then on. This can\'t be undone.')) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(apiUrl('/api/qrlinks/' + encodeURIComponent(id)), { method: 'DELETE', headers: apiHeaders(true) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) { alert(data.error || 'Could not delete the link.'); btn.disabled = false; return; }
+          loadMyQrLinks();
+        } catch (e) {
+          alert('Could not reach the server.');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  async function loadMyQrLinks(){
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      myLinksSection.style.display = 'none';
+      return;
+    }
+    myLinksSection.style.display = '';
+    myLinksList.innerHTML = '<div class="qr-mylinks-empty">Loading…</div>';
+    try {
+      const res = await fetch(apiUrl('/api/qrlinks'), { headers: apiHeaders(true) });
+      const data = await res.json();
+      if (!res.ok) { myLinksList.innerHTML = '<div class="qr-mylinks-empty">' + escapeHtml(data.error || 'Could not load your links.') + '</div>'; return; }
+      renderMyQrLinks(data.links || []);
+    } catch (e) {
+      myLinksList.innerHTML = '<div class="qr-mylinks-empty">Could not reach the server.</div>';
+    }
+  }
+
+  myLinksRefreshBtn.addEventListener('click', loadMyQrLinks);
+  window.refreshQrMyLinksUI = loadMyQrLinks;
+  loadMyQrLinks();
 })();
 
 // --- Pro Link Maker: LSB image steganography, entirely client-side via Canvas ---
@@ -7925,7 +8070,7 @@ processSharedFileIfAny();
   }
   tabHide.addEventListener('click', () => activateTab(tabHide, paneHide));
   tabReveal.addEventListener('click', () => activateTab(tabReveal, paneReveal));
-  tabShare.addEventListener('click', () => activateTab(tabShare, paneShare));
+  tabShare.addEventListener('click', () => { activateTab(tabShare, paneShare); loadMySharePages(); });
 
   // ---- Hide pane ----
   const hideDropzone = document.getElementById('sgHideDropzone');
@@ -8220,6 +8365,7 @@ processSharedFileIfAny();
       shareResultLink.textContent = data.url;
       shareOutput.style.display = '';
       setShareStatus('✓ Ready — hosted here, og:url filled in automatically. Paste the URL above into Facebook.', 'ok');
+      loadMySharePages();
     } catch (err) {
       setShareStatus('Could not reach the server.', 'error');
     }
@@ -8252,6 +8398,68 @@ processSharedFileIfAny();
     sharePreviewCard.style.display = 'none';
     setShareStatus('');
   });
+
+  // ---- My Share Pages ----
+  const mySharesSection = document.getElementById('sgMySharesSection');
+  const mySharesList = document.getElementById('sgMySharesList');
+  const mySharesRefreshBtn = document.getElementById('sgMySharesRefreshBtn');
+
+  function renderMyShares(shares){
+    if (!shares.length) {
+      mySharesList.innerHTML = '<div class="sg-myshares-empty">No share pages yet — create one above.</div>';
+      return;
+    }
+    mySharesList.innerHTML = shares.map(s => {
+      const shareUrl = REVIEWS_API_BASE.replace(/\/$/, '') + '/share/' + s.id;
+      return '<div class="sg-myshares-item" data-id="' + escapeHtml(s.id) + '">' +
+        '<img class="sg-myshares-thumb" src="' + escapeHtml(s.imageUrl) + '" alt="">' +
+        '<div class="sg-myshares-info">' +
+          '<div class="sg-myshares-title">' + escapeHtml(s.title) + '</div>' +
+          '<div class="sg-myshares-link"><a href="' + escapeHtml(shareUrl) + '" target="_blank" rel="noopener">' + escapeHtml(shareUrl) + '</a></div>' +
+          '<div class="sg-myshares-meta">' + s.views + ' view' + (s.views === 1 ? '' : 's') + ' · ' + timeAgo(s.createdAt) + '</div>' +
+        '</div>' +
+        '<button class="sg-myshares-del" type="button" data-id="' + escapeHtml(s.id) + '">🗑 Delete</button>' +
+      '</div>';
+    }).join('');
+
+    mySharesList.querySelectorAll('.sg-myshares-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (!confirm('Delete this share page? The link will stop working — if it\'s already pasted somewhere (like a Facebook post), that post\'s preview card will break. This can\'t be undone.')) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(apiUrl('/api/shares/' + encodeURIComponent(id)), { method: 'DELETE', headers: apiHeaders(true) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) { alert(data.error || 'Could not delete the share page.'); btn.disabled = false; return; }
+          loadMySharePages();
+        } catch (e) {
+          alert('Could not reach the server.');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  async function loadMySharePages(){
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      mySharesSection.style.display = 'none';
+      return;
+    }
+    mySharesSection.style.display = '';
+    mySharesList.innerHTML = '<div class="sg-myshares-empty">Loading…</div>';
+    try {
+      const res = await fetch(apiUrl('/api/shares'), { headers: apiHeaders(true) });
+      const data = await res.json();
+      if (!res.ok) { mySharesList.innerHTML = '<div class="sg-myshares-empty">' + escapeHtml(data.error || 'Could not load your share pages.') + '</div>'; return; }
+      renderMyShares(data.shares || []);
+    } catch (e) {
+      mySharesList.innerHTML = '<div class="sg-myshares-empty">Could not reach the server.</div>';
+    }
+  }
+
+  mySharesRefreshBtn.addEventListener('click', loadMySharePages);
+  window.refreshMySharePagesUI = loadMySharePages;
+  loadMySharePages();
 })();
 
 // --- FlashBackMan Radio: browses & streams real internet radio via the Radio Browser API ---
