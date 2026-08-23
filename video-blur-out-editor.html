@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free QR Code Generator — No Sign-Up, No Upload | The Truth Button</title>
-<meta name="description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account, nothing ever sent to a server.">
-<link rel="canonical" href="https://projectsilverbeam.com/qr-code-generator.html">
+<title>Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video | The Truth Button</title>
+<meta name="description" content="Video Blur Out Editor: upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for the whole clip. No app to install, nothing uploaded — edited and converted entirely locally in your browser.">
+<link rel="canonical" href="https://projectsilverbeam.com/video-blur-out-editor.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://projectsilverbeam.com/qr-code-generator.html">
-<meta property="og:title" content="Free QR Code Generator — No Sign-Up, No Upload">
-<meta property="og:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta property="og:url" content="https://projectsilverbeam.com/video-blur-out-editor.html">
+<meta property="og:title" content="Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video">
+<meta property="og:description" content="Upload a video, draw a box over what you want hidden, and blur it for the whole clip. No app, nothing uploaded.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Free QR Code Generator — No Sign-Up, No Upload">
-<meta name="twitter:description" content="Generate a QR code from any URL or text, entirely in your browser. Download it as a PNG. Free, no account.">
+<meta name="twitter:title" content="Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video">
+<meta name="twitter:description" content="Upload a video, draw a box over what you want hidden, and blur it for the whole clip. No app, nothing uploaded.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,18 +26,28 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "How do I make a QR code for free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it." }
+      "name": "How do I blur part of a video?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Open Video Blur Out Editor, upload a video file, then click and drag on the preview to draw a box over the area you want hidden — a face, license plate, screen, anything. Click Blur & Export and it converts the whole clip with that region blurred out." }
     },
     {
       "@type": "Question",
-      "name": "Does this upload what I type anywhere?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server." }
+      "name": "Does the blur follow a moving subject?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — the blur box stays in the exact same position for the entire clip. It's built for fixed-position redaction (a stationary camera, a static watermark or logo, a license plate that doesn't move much), not for tracking a moving face or object across the frame." }
     },
     {
       "@type": "Question",
-      "name": "What's error correction level for?",
-      "acceptedAnswer": { "@type": "Answer", "text": "It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses." }
+      "name": "Does this upload my video anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The video is loaded and re-encoded entirely in your browser (the conversion uses ffmpeg compiled to WebAssembly). Nothing is sent to a server — the file only exists on your device until you download the result." }
+    },
+    {
+      "@type": "Question",
+      "name": "What video formats does it accept, and what does it export?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It accepts common formats like MP4, WebM, and MOV, and always exports MP4 (H.264 video, AAC audio) regardless of what you uploaded." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does it take a while to process?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The blur and re-encode both run locally in your browser rather than on a server, so it works best for short clips — 5 minutes or under, no higher than 720p. Longer or higher-resolution videos take proportionally longer." }
     },
     {
       "@type": "Question",
@@ -94,37 +104,50 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="kicker">Free · Generated Locally · Nothing Uploaded</div>
-  <h1>📱 <span class="accent">QR Code</span> Generator</h1>
-  <p class="lede">Type or paste a URL, phone number, or any text and get a scannable QR code instantly — generated entirely in your browser, downloadable as a PNG.</p>
+  <div class="kicker">Free · Edits Locally · Nothing Uploaded</div>
+  <h1>🎞️ <span class="accent">Video Blur Out Editor</span></h1>
+  <p class="lede">Upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for the whole clip. No app to install, no account, nothing ever leaves your browser.</p>
 
   <div class="cta-row">
-    <a class="cta-btn" href="index.html?mode=qrcode">Open QR Generator →</a>
-    <div class="cta-fine">Updates live as you type — no "generate" button to click</div>
+    <a class="cta-btn" href="index.html?mode=vidblur">Open Video Blur Out Editor →</a>
+    <div class="cta-fine">Draw a box, export — that region stays blurred for the whole clip</div>
   </div>
 
   <section>
     <h2>What this actually is</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Type or paste anything — a URL, a phone number, wifi info, a note — into the box.</span></li>
-      <li><span class="num">2</span><span>The QR code renders instantly as you type, right there on the page.</span></li>
-      <li><span class="num">3</span><span>Adjust error correction or size if you want, then click Download PNG.</span></li>
+      <li><span class="num">1</span><span>Upload a video file from your device — MP4, WebM, or MOV.</span></li>
+      <li><span class="num">2</span><span>Click and drag on the preview to draw a box over whatever you want hidden. Scrub the video first if you need to line it up against a specific frame.</span></li>
+      <li><span class="num">3</span><span>Click Blur &amp; Export. That box stays blurred in the exact same spot for the entire clip while everything else stays sharp, converted to a downloadable MP4.</span></li>
     </ol>
+  </section>
+
+  <section>
+    <h2>Fixed region, not a moving tracker</h2>
+    <p>The blur box stays in the exact same position for the whole clip — it does not follow a moving subject across the frame. That makes it a good fit for a stationary camera angle, a static watermark or logo, a screen recording with a fixed sensitive area, or a license plate that doesn't move much in frame. It won't automatically track a face or object as it moves.</p>
   </section>
 
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">How do I make a QR code for free?</div>
-      <p class="faq-a">Type or paste a URL, phone number, or any text into the QR Code Generator, and it renders instantly as you type. Click Download PNG to save it.</p>
+      <div class="faq-q">How do I blur part of a video?</div>
+      <p class="faq-a">Open Video Blur Out Editor, upload a video file, then click and drag on the preview to draw a box over the area you want hidden — a face, license plate, screen, anything. Click Blur & Export and it converts the whole clip with that region blurred out.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Does this upload what I type anywhere?</div>
-      <p class="faq-a">No. The QR code is generated entirely in your browser using a local, self-hosted encoder — nothing you type is ever sent to a server.</p>
+      <div class="faq-q">Does the blur follow a moving subject?</div>
+      <p class="faq-a">No — the blur box stays in the exact same position for the entire clip. It's built for fixed-position redaction (a stationary camera, a static watermark or logo, a license plate that doesn't move much), not for tracking a moving face or object across the frame.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">What's error correction level for?</div>
-      <p class="faq-a">It controls how much of the code can be damaged, dirty, or obscured (e.g. by a logo overlay) and still scan correctly. Higher levels are more resistant but produce a denser code. Medium is a good default for most uses.</p>
+      <div class="faq-q">Does this upload my video anywhere?</div>
+      <p class="faq-a">No. The video is loaded and re-encoded entirely in your browser (the conversion uses ffmpeg compiled to WebAssembly). Nothing is sent to a server — the file only exists on your device until you download the result.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What video formats does it accept, and what does it export?</div>
+      <p class="faq-a">It accepts common formats like MP4, WebM, and MOV, and always exports MP4 (H.264 video, AAC audio) regardless of what you uploaded.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why does it take a while to process?</div>
+      <p class="faq-a">The blur and re-encode both run locally in your browser rather than on a server, so it works best for short clips — 5 minutes or under, no higher than 720p. Longer or higher-resolution videos take proportionally longer.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Is this free?</div>
@@ -133,7 +156,7 @@
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> the QR code is generated entirely in your browser using a local copy of a standard open-source encoder — nothing you type is ever sent anywhere. Very long text needs a larger/denser code; if generation fails, try shortening the text or lowering the error correction level.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser — nothing is ever uploaded to a server. The blur covers a fixed rectangle for the entire clip; it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide throughout the video before you share it.</div>
   </section>
 
   <section>
@@ -148,14 +171,13 @@
         <li><a href="index.html?mode=scanner">Scan a GitHub repo for infostealer patterns</a></li>
         <li><a href="index.html?mode=pdf">Merge, split, rotate, or watermark a PDF</a></li>
         <li><a href="index.html?mode=downloader">Record music or audio from a browser tab, then download the MP3</a></li>
+        <li><a href="index.html?mode=videodl">Record a browser tab, window, or your screen with Thunder Video Downloader, and save it as an MP4</a></li>
+        <li><a href="index.html?mode=qrcode">Generate a QR code from any URL or text</a></li>
         <li><a href="index.html?mode=stego">Hide a link invisibly inside a photo, then reveal it later</a></li>
         <li><a href="index.html?mode=radio">Stream thousands of real FM/AM radio stations, free</a></li>
         <li><a href="index.html?mode=cropper">Crop a screenshot to the exact ratio each platform wants</a></li>
         <li><a href="index.html?mode=mp3library">Play your MP3 library with no internet connection</a></li>
-
         <li><a href="index.html?mode=scamid">Check a phone number against real FTC scam/robocall complaint data</a></li>
-        <li><a href="index.html?mode=videodl">Record a browser tab, window, or your screen, and save it as an MP4</a></li>
-              <li><a href="index.html?mode=vidblur">Upload a video and blur out a face, plate, or anything else for the whole clip</a></li>
       </ul>
     </div>
   </section>

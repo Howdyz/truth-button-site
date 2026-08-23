@@ -1445,6 +1445,7 @@
     <div class="mode-tab" data-mode="pdf" id="tabPdf">📄 PDF Editor</div>
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
     <div class="mode-tab" data-mode="videodl" id="tabVideoDl">🌩️ Thunder Video Downloader</div>
+    <div class="mode-tab" data-mode="vidblur" id="tabVidBlur">🎞️ Video Blur Out Editor</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FlashBackMan Radio</div>
@@ -2301,6 +2302,104 @@
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> this records video/audio from a tab, window, or screen you explicitly choose and approve through your browser's own sharing dialog — the same permission prompt used for video calls. Everything is captured and converted to MP4 locally in your browser; nothing is ever sent to a server. You're responsible for only recording video you actually have the right to record.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="vidblurPanel">
+    <div class="lookup-card">
+      <h3>🎞️ Video Blur Out Editor</h3>
+      <div class="lc-sub">Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.</div>
+
+      <div id="video-blur-editor-widget">
+        <style>
+          #video-blur-editor-widget {
+            --vb-bg: #14110F; --vb-panel: #1C1814; --vb-border: rgba(242,237,225,0.14);
+            --vb-text: #F2EDE1; --vb-text-dim: #8C8377; --vb-accent: #2F8F7A; --vb-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--vb-text); margin-top: 16px;
+          }
+          #video-blur-editor-widget *{box-sizing:border-box;}
+          #video-blur-editor-widget .vb-desc{font-size:12.5px; color:var(--vb-text-dim); line-height:1.6; margin-bottom:12px;}
+          #video-blur-editor-widget .vb-dropzone{
+            border:2px dashed var(--vb-border); border-radius:8px; padding:32px 20px; text-align:center;
+            cursor:pointer; transition:border-color .15s ease;
+          }
+          #video-blur-editor-widget .vb-dropzone:hover, #video-blur-editor-widget .vb-dropzone.dragover{border-color:var(--vb-accent);}
+          #video-blur-editor-widget .vb-dropzone .vb-dz-icon{font-size:28px; margin-bottom:8px;}
+          #video-blur-editor-widget .vb-dropzone .vb-dz-text{font-size:13px; color:var(--vb-text);}
+          #video-blur-editor-widget .vb-dropzone .vb-dz-sub{font-size:11.5px; color:var(--vb-text-dim); margin-top:4px;}
+          #video-blur-editor-widget .vb-editor{display:none; margin-top:16px;}
+          #video-blur-editor-widget .vb-editor.show{display:block;}
+          #video-blur-editor-widget .vb-canvas-wrap{position:relative; display:inline-block; max-width:100%; line-height:0;}
+          #video-blur-editor-widget .vb-canvas-wrap video{max-width:100%; height:auto; display:block; border-radius:6px; background:#000;}
+          #video-blur-editor-widget .vb-canvas-wrap canvas{position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair; border-radius:6px;}
+          #video-blur-editor-widget .vb-hint{font-size:12px; color:var(--vb-text-dim); margin:10px 0; line-height:1.5;}
+          #video-blur-editor-widget .vb-controls-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+          #video-blur-editor-widget button.vb-action{
+            padding:10px 16px; background:var(--vb-accent); border:none;
+            border-radius:5px; color:var(--vb-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #video-blur-editor-widget button.vb-action:hover{opacity:0.88;}
+          #video-blur-editor-widget button.vb-action:disabled{opacity:.5; cursor:default;}
+          #video-blur-editor-widget button.vb-reset{
+            padding:10px 16px; background:none; border:1px solid var(--vb-border); color:var(--vb-text-dim);
+            border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
+          }
+          #video-blur-editor-widget button.vb-reset:hover{border-color:var(--vb-accent); color:var(--vb-accent);}
+          #video-blur-editor-widget .vb-progress-wrap{background:var(--vb-bg); border:1px solid var(--vb-border); border-radius:5px; height:10px; margin:12px 0; overflow:hidden; display:none; max-width:480px;}
+          #video-blur-editor-widget .vb-progress-wrap.show{display:block;}
+          #video-blur-editor-widget .vb-progress{height:100%; width:0%; background:linear-gradient(90deg, var(--vb-accent), #E8C23C); transition:width .15s linear;}
+          #video-blur-editor-widget .vb-status{font-size:12.5px; color:var(--vb-text-dim); margin-top:10px; min-height:18px;}
+          #video-blur-editor-widget .vb-status.error{color:var(--vb-red);}
+          #video-blur-editor-widget .vb-status.ok{color:var(--vb-accent);}
+          #video-blur-editor-widget .vb-result{display:none; margin-top:16px; background:var(--vb-bg); border:1px solid var(--vb-border); border-radius:8px; padding:14px;}
+          #video-blur-editor-widget .vb-result.show{display:block;}
+          #video-blur-editor-widget .vb-result video{width:100%; max-width:480px; margin-bottom:10px; border-radius:6px;}
+          #video-blur-editor-widget .vb-result-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #video-blur-editor-widget a.vb-download{
+            padding:10px 16px; background:#E8C23C; border:none; border-radius:5px; color:var(--vb-bg);
+            font-weight:700; font-size:12.5px; text-decoration:none; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #video-blur-editor-widget a.vb-download:hover{opacity:0.88;}
+        </style>
+
+        <div class="vb-desc">Upload a video, drag a box over the area you want hidden (a face, license plate, screen, anything), then export — that region stays blurred for the whole clip while everything else stays sharp. Everything runs locally in your browser; the video is never uploaded. Best for short clips at 720p or lower — 5 minutes or under, no higher than 720p, converts in a reasonable amount of time.</div>
+
+        <div class="vb-dropzone" id="vbDropzone">
+          <div class="vb-dz-icon">🎞️</div>
+          <div class="vb-dz-text">Drop a video here, or tap to choose one</div>
+          <div class="vb-dz-sub">MP4, WebM, MOV — analyzed and edited locally, never uploaded</div>
+        </div>
+        <input type="file" id="vbFileInput" accept="video/*" style="display:none;">
+
+        <div class="vb-editor" id="vbEditor">
+          <div class="vb-canvas-wrap" id="vbCanvasWrap">
+            <video id="vbVideoPreview" muted controls playsinline></video>
+            <canvas id="vbOverlayCanvas"></canvas>
+          </div>
+          <div class="vb-hint">Click and drag on the video above to draw a box over what you want blurred. Draw again to redraw it. Scrub the video with its controls first if you need to find a good frame to line it up against.</div>
+          <div class="vb-controls-row">
+            <button class="vb-action" id="vbExportBtn" type="button" disabled>🫥 Blur &amp; Export</button>
+            <button class="vb-reset" id="vbClearBoxBtn" type="button">Clear Box</button>
+            <button class="vb-reset" id="vbChooseAnotherBtn" type="button">Choose Another Video</button>
+          </div>
+        </div>
+
+        <div class="vb-progress-wrap" id="vbProgressWrap"><div class="vb-progress" id="vbProgress"></div></div>
+        <div class="vb-status" id="vbStatus"></div>
+
+        <div class="vb-result" id="vbResult">
+          <video controls id="vbResultVideo"></video>
+          <div class="vb-result-row">
+            <a class="vb-download" id="vbDownloadLink" download="video-blur-out-editor.mp4">⬇ Download MP4</a>
+            <button class="vb-reset" id="vbResetBtn" type="button">Edit Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser using ffmpeg compiled to WebAssembly — nothing is ever uploaded to a server. The blur covers a fixed rectangle for the entire clip; it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide throughout the video before you share it.
     </div>
   </div>
 
@@ -3702,6 +3801,7 @@ document.addEventListener('click', function(e){
   if (e.target.closest('#pdf-editor-widget')) return; // dense multi-button tool — normal use shouldn't start the drum gag
   if (e.target.closest('#lightning-downloader-widget')) return; // recording controls shouldn't trigger the drum gag
   if (e.target.closest('#video-downloader-widget')) return; // recording controls shouldn't trigger the drum gag
+  if (e.target.closest('#video-blur-editor-widget')) return; // box-drawing/export controls shouldn't trigger the drum gag
   if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
     toggleIntroAudio();
   }
@@ -3801,6 +3901,7 @@ const cropperPanel = document.getElementById('cropperPanel');
 const mp3libraryPanel = document.getElementById('mp3libraryPanel');
 const scamidPanel = document.getElementById('scamidPanel');
 const videodlPanel = document.getElementById('videodlPanel');
+const vidblurPanel = document.getElementById('vidblurPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'Look up Flock Safety / ALPR camera reporting for your state, or report a camera yourself if it isn\'t documented yet.',
@@ -3819,7 +3920,8 @@ const LOOKUP_TAGLINES = {
   cropper: 'Capture your screen, then crop it to the exact ratio each platform actually wants — Facebook/LinkedIn/X, Instagram, Stories, Pinterest, YouTube. Nothing is ever uploaded.',
   mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.',
   scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
-  videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.'
+  videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.',
+  vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.'
 };
 
 function setMode(newMode){
@@ -3829,7 +3931,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -3851,6 +3953,7 @@ function setMode(newMode){
   mp3libraryPanel.classList.toggle('show', newMode === 'mp3library');
   scamidPanel.classList.toggle('show', newMode === 'scamid');
   videodlPanel.classList.toggle('show', newMode === 'videodl');
+  vidblurPanel.classList.toggle('show', newMode === 'vidblur');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -3880,6 +3983,7 @@ document.getElementById('tabCropper').addEventListener('click', () => setMode('c
 document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
 document.getElementById('tabScamId').addEventListener('click', () => setMode('scamid'));
 document.getElementById('tabVideoDl').addEventListener('click', () => setMode('videodl'));
+document.getElementById('tabVidBlur').addEventListener('click', () => setMode('vidblur'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -6379,7 +6483,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -7126,6 +7230,256 @@ processSharedFileIfAny();
     recordBtn.style.display = 'none';
     timerEl.textContent = '00:00';
     setStatus('');
+  });
+})();
+
+// --- Video Blur Out Editor: upload a video, draw a fixed blur box, re-encode locally via ffmpeg.wasm ---
+(function(){
+  const root = document.getElementById('video-blur-editor-widget');
+  if (!root) return;
+
+  const dropzone = document.getElementById('vbDropzone');
+  const fileInput = document.getElementById('vbFileInput');
+  const editorEl = document.getElementById('vbEditor');
+  const canvasWrap = document.getElementById('vbCanvasWrap');
+  const video = document.getElementById('vbVideoPreview');
+  const overlay = document.getElementById('vbOverlayCanvas');
+  const exportBtn = document.getElementById('vbExportBtn');
+  const clearBoxBtn = document.getElementById('vbClearBoxBtn');
+  const chooseAnotherBtn = document.getElementById('vbChooseAnotherBtn');
+  const progressWrap = document.getElementById('vbProgressWrap');
+  const progressBar = document.getElementById('vbProgress');
+  const statusEl = document.getElementById('vbStatus');
+  const resultEl = document.getElementById('vbResult');
+  const resultVideo = document.getElementById('vbResultVideo');
+  const downloadLink = document.getElementById('vbDownloadLink');
+  const resetBtn = document.getElementById('vbResetBtn');
+
+  let vbFile = null;
+  let vbVideoObjectUrl = null;
+  let vbResultObjectUrl = null;
+  let vbBox = null; // {x,y,w,h} in the video's native pixel coordinates
+  let vbDragStart = null;
+  let vbFileCounter = 0;
+
+  function setStatus(msg, cls){
+    statusEl.className = 'vb-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function setProgress(percent){
+    progressWrap.classList.add('show');
+    progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  }
+
+  function loadFile(file){
+    if (!file || !file.type.startsWith('video/')) {
+      setStatus('That doesn\'t look like a video file.', 'error');
+      return;
+    }
+    vbFile = file;
+    vbBox = null;
+    if (vbVideoObjectUrl) URL.revokeObjectURL(vbVideoObjectUrl);
+    vbVideoObjectUrl = URL.createObjectURL(file);
+    video.src = vbVideoObjectUrl;
+    resultEl.classList.remove('show');
+    setStatus('');
+    exportBtn.disabled = true;
+  }
+
+  video.addEventListener('loadedmetadata', () => {
+    overlay.width = video.videoWidth;
+    overlay.height = video.videoHeight;
+    dropzone.style.display = 'none';
+    editorEl.classList.add('show');
+    redrawOverlay();
+  });
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+  ['dragenter', 'dragover'].forEach(evt => dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+  function redrawOverlay(){
+    const ctx = overlay.getContext('2d');
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+    if (vbBox) {
+      ctx.strokeStyle = '#E8402C';
+      ctx.lineWidth = Math.max(2, overlay.width * 0.003);
+      ctx.setLineDash([overlay.width * 0.01, overlay.width * 0.008]);
+      ctx.strokeRect(vbBox.x, vbBox.y, vbBox.w, vbBox.h);
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(232,64,44,0.15)';
+      ctx.fillRect(vbBox.x, vbBox.y, vbBox.w, vbBox.h);
+    }
+  }
+
+  function canvasCoords(e){
+    const rect = overlay.getBoundingClientRect();
+    const scaleX = overlay.width / rect.width;
+    const scaleY = overlay.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  overlay.addEventListener('mousedown', (e) => { vbDragStart = canvasCoords(e); });
+  overlay.addEventListener('mousemove', (e) => {
+    if (!vbDragStart) return;
+    const cur = canvasCoords(e);
+    vbBox = {
+      x: Math.min(vbDragStart.x, cur.x),
+      y: Math.min(vbDragStart.y, cur.y),
+      w: Math.abs(cur.x - vbDragStart.x),
+      h: Math.abs(cur.y - vbDragStart.y)
+    };
+    redrawOverlay();
+  });
+  window.addEventListener('mouseup', (e) => {
+    if (!vbDragStart) return;
+    vbDragStart = null;
+    if (vbBox && (vbBox.w < 8 || vbBox.h < 8)) { vbBox = null; redrawOverlay(); }
+    exportBtn.disabled = !vbBox;
+  });
+
+  clearBoxBtn.addEventListener('click', () => { vbBox = null; redrawOverlay(); exportBtn.disabled = true; });
+  chooseAnotherBtn.addEventListener('click', () => resetToDropzone());
+
+  // ---- MP4 re-encode via ffmpeg.wasm (self-hosted, single-threaded core).
+  // Same self-hosted-gzip-decompress loading approach as Thunder Video
+  // Downloader — kept as its own independent copy in this widget's scope
+  // rather than shared, matching this codebase's existing per-tool pattern
+  // (each widget owns its own helpers/state, e.g. escapeHtml is duplicated
+  // per-tool too). The one-time ~10MB download happens again if a visitor
+  // uses both tools in the same session — a small, deliberate trade for
+  // keeping the two tools fully independent of each other.
+  let ffmpegInstance = null;
+  let ffmpegLoadPromise = null;
+  let ffmpegScriptPromise = null;
+
+  function loadFfmpegScript(){
+    if (ffmpegScriptPromise) return ffmpegScriptPromise;
+    ffmpegScriptPromise = new Promise((resolve, reject) => {
+      if (window.FFmpegWASM) { resolve(); return; }
+      const script = document.createElement('script');
+      script.src = 'ffmpeg.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('ffmpeg.js failed to load'));
+      document.head.appendChild(script);
+    });
+    return ffmpegScriptPromise;
+  }
+
+  async function fetchDecompressedWasmUrl(){
+    const res = await fetch('ffmpeg-core.wasm.gz');
+    if (!res.ok) throw new Error('ffmpeg-core.wasm.gz failed to load (HTTP ' + res.status + ')');
+    const decompressedStream = res.body.pipeThrough(new DecompressionStream('gzip'));
+    const wasmBlob = await new Response(decompressedStream).blob();
+    return URL.createObjectURL(new Blob([wasmBlob], { type: 'application/wasm' }));
+  }
+
+  async function getFfmpeg(onProgress){
+    if (ffmpegInstance) return ffmpegInstance;
+    if (!ffmpegLoadPromise) {
+      ffmpegLoadPromise = (async () => {
+        await loadFfmpegScript();
+        const wasmURL = await fetchDecompressedWasmUrl();
+        const ffmpeg = new FFmpegWASM.FFmpeg();
+        ffmpeg.on('progress', ({ progress }) => {
+          if (onProgress && typeof progress === 'number' && isFinite(progress)) {
+            onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
+          }
+        });
+        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
+        ffmpegInstance = ffmpeg;
+        return ffmpeg;
+      })();
+    }
+    return ffmpegLoadPromise;
+  }
+
+  // Downscales first (same 854px cap, same reasoning as Thunder Video
+  // Downloader — single-threaded WASM x264 encoding scales with pixel
+  // count, no server to offload to), then crops+blurs+overlays the SAME
+  // rectangle back onto the frame at every timestamp — a fixed-position
+  // blur that runs on the whole clip without needing per-frame tracking.
+  // The box coordinates have to be scaled down by the same ratio as the
+  // video itself, since they were captured against the native resolution.
+  async function exportBlurredVideo(){
+    if (!vbFile || !vbBox) return;
+    const inputName = 'vbin_' + vbFileCounter + '.' + (vbFile.name.split('.').pop() || 'mp4');
+    const outputName = 'vbout_' + vbFileCounter + '.mp4';
+    vbFileCounter++;
+
+    exportBtn.disabled = true;
+    setStatus('Loading video engine (one-time, ~10MB — hang tight)…', 'ok');
+    const ffmpeg = await getFfmpeg((percent) => {
+      setProgress(percent);
+      setStatus('Blurring & converting… ' + percent + '% (can take a while for longer/higher-res clips)', 'ok');
+    });
+
+    const nativeW = video.videoWidth, nativeH = video.videoHeight;
+    const targetW = Math.min(854, nativeW);
+    const scaleRatio = targetW / nativeW;
+    const targetH = Math.max(2, Math.round((nativeH * scaleRatio) / 2) * 2);
+
+    let bx = Math.round(vbBox.x * scaleRatio);
+    let by = Math.round(vbBox.y * scaleRatio);
+    let bw = Math.round(vbBox.w * scaleRatio);
+    let bh = Math.round(vbBox.h * scaleRatio);
+    bx = Math.max(0, Math.min(bx, targetW - 2));
+    by = Math.max(0, Math.min(by, targetH - 2));
+    bw = Math.max(2, Math.min(bw, targetW - bx));
+    bh = Math.max(2, Math.min(bh, targetH - by));
+
+    setStatus('Blurring & converting… 0% (can take a while for longer/higher-res clips)', 'ok');
+    setProgress(0);
+    const inputData = new Uint8Array(await vbFile.arrayBuffer());
+    await ffmpeg.writeFile(inputName, inputData);
+
+    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=20:10[bl];[bg][bl]overlay=" + bx + ":" + by + "[out]";
+    try {
+      await ffmpeg.exec(['-i', inputName, '-filter_complex', filter, '-map', '[out]', '-map', '0:a?',
+        '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac', '-movflags', '+faststart', outputName]);
+      const outputData = await ffmpeg.readFile(outputName);
+      await ffmpeg.deleteFile(inputName);
+      await ffmpeg.deleteFile(outputName);
+
+      const blob = new Blob([outputData.buffer], { type: 'video/mp4' });
+      if (vbResultObjectUrl) URL.revokeObjectURL(vbResultObjectUrl);
+      vbResultObjectUrl = URL.createObjectURL(blob);
+      resultVideo.src = vbResultObjectUrl;
+      downloadLink.href = vbResultObjectUrl;
+      downloadLink.download = 'video-blur-out-editor-' + Date.now() + '.mp4';
+      resultEl.classList.add('show');
+      setStatus('Blurred and converted to MP4 below — preview it, then download.', 'ok');
+    } catch (err) {
+      setStatus('Blur/conversion failed: ' + ((err && err.message) ? err.message : String(err)), 'error');
+      console.error('Video Blur Out Editor export failed:', err);
+    }
+    progressWrap.classList.remove('show');
+    progressBar.style.width = '0%';
+    exportBtn.disabled = false;
+  }
+
+  exportBtn.addEventListener('click', exportBlurredVideo);
+
+  function resetToDropzone(){
+    vbFile = null;
+    vbBox = null;
+    if (vbVideoObjectUrl) { URL.revokeObjectURL(vbVideoObjectUrl); vbVideoObjectUrl = null; }
+    video.removeAttribute('src');
+    editorEl.classList.remove('show');
+    dropzone.style.display = '';
+    fileInput.value = '';
+    resultEl.classList.remove('show');
+    setStatus('');
+  }
+
+  resetBtn.addEventListener('click', () => {
+    if (vbResultObjectUrl) { URL.revokeObjectURL(vbResultObjectUrl); vbResultObjectUrl = null; }
+    resultVideo.removeAttribute('src');
+    resetToDropzone();
   });
 })();
 

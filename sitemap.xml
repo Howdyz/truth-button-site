@@ -64,4 +64,8 @@
     <loc>https://projectsilverbeam.com/thunder-video-downloader.html</loc>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://projectsilverbeam.com/video-blur-out-editor.html</loc>
+    <priority>0.8</priority>
+  </url>
 </urlset>
