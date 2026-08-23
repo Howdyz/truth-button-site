@@ -1519,14 +1519,14 @@
       <div class="icon" id="dzIcon">[ + ]</div>
       <p id="dzLabel">Drop a photo here, or tap to choose one</p>
       <div class="sub" id="dzSub">JPG or PNG · analyzed locally, never uploaded</div>
-      <input type="file" id="fileInput" accept="image/png, image/jpeg">
+      <input type="file" id="fileInput" accept="image/png, image/jpeg" aria-label="Choose a file to analyze">
     </div>
   </div>
 
   <div class="report-bar" id="reportBar">
     <div class="report-label" id="reportLabel">File a report — paste a link to suspected AI content</div>
     <div class="report-row">
-      <input type="text" id="urlInput" placeholder="https://example.com/photo.jpg" autocomplete="off">
+      <input type="text" id="urlInput" placeholder="https://example.com/photo.jpg" autocomplete="off" aria-label="Link to suspected AI content">
       <button id="urlAnalyzeBtn">Analyze Link</button>
     </div>
     <div class="url-status" id="urlStatus"></div>
@@ -1614,8 +1614,8 @@
       <h3>Find Flock / ALPR cameras near you</h3>
       <div class="lc-sub">There's no official public database of Flock Safety camera locations — Flock doesn't publish one, and has even sent a cease-and-desist to the main volunteer mapping project over it (EFF pushed back on First Amendment grounds). What exists is community-crowdsourced data. Pick a state to jump to real, live reporting.</div>
       <div class="lookup-row">
-        <select id="flockState"></select>
-        <input type="text" id="flockCity" placeholder="City (optional)">
+        <select id="flockState" aria-label="Select a state"></select>
+        <input type="text" id="flockCity" placeholder="City (optional)" aria-label="City (optional)">
         <button id="flockSearchBtn">Search</button>
       </div>
       <div class="lookup-results" id="flockResults"></div>
@@ -1672,8 +1672,8 @@
       <h3>Find data centers near you</h3>
       <div class="lc-sub">This links to Data Center Map, an independent commercial directory of colocation and cloud facilities — it doesn't include classified, government, or many hyperscaler-owned sites that don't publicly list. Pick a state to see documented facilities.</div>
       <div class="lookup-row">
-        <select id="dcState"></select>
-        <input type="text" id="dcCity" placeholder="City (optional)">
+        <select id="dcState" aria-label="Select a state"></select>
+        <input type="text" id="dcCity" placeholder="City (optional)" aria-label="City (optional)">
         <button id="dcSearchBtn">Search</button>
       </div>
       <div class="lookup-results" id="dcResults"></div>
@@ -1760,7 +1760,7 @@
       <div class="qotd-meta" id="qotdMeta"></div>
       <div class="leaderboard" id="leaderboardRow"></div>
       <div class="qotd-set-row" id="qotdSetRow" style="display:none;">
-        <input type="text" id="qotdInput" placeholder="You're the top contributor — set today's question…" maxlength="300">
+        <input type="text" id="qotdInput" placeholder="You're the top contributor — set today's question…" maxlength="300" aria-label="Set today's question">
         <button id="qotdSubmitBtn">Set It</button>
       </div>
     </div>
@@ -1776,33 +1776,33 @@
       <div class="auth-gate-note" id="reviewAuthNote" style="display:none;">Posting a review requires an account — <b class="link" id="reviewSignInLink">sign in or create one</b> (free, takes a few seconds).</div>
       <div class="rf-row" id="postingAsRow" style="display:none;">
         <div>
-          <label>Posting as</label>
+          <label for="postingAsDisplay">Posting as</label>
           <input type="text" id="postingAsDisplay" disabled>
         </div>
       </div>
       <div class="rf-row">
         <div>
-          <label>State</label>
+          <label for="rfState">State</label>
           <select id="rfState"></select>
         </div>
         <div>
-          <label id="rfSubjectLabel">Subject</label>
+          <label id="rfSubjectLabel" for="rfSubject">Subject</label>
           <input type="text" id="rfSubject" placeholder="e.g. McDonald's on Main St, or 'warehouse job'">
         </div>
       </div>
       <div class="rf-row sport-fields" id="sportFields">
         <div>
-          <label>Which sport?</label>
+          <label for="rfSportType">Which sport?</label>
           <select id="rfSportType"></select>
         </div>
       </div>
       <div class="rf-row price-fields" id="priceFields">
         <div>
-          <label>Price a year or two ago</label>
+          <label for="rfPriceThen">Price a year or two ago</label>
           <input type="text" id="rfPriceThen" placeholder="$5.99">
         </div>
         <div>
-          <label>Price now</label>
+          <label for="rfPriceNow">Price now</label>
           <input type="text" id="rfPriceNow" placeholder="$8.49">
         </div>
       </div>
@@ -1816,7 +1816,7 @@
       </div>
       <div class="rf-row">
         <div style="flex-basis:100%;">
-          <label>Your review</label>
+          <label for="rfText">Your review</label>
           <textarea id="rfText" placeholder="What happened, what changed, what should people know…"></textarea>
         </div>
       </div>
@@ -1838,14 +1838,14 @@
 
       <div class="rf-row">
         <div>
-          <label>Peptide amount in vial</label>
+          <label for="pcVialAmount">Peptide amount in vial</label>
           <div class="pc-input-group">
             <input type="number" id="pcVialAmount" placeholder="5" min="0" step="any">
-            <select id="pcVialUnit"><option value="mg">mg</option><option value="mcg">mcg</option><option value="IU">IU</option></select>
+            <select id="pcVialUnit" aria-label="Vial amount unit"><option value="mg">mg</option><option value="mcg">mcg</option><option value="IU">IU</option></select>
           </div>
         </div>
         <div>
-          <label>Reconstitution volume added</label>
+          <label for="pcReconVolume">Reconstitution volume added</label>
           <div class="pc-input-group">
             <input type="number" id="pcReconVolume" placeholder="2" min="0" step="any">
             <span class="pc-unit-label">mL</span>
@@ -1855,14 +1855,14 @@
 
       <div class="rf-row">
         <div>
-          <label>Your prescribed / labeled dose</label>
+          <label for="pcDoseAmount">Your prescribed / labeled dose</label>
           <div class="pc-input-group">
             <input type="number" id="pcDoseAmount" placeholder="250" min="0" step="any">
-            <select id="pcDoseUnit"><option value="mcg">mcg</option><option value="mg">mg</option><option value="IU">IU</option></select>
+            <select id="pcDoseUnit" aria-label="Dose unit"><option value="mcg">mcg</option><option value="mg">mg</option><option value="IU">IU</option></select>
           </div>
         </div>
         <div>
-          <label>Syringe type</label>
+          <label for="pcSyringeType">Syringe type</label>
           <select id="pcSyringeType">
             <option value="100">U-100 insulin syringe (100 units/mL)</option>
             <option value="40">U-40 insulin syringe (40 units/mL)</option>
@@ -2438,7 +2438,7 @@
           <div class="vb-dz-text">Drop a video here, or tap to choose one</div>
           <div class="vb-dz-sub">MP4, WebM, MOV — analyzed and edited locally, never uploaded</div>
         </div>
-        <input type="file" id="vbFileInput" accept="video/*" style="display:none;">
+        <input type="file" id="vbFileInput" accept="video/*" style="display:none;" aria-label="Choose a video to blur">
 
         <div class="vb-editor" id="vbEditor">
           <div class="vb-canvas-wrap" id="vbCanvasWrap">
@@ -2550,7 +2550,7 @@
         </style>
 
         <div id="qrEditControls">
-          <textarea id="qrInput" placeholder="https://example.com, a phone number, a note to yourself — anything." maxlength="2000"></textarea>
+          <textarea id="qrInput" placeholder="https://example.com, a phone number, a note to yourself — anything." maxlength="2000" aria-label="Text or URL to encode as a QR code"></textarea>
 
           <div class="qr-options">
             <div class="qr-opt">
@@ -2684,9 +2684,9 @@
         <div class="sg-pane active" id="sgPaneHide">
           <div class="sg-dropzone" id="sgHideDropzone">
             <div id="sgHideDzText">Click to choose a photo, or drag one here (JPG or PNG in — always saved as PNG, since hiding data needs a lossless file)</div>
-            <input type="file" id="sgHideFileInput" accept="image/*">
+            <input type="file" id="sgHideFileInput" accept="image/*" aria-label="Choose a photo to hide a link in">
           </div>
-          <textarea id="sgMessageInput" placeholder="https://example.com — or any short message to hide" maxlength="2000"></textarea>
+          <textarea id="sgMessageInput" placeholder="https://example.com — or any short message to hide" maxlength="2000" aria-label="Link or message to hide"></textarea>
           <div class="sg-capacity" id="sgCapacity"></div>
           <button class="sg-action" id="sgHideBtn" disabled>Hide Link In Photo</button>
           <div class="sg-status" id="sgHideStatus"></div>
@@ -2700,7 +2700,7 @@
         <div class="sg-pane" id="sgPaneReveal">
           <div class="sg-dropzone" id="sgRevealDropzone">
             <div id="sgRevealDzText">Click to choose a PNG to check, or drag one here</div>
-            <input type="file" id="sgRevealFileInput" accept="image/*">
+            <input type="file" id="sgRevealFileInput" accept="image/*" aria-label="Choose a photo to reveal a hidden link from">
           </div>
           <div class="sg-preview-wrap" id="sgRevealPreviewWrap">
             <img id="sgRevealPreviewImg" alt="Uploaded photo">
@@ -2719,29 +2719,29 @@
             <b style="color:var(--sg-red);">Does not work on:</b> Instagram or TikTok — those platforms don't make links clickable in regular posts at all, no matter what tags a page has. Only a bio link, a Stories link sticker, or paid ads get you an outbound link there.
           </div>
 
-          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin-bottom:4px;">Destination URL (where clicking should take people)</label>
+          <label for="sgShareDest" style="display:block; font-size:11px; color:var(--sg-text-dim); margin-bottom:4px;">Destination URL (where clicking should take people)</label>
           <textarea id="sgShareDest" placeholder="https://yourwebsite.com" style="min-height:20px;"></textarea>
 
-          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Photo URL (must already be hosted somewhere public — Facebook has to be able to fetch it)</label>
+          <label for="sgShareImage" style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Photo URL (must already be hosted somewhere public — Facebook has to be able to fetch it)</label>
           <textarea id="sgShareImage" placeholder="https://yoursite.com/photo.jpg" style="min-height:20px;"></textarea>
           <div style="margin-top:8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <button class="sg-action" id="sgUploadPhotoBtn" type="button" style="margin-top:0; padding:8px 14px;">📤 Don't have a URL? Upload a photo</button>
             <span class="sg-capacity" id="sgUploadStatus" style="margin-top:0;"></span>
           </div>
-          <input type="file" id="sgUploadFileInput" accept="image/*" style="display:none;">
+          <input type="file" id="sgUploadFileInput" accept="image/*" style="display:none;" aria-label="Choose a photo to upload for the share page">
           <div class="sg-capacity" style="margin-top:6px;">Requires sign-in. Hosted on The Truth Button's server for 90 days, then auto-deleted (see disclaimer below).</div>
 
-          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Title</label>
+          <label for="sgShareTitle" style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Title</label>
           <textarea id="sgShareTitle" placeholder="What shows as the headline on the card" style="min-height:20px;" maxlength="120"></textarea>
 
-          <label style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Description (optional)</label>
+          <label for="sgShareDesc" style="display:block; font-size:11px; color:var(--sg-text-dim); margin:12px 0 4px;">Description (optional)</label>
           <textarea id="sgShareDesc" placeholder="A line or two under the title" maxlength="300" style="min-height:44px;"></textarea>
 
           <button class="sg-action" id="sgShareGenBtn">Create Share Page</button>
           <div class="sg-status" id="sgShareStatus"></div>
 
           <div id="sgSharePreviewCard" style="display:none; margin-top:16px; border:1px solid var(--sg-border); border-radius:8px; overflow:hidden; text-align:left; background:var(--sg-panel);">
-            <div id="sgSharePreviewImgWrap" style="width:100%; aspect-ratio:1.91/1; background:#000; overflow:hidden;"><img id="sgSharePreviewImg" style="width:100%; height:100%; object-fit:cover; display:block;"></div>
+            <div id="sgSharePreviewImgWrap" style="width:100%; aspect-ratio:1.91/1; background:#000; overflow:hidden;"><img id="sgSharePreviewImg" alt="Preview of your share page photo" style="width:100%; height:100%; object-fit:cover; display:block;"></div>
             <div style="padding:10px 12px;">
               <div style="font-size:10px; color:var(--sg-text-dim); text-transform:uppercase; letter-spacing:0.05em;" id="sgSharePreviewDomain"></div>
               <div style="font-weight:700; font-size:14px; margin-top:2px;" id="sgSharePreviewTitle"></div>
@@ -2787,6 +2787,7 @@
             border-radius:5px; color:var(--rd-text); font-size:13px; font-family:inherit;
           }
           #radio-widget select{
+            flex:1; min-width:120px; max-width:100%;
             padding:10px 10px; background:var(--rd-bg); border:1px solid var(--rd-border);
             border-radius:5px; color:var(--rd-text); font-size:12.5px; font-family:inherit;
           }
@@ -2847,8 +2848,8 @@
         </style>
 
         <div class="rd-controls">
-          <input type="text" id="rdSearchInput" placeholder="Search station name (e.g. KIIS, BBC, Hot 97)…">
-          <select id="rdCountrySelect"><option value="">All countries</option></select>
+          <input type="text" id="rdSearchInput" placeholder="Search station name (e.g. KIIS, BBC, Hot 97)…" aria-label="Search radio station name">
+          <select id="rdCountrySelect" aria-label="Filter by country"><option value="">All countries</option></select>
           <div class="rd-band-toggle">
             <div class="rd-band-btn active" data-band="all" id="rdBandAll">All</div>
             <div class="rd-band-btn" data-band="fm" id="rdBandFm">FM</div>
@@ -2867,7 +2868,7 @@
           </div>
           <div class="rd-player-controls">
             <span style="font-size:14px;">🔊</span>
-            <input type="range" id="rdVolume" min="0" max="100" value="80">
+            <input type="range" id="rdVolume" min="0" max="100" value="80" aria-label="Volume">
             <button class="rd-stop-btn" id="rdStopBtn" type="button">⏹ Stop</button>
           </div>
         </div>
@@ -2949,10 +2950,10 @@
           <span class="cw-or">or</span>
         </div>
         <div class="cw-url-row">
-          <input type="text" id="cwUrlInput" placeholder="Paste an image URL…">
+          <input type="text" id="cwUrlInput" placeholder="Paste an image URL…" aria-label="Image URL to load">
           <button class="cw-secondary" id="cwLoadUrlBtn" type="button">Load from URL</button>
         </div>
-        <input type="file" id="cwFileInput" accept="image/*">
+        <input type="file" id="cwFileInput" accept="image/*" aria-label="Choose a photo to crop">
         <div class="cw-status" id="cwStatus"></div>
 
         <div class="cw-presets" id="cwPresets">
@@ -2971,7 +2972,7 @@
           <div class="cw-hint">Drag to reposition, use the slider to zoom</div>
           <div class="cw-zoom-row">
             <span style="font-size:13px;">🔍−</span>
-            <input type="range" id="cwZoom" min="0" max="100" value="0">
+            <input type="range" id="cwZoom" min="0" max="100" value="0" aria-label="Zoom">
             <span style="font-size:13px;">🔍+</span>
           </div>
           <div class="cw-dims" id="cwDims"></div>
@@ -3091,7 +3092,7 @@
         </details>
 
         <div class="ml-controls">
-          <div class="ml-search"><input type="search" id="mlSearchInput" placeholder="Search by name…" autocomplete="off"></div>
+          <div class="ml-search"><input type="search" id="mlSearchInput" placeholder="Search by name…" autocomplete="off" aria-label="Search your music library"></div>
           <button class="ml-action" id="mlAddBtn" type="button">＋ Add Music</button>
         </div>
         <div class="ml-stats" id="mlStats">0 tracks • 0 B</div>
@@ -3104,7 +3105,7 @@
           <div class="ml-now-playing" id="mlNowPlaying">Nothing playing</div>
           <div class="ml-seek-row">
             <span class="ml-time" id="mlCurrentTime">0:00</span>
-            <input type="range" id="mlSeek" min="0" max="100" value="0">
+            <input type="range" id="mlSeek" min="0" max="100" value="0" aria-label="Seek">
             <span class="ml-time" id="mlDuration">0:00</span>
           </div>
           <div class="ml-transport-row">
@@ -3114,11 +3115,11 @@
           </div>
           <div class="ml-volume-row">
             <span>🔉</span>
-            <input type="range" id="mlVolume" min="0" max="100" value="80">
+            <input type="range" id="mlVolume" min="0" max="100" value="80" aria-label="Volume">
           </div>
         </div>
 
-        <input type="file" id="mlFileInput" accept="audio/mpeg,.mp3" multiple hidden>
+        <input type="file" id="mlFileInput" accept="audio/mpeg,.mp3" multiple hidden aria-label="Choose MP3 files to add">
         <audio id="mlAudioEl" preload="metadata"></audio>
 
         <script>
@@ -3558,7 +3559,7 @@
         </style>
 
         <div class="sci-search-row">
-          <input type="tel" id="sciNumberInput" placeholder="(555) 123-4567" autocomplete="off">
+          <input type="tel" id="sciNumberInput" placeholder="(555) 123-4567" autocomplete="off" aria-label="Phone number to look up">
           <button class="sci-action" id="sciLookupBtn" type="button">🔍 Look Up</button>
         </div>
         <div class="sci-status" id="sciStatus"></div>
@@ -3583,7 +3584,7 @@
             <h4>🗣️ Community Reports</h4>
             <div id="sciReportsList"></div>
             <div class="sci-report-form">
-              <select id="sciReportTag">
+              <select id="sciReportTag" aria-label="Tag this number as">
                 <option value="scam">🚩 Scam</option>
                 <option value="robocall">🤖 Robocall</option>
                 <option value="telemarketer">📢 Telemarketer</option>
@@ -3591,7 +3592,7 @@
                 <option value="personal">👤 Personal</option>
                 <option value="unknown">❓ Unknown / Other</option>
               </select>
-              <input type="text" id="sciReportNote" placeholder="Optional note (e.g. who it actually was)" maxlength="300">
+              <input type="text" id="sciReportNote" placeholder="Optional note (e.g. who it actually was)" maxlength="300" aria-label="Optional note about this number">
               <button class="sci-action" id="sciReportBtn" type="button">Report This Number</button>
             </div>
           </div>
@@ -3806,19 +3807,19 @@
         </div>
 
         <div class="auth-form show" id="authFormSignin">
-          <label>Email</label>
+          <label for="signinEmail">Email</label>
           <input type="email" id="signinEmail" autocomplete="email">
-          <label>Password</label>
+          <label for="signinPassword">Password</label>
           <input type="password" id="signinPassword" autocomplete="current-password">
           <button class="auth-submit" id="signinSubmitBtn">Sign In</button>
         </div>
 
         <div class="auth-form" id="authFormSignup">
-          <label>Username</label>
+          <label for="signupUsername">Username</label>
           <input type="text" id="signupUsername" autocomplete="username" placeholder="Shown on your reviews">
-          <label>Email</label>
+          <label for="signupEmail">Email</label>
           <input type="email" id="signupEmail" autocomplete="email">
-          <label>Password</label>
+          <label for="signupPassword">Password</label>
           <input type="password" id="signupPassword" autocomplete="new-password" placeholder="At least 8 characters">
           <button class="auth-submit" id="signupSubmitBtn">Create Account</button>
         </div>
