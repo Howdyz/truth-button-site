@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video | The Truth Button</title>
-<meta name="description" content="Video Blur Out Editor: upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for the whole clip. No app to install, nothing uploaded — edited and converted entirely locally in your browser.">
+<meta name="description" content="Video Blur Out Editor: upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for just the stretch of the clip you choose. No app to install, nothing uploaded — edited and converted entirely locally in your browser.">
 <link rel="canonical" href="https://projectsilverbeam.com/video-blur-out-editor.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://projectsilverbeam.com/video-blur-out-editor.html">
 <meta property="og:title" content="Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video">
-<meta property="og:description" content="Upload a video, draw a box over what you want hidden, and blur it for the whole clip. No app, nothing uploaded.">
+<meta property="og:description" content="Upload a video, draw a box over what you want hidden, and blur it for just the part of the clip you choose. No app, nothing uploaded.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free Video Blur Tool — Blur a Face, Plate, or Screen in Any Video">
-<meta name="twitter:description" content="Upload a video, draw a box over what you want hidden, and blur it for the whole clip. No app, nothing uploaded.">
+<meta name="twitter:description" content="Upload a video, draw a box over what you want hidden, and blur it for just the part of the clip you choose. No app, nothing uploaded.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -27,12 +27,12 @@
     {
       "@type": "Question",
       "name": "How do I blur part of a video?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Open Video Blur Out Editor, upload a video file, then click and drag on the preview to draw a box over the area you want hidden — a face, license plate, screen, anything. Click Blur & Export and it converts the whole clip with that region blurred out." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Open Video Blur Out Editor, upload a video file, then pause where you want the blur to start and drag a box over the area you want hidden. Press play again, and when the video reaches where the blur should stop, click \"End Blur Here\" (or leave it unset to blur through to the end). Click Blur & Export." }
     },
     {
       "@type": "Question",
       "name": "Does the blur follow a moving subject?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No — the blur box stays in the exact same position for the entire clip. It's built for fixed-position redaction (a stationary camera, a static watermark or logo, a license plate that doesn't move much), not for tracking a moving face or object across the frame." }
+      "acceptedAnswer": { "@type": "Answer", "text": "No — the blur box stays in one fixed position on screen, for whatever time window you set (or through to the end of the video if you don't set one). It's built for fixed-position redaction during a specific stretch of the clip — a scene a face appears in, a screen that shows something sensitive — not for tracking a moving face or object across the frame." }
     },
     {
       "@type": "Question",
@@ -106,36 +106,37 @@
 <div class="wrap">
   <div class="kicker">Free · Edits Locally · Nothing Uploaded</div>
   <h1>🎞️ <span class="accent">Video Blur Out Editor</span></h1>
-  <p class="lede">Upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for the whole clip. No app to install, no account, nothing ever leaves your browser.</p>
+  <p class="lede">Upload a video, pause where the blur should start, draw a box over a face, license plate, screen, or anything else, then mark where it should stop. No app to install, no account, nothing ever leaves your browser.</p>
 
   <div class="cta-row">
     <a class="cta-btn" href="index.html?mode=vidblur">Open Video Blur Out Editor →</a>
-    <div class="cta-fine">Draw a box, export — that region stays blurred for the whole clip</div>
+    <div class="cta-fine">Pause, draw a box, play on, mark the end — that region stays blurred just for that stretch</div>
   </div>
 
   <section>
     <h2>What this actually is</h2>
     <ol class="steps">
       <li><span class="num">1</span><span>Upload a video file from your device — MP4, WebM, or MOV.</span></li>
-      <li><span class="num">2</span><span>Click and drag on the preview to draw a box over whatever you want hidden. Scrub the video first if you need to line it up against a specific frame.</span></li>
-      <li><span class="num">3</span><span>Click Blur &amp; Export. That box stays blurred in the exact same spot for the entire clip while everything else stays sharp, converted to a downloadable MP4.</span></li>
+      <li><span class="num">2</span><span>Play the video and pause where you want the blur to start. Click and drag on the frame to draw a box over whatever you want hidden — that sets the start point.</span></li>
+      <li><span class="num">3</span><span>Press play again. When the video reaches where the blur should stop, click "End Blur Here" (or leave it unset to blur through to the end).</span></li>
+      <li><span class="num">4</span><span>Click Blur &amp; Export. That box stays blurred in the exact same spot for just that time window, converted to a downloadable MP4.</span></li>
     </ol>
   </section>
 
   <section>
-    <h2>Fixed region, not a moving tracker</h2>
-    <p>The blur box stays in the exact same position for the whole clip — it does not follow a moving subject across the frame. That makes it a good fit for a stationary camera angle, a static watermark or logo, a screen recording with a fixed sensitive area, or a license plate that doesn't move much in frame. It won't automatically track a face or object as it moves.</p>
+    <h2>Fixed region, time-bounded, not a moving tracker</h2>
+    <p>The blur box stays in one fixed position on screen for whatever time window you set — it does not follow a moving subject across the frame. That makes it a good fit for a scene where a face or plate holds roughly still for a few seconds, a static watermark or logo, or a screen recording with a sensitive area on screen for part of the clip. It won't automatically track a face or object as it moves, and outside the time window you set, that area of the frame stays sharp.</p>
   </section>
 
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I blur part of a video?</div>
-      <p class="faq-a">Open Video Blur Out Editor, upload a video file, then click and drag on the preview to draw a box over the area you want hidden — a face, license plate, screen, anything. Click Blur & Export and it converts the whole clip with that region blurred out.</p>
+      <p class="faq-a">Open Video Blur Out Editor, upload a video file, then pause where you want the blur to start and drag a box over the area you want hidden. Press play again, and when the video reaches where the blur should stop, click "End Blur Here" (or leave it unset to blur through to the end). Click Blur &amp; Export.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Does the blur follow a moving subject?</div>
-      <p class="faq-a">No — the blur box stays in the exact same position for the entire clip. It's built for fixed-position redaction (a stationary camera, a static watermark or logo, a license plate that doesn't move much), not for tracking a moving face or object across the frame.</p>
+      <p class="faq-a">No — the blur box stays in one fixed position on screen, for whatever time window you set (or through to the end of the video if you don't set one). It's built for fixed-position redaction during a specific stretch of the clip, not for tracking a moving face or object across the frame.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Does this upload my video anywhere?</div>
@@ -156,7 +157,7 @@
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser — nothing is ever uploaded to a server. The blur covers a fixed rectangle for the entire clip; it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide throughout the video before you share it.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser — nothing is ever uploaded to a server. The blur box stays in a fixed screen position for the time window you set (or through to the end if you don't set one); it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide for that whole window before you share it.</div>
   </section>
 
   <section>

@@ -2333,6 +2333,7 @@
           #video-blur-editor-widget .vb-canvas-wrap video{max-width:100%; height:auto; display:block; border-radius:6px; background:#000;}
           #video-blur-editor-widget .vb-canvas-wrap canvas{position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair; border-radius:6px;}
           #video-blur-editor-widget .vb-hint{font-size:12px; color:var(--vb-text-dim); margin:10px 0; line-height:1.5;}
+          #video-blur-editor-widget .vb-timing{font-size:12.5px; color:var(--vb-accent); margin-bottom:4px; min-height:18px; font-weight:600;}
           #video-blur-editor-widget .vb-controls-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
           #video-blur-editor-widget button.vb-action{
             padding:10px 16px; background:var(--vb-accent); border:none;
@@ -2363,7 +2364,7 @@
           #video-blur-editor-widget a.vb-download:hover{opacity:0.88;}
         </style>
 
-        <div class="vb-desc">Upload a video, drag a box over the area you want hidden (a face, license plate, screen, anything), then export — that region stays blurred for the whole clip while everything else stays sharp. Everything runs locally in your browser; the video is never uploaded. Best for short clips at 720p or lower — 5 minutes or under, no higher than 720p, converts in a reasonable amount of time.</div>
+        <div class="vb-desc">Upload a video, pause where you want the blur to start, drag a box over the area you want hidden (a face, license plate, screen, anything), then play on and mark where it should stop — that region stays blurred just for that stretch of the clip while everything else stays sharp. Everything runs locally in your browser; the video is never uploaded. Best for short clips at 720p or lower — 5 minutes or under, no higher than 720p, converts in a reasonable amount of time.</div>
 
         <div class="vb-dropzone" id="vbDropzone">
           <div class="vb-dz-icon">🎞️</div>
@@ -2377,10 +2378,15 @@
             <video id="vbVideoPreview" muted controls playsinline></video>
             <canvas id="vbOverlayCanvas"></canvas>
           </div>
-          <div class="vb-hint">Click and drag on the video above to draw a box over what you want blurred. Draw again to redraw it. Scrub the video with its controls first if you need to find a good frame to line it up against.</div>
+          <div class="vb-hint">1) Play the video and pause where you want the blur to start. 2) Click and drag on the frame to draw a box over what you want hidden — that sets the start point. 3) Press play again; when the video reaches where the blur should stop, click "End Blur Here." Leave it unset to blur through to the end of the video.</div>
+          <div class="vb-timing" id="vbTimingLabel"></div>
+          <div class="vb-controls-row">
+            <button class="vb-reset" id="vbEndHereBtn" type="button" disabled>⏹ End Blur Here</button>
+            <button class="vb-reset" id="vbClearEndBtn" type="button" style="display:none;">Clear End Point</button>
+            <button class="vb-reset" id="vbClearBoxBtn" type="button">Clear Box</button>
+          </div>
           <div class="vb-controls-row">
             <button class="vb-action" id="vbExportBtn" type="button" disabled>🫥 Blur &amp; Export</button>
-            <button class="vb-reset" id="vbClearBoxBtn" type="button">Clear Box</button>
             <button class="vb-reset" id="vbChooseAnotherBtn" type="button">Choose Another Video</button>
           </div>
         </div>
@@ -2399,7 +2405,7 @@
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser using ffmpeg compiled to WebAssembly — nothing is ever uploaded to a server. The blur covers a fixed rectangle for the entire clip; it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide throughout the video before you share it.
+      <b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser using ffmpeg compiled to WebAssembly — nothing is ever uploaded to a server. The blur box stays in the exact same position on screen for the time window you set (or through to the end if you don't set one) — it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide for that entire window before you share it.
     </div>
   </div>
 
@@ -7246,6 +7252,9 @@ processSharedFileIfAny();
   const overlay = document.getElementById('vbOverlayCanvas');
   const exportBtn = document.getElementById('vbExportBtn');
   const clearBoxBtn = document.getElementById('vbClearBoxBtn');
+  const endHereBtn = document.getElementById('vbEndHereBtn');
+  const clearEndBtn = document.getElementById('vbClearEndBtn');
+  const timingLabel = document.getElementById('vbTimingLabel');
   const chooseAnotherBtn = document.getElementById('vbChooseAnotherBtn');
   const progressWrap = document.getElementById('vbProgressWrap');
   const progressBar = document.getElementById('vbProgress');
@@ -7261,10 +7270,25 @@ processSharedFileIfAny();
   let vbBox = null; // {x,y,w,h} in the video's native pixel coordinates
   let vbDragStart = null;
   let vbFileCounter = 0;
+  let vbBoxStartTime = null; // seconds — when the box was drawn (video.currentTime at that moment)
+  let vbBoxEndTime = null;   // seconds — null means "through to the end of the video"
 
   function setStatus(msg, cls){
     statusEl.className = 'vb-status' + (cls ? ' ' + cls : '');
     statusEl.textContent = msg;
+  }
+
+  function formatClock(sec){
+    sec = Math.max(0, sec);
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function updateTimingLabel(){
+    if (!vbBox || vbBoxStartTime === null) { timingLabel.textContent = ''; return; }
+    const endText = vbBoxEndTime === null ? 'end of video' : formatClock(vbBoxEndTime);
+    timingLabel.textContent = 'Blur active from ' + formatClock(vbBoxStartTime) + ' to ' + endText + '.';
   }
 
   function setProgress(percent){
@@ -7279,12 +7303,17 @@ processSharedFileIfAny();
     }
     vbFile = file;
     vbBox = null;
+    vbBoxStartTime = null;
+    vbBoxEndTime = null;
     if (vbVideoObjectUrl) URL.revokeObjectURL(vbVideoObjectUrl);
     vbVideoObjectUrl = URL.createObjectURL(file);
     video.src = vbVideoObjectUrl;
     resultEl.classList.remove('show');
     setStatus('');
     exportBtn.disabled = true;
+    endHereBtn.disabled = true;
+    clearEndBtn.style.display = 'none';
+    updateTimingLabel();
   }
 
   video.addEventListener('loadedmetadata', () => {
@@ -7339,9 +7368,47 @@ processSharedFileIfAny();
     vbDragStart = null;
     if (vbBox && (vbBox.w < 8 || vbBox.h < 8)) { vbBox = null; redrawOverlay(); }
     exportBtn.disabled = !vbBox;
+    endHereBtn.disabled = !vbBox;
+    if (vbBox) {
+      // Drawing the box marks the start point — whatever moment the video
+      // was paused at when the box got drawn is when the blur should begin.
+      vbBoxStartTime = video.currentTime;
+      vbBoxEndTime = null;
+      clearEndBtn.style.display = 'none';
+    }
+    updateTimingLabel();
   });
 
-  clearBoxBtn.addEventListener('click', () => { vbBox = null; redrawOverlay(); exportBtn.disabled = true; });
+  endHereBtn.addEventListener('click', () => {
+    if (!vbBox) return;
+    vbBoxEndTime = video.currentTime;
+    if (vbBoxEndTime <= vbBoxStartTime) {
+      setStatus('That\'s before (or at) the start point — pause further into the video first, then click "End Blur Here."', 'error');
+      vbBoxEndTime = null;
+      updateTimingLabel();
+      return;
+    }
+    setStatus('');
+    clearEndBtn.style.display = '';
+    updateTimingLabel();
+  });
+
+  clearEndBtn.addEventListener('click', () => {
+    vbBoxEndTime = null;
+    clearEndBtn.style.display = 'none';
+    updateTimingLabel();
+  });
+
+  clearBoxBtn.addEventListener('click', () => {
+    vbBox = null;
+    vbBoxStartTime = null;
+    vbBoxEndTime = null;
+    redrawOverlay();
+    exportBtn.disabled = true;
+    endHereBtn.disabled = true;
+    clearEndBtn.style.display = 'none';
+    updateTimingLabel();
+  });
   chooseAnotherBtn.addEventListener('click', () => resetToDropzone());
 
   // ---- MP4 re-encode via ffmpeg.wasm (self-hosted, single-threaded core).
@@ -7441,7 +7508,18 @@ processSharedFileIfAny();
     // unqualified high luma radius (e.g. 20) can silently blow past that on
     // the chroma plane and abort the whole export. 16:3 stays under the cap
     // on both planes while still being a strong, clearly-redacting blur.
-    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=16:3[bl];[bg][bl]overlay=" + bx + ":" + by + "[out]";
+    //
+    // enable='between(t,start,end)' on the overlay is what makes the blur
+    // time-bounded rather than covering the whole clip: crop+boxblur still
+    // run on every frame (cheap relative to the main encode), but overlay
+    // only actually composites the blurred patch onto frames that fall
+    // inside [start,end] — outside that window it passes the sharp frame
+    // through untouched. An unset end time means "through to the end", so
+    // just use a value past any real video length instead of branching the
+    // filter string.
+    const startT = vbBoxStartTime;
+    const endT = vbBoxEndTime === null ? 999999 : vbBoxEndTime;
+    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=16:3[bl];[bg][bl]overlay=" + bx + ":" + by + ":enable='between(t," + startT + "," + endT + ")'[out]";
     try {
       await ffmpeg.exec(['-i', inputName, '-filter_complex', filter, '-map', '[out]', '-map', '0:a?',
         '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p',
@@ -7472,12 +7550,17 @@ processSharedFileIfAny();
   function resetToDropzone(){
     vbFile = null;
     vbBox = null;
+    vbBoxStartTime = null;
+    vbBoxEndTime = null;
     if (vbVideoObjectUrl) { URL.revokeObjectURL(vbVideoObjectUrl); vbVideoObjectUrl = null; }
     video.removeAttribute('src');
     editorEl.classList.remove('show');
     dropzone.style.display = '';
     fileInput.value = '';
     resultEl.classList.remove('show');
+    endHereBtn.disabled = true;
+    clearEndBtn.style.display = 'none';
+    updateTimingLabel();
     setStatus('');
   }
 
