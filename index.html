@@ -1345,7 +1345,6 @@
 </head>
 <body>
 <div class="wrap">
-  <audio id="introAudio" src="intro-drums.mp3" preload="auto"></audio>
   <div class="auth-bar" id="authBar">
     <button class="auth-bar-btn" id="authOpenBtn">👤 Sign In / Sign Up</button>
     <div class="auth-bar-user" id="authBarUser" style="display:none;">
@@ -3790,31 +3789,6 @@ if (spreadShareBtn) {
     }).catch(function(){});
   });
 }
-
-const introAudio = document.getElementById('introAudio');
-introAudio.volume = 0.55;
-let introAudioSpent = false;
-function toggleIntroAudio(){
-  if (introAudioSpent) return;
-  if (introAudio.paused) {
-    introAudio.currentTime = 0;
-    introAudio.play().catch(function(){});
-  } else {
-    introAudio.pause();
-    introAudio.currentTime = 0;
-    introAudioSpent = true;
-  }
-}
-document.addEventListener('click', function(e){
-  if (!introAudio.paused) { toggleIntroAudio(); return; } // already playing — any click anywhere stops it
-  if (e.target.closest('#pdf-editor-widget')) return; // dense multi-button tool — normal use shouldn't start the drum gag
-  if (e.target.closest('#lightning-downloader-widget')) return; // recording controls shouldn't trigger the drum gag
-  if (e.target.closest('#video-downloader-widget')) return; // recording controls shouldn't trigger the drum gag
-  if (e.target.closest('#video-blur-editor-widget')) return; // box-drawing/export controls shouldn't trigger the drum gag
-  if (e.target.closest('button, .mode-tab, .cat-pill, .auth-tab, .dropzone, .star, a.report-link-btn')) {
-    toggleIntroAudio();
-  }
-});
 
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
