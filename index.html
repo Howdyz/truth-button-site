@@ -4405,6 +4405,7 @@ authSignOutBtn.addEventListener('click', async () => {
   authToken = null;
   renderAuthUI();
   if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
+  if (typeof refreshDownloaderUnlockUI === 'function') refreshDownloaderUnlockUI();
 });
 
 function onAuthSuccess(token, user){
@@ -4414,6 +4415,7 @@ function onAuthSuccess(token, user){
   ['signinEmail','signinPassword','signupUsername','signupEmail','signupPassword'].forEach(id => document.getElementById(id).value = '');
   renderAuthUI();
   if (reviewsInitialized) { loadQotdAndLeaderboard(); loadAndRenderReviews(); }
+  if (typeof refreshDownloaderUnlockUI === 'function') refreshDownloaderUnlockUI();
 }
 
 function renderAuthUI(){
@@ -6636,6 +6638,13 @@ processSharedFileIfAny();
 
   document.getElementById('tabDownloader').addEventListener('click', updateTrialUI);
   updateTrialUI();
+  // Exposed so the (globally-scoped) sign-in/sign-up success handler can
+  // tell this panel to redraw — updateTrialUI lives inside this IIFE and
+  // currentUser.downloaderUnlocked genuinely does flip to true on sign-in,
+  // but without this hook nothing ever told the on-screen paywall to
+  // re-check it, so a user signing in while already on this tab would see
+  // no visible change until they switched tabs or reloaded the page.
+  window.refreshDownloaderUnlockUI = updateTrialUI;
 
   if (new URLSearchParams(location.search).get('paid') === '1') {
     setStatus('Payment received! If you\'re signed in, click "I\'ve Paid — Check Now" below to unlock.', 'ok');
