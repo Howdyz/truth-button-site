@@ -7436,7 +7436,12 @@ processSharedFileIfAny();
     const inputData = new Uint8Array(await vbFile.arrayBuffer());
     await ffmpeg.writeFile(inputName, inputData);
 
-    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=20:10[bl];[bg][bl]overlay=" + bx + ":" + by + "[out]";
+    // boxblur's chroma radius defaults to matching the luma radius, and
+    // ffmpeg hard-caps chroma radius at 17 regardless of crop size — an
+    // unqualified high luma radius (e.g. 20) can silently blow past that on
+    // the chroma plane and abort the whole export. 16:3 stays under the cap
+    // on both planes while still being a strong, clearly-redacting blur.
+    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=16:3[bl];[bg][bl]overlay=" + bx + ":" + by + "[out]";
     try {
       await ffmpeg.exec(['-i', inputName, '-filter_complex', filter, '-map', '[out]', '-map', '0:a?',
         '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p',
