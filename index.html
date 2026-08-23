@@ -7119,17 +7119,27 @@ processSharedFileIfAny();
     if (ffmpegInstance) return ffmpegInstance;
     if (!ffmpegLoadPromise) {
       ffmpegLoadPromise = (async () => {
-        await loadFfmpegScript();
-        const wasmURL = await fetchDecompressedWasmUrl();
-        const ffmpeg = new FFmpegWASM.FFmpeg();
-        ffmpeg.on('progress', ({ progress }) => {
-          if (onProgress && typeof progress === 'number' && isFinite(progress)) {
-            onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
-          }
-        });
-        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
-        ffmpegInstance = ffmpeg;
-        return ffmpeg;
+        try {
+          await loadFfmpegScript();
+          const wasmURL = await fetchDecompressedWasmUrl();
+          const ffmpeg = new FFmpegWASM.FFmpeg();
+          ffmpeg.on('progress', ({ progress }) => {
+            if (onProgress && typeof progress === 'number' && isFinite(progress)) {
+              onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
+            }
+          });
+          await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
+          ffmpegInstance = ffmpeg;
+          return ffmpeg;
+        } catch (err) {
+          // Without this, a rejected promise gets cached forever — one bad
+          // network blip on the first attempt would permanently break the
+          // tool for the rest of the page session, since every later call
+          // would just replay the same stale rejection instead of actually
+          // retrying. Clearing it here lets the next click try fresh.
+          ffmpegLoadPromise = null;
+          throw err;
+        }
       })();
     }
     return ffmpegLoadPromise;
@@ -7456,17 +7466,27 @@ processSharedFileIfAny();
     if (ffmpegInstance) return ffmpegInstance;
     if (!ffmpegLoadPromise) {
       ffmpegLoadPromise = (async () => {
-        await loadFfmpegScript();
-        const wasmURL = await fetchDecompressedWasmUrl();
-        const ffmpeg = new FFmpegWASM.FFmpeg();
-        ffmpeg.on('progress', ({ progress }) => {
-          if (onProgress && typeof progress === 'number' && isFinite(progress)) {
-            onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
-          }
-        });
-        await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
-        ffmpegInstance = ffmpeg;
-        return ffmpeg;
+        try {
+          await loadFfmpegScript();
+          const wasmURL = await fetchDecompressedWasmUrl();
+          const ffmpeg = new FFmpegWASM.FFmpeg();
+          ffmpeg.on('progress', ({ progress }) => {
+            if (onProgress && typeof progress === 'number' && isFinite(progress)) {
+              onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
+            }
+          });
+          await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
+          ffmpegInstance = ffmpeg;
+          return ffmpeg;
+        } catch (err) {
+          // Without this, a rejected promise gets cached forever — one bad
+          // network blip on the first attempt would permanently break the
+          // tool for the rest of the page session, since every later call
+          // would just replay the same stale rejection instead of actually
+          // retrying. Clearing it here lets the next click try fresh.
+          ffmpegLoadPromise = null;
+          throw err;
+        }
       })();
     }
     return ffmpegLoadPromise;
@@ -7487,48 +7507,55 @@ processSharedFileIfAny();
 
     exportBtn.disabled = true;
     setStatus('Loading video engine (one-time, ~10MB — hang tight)…', 'ok');
-    const ffmpeg = await getFfmpeg((percent) => {
-      setProgress(percent);
-      setStatus('Blurring & converting… ' + percent + '% (can take a while for longer/higher-res clips)', 'ok');
-    });
-
-    const nativeW = video.videoWidth, nativeH = video.videoHeight;
-    const targetW = Math.min(854, nativeW);
-    const scaleRatio = targetW / nativeW;
-    const targetH = Math.max(2, Math.round((nativeH * scaleRatio) / 2) * 2);
-
-    let bx = Math.round(vbBox.x * scaleRatio);
-    let by = Math.round(vbBox.y * scaleRatio);
-    let bw = Math.round(vbBox.w * scaleRatio);
-    let bh = Math.round(vbBox.h * scaleRatio);
-    bx = Math.max(0, Math.min(bx, targetW - 2));
-    by = Math.max(0, Math.min(by, targetH - 2));
-    bw = Math.max(2, Math.min(bw, targetW - bx));
-    bh = Math.max(2, Math.min(bh, targetH - by));
-
-    setStatus('Blurring & converting… 0% (can take a while for longer/higher-res clips)', 'ok');
-    setProgress(0);
-    const inputData = new Uint8Array(await vbFile.arrayBuffer());
-    await ffmpeg.writeFile(inputName, inputData);
-
-    // boxblur's chroma radius defaults to matching the luma radius, and
-    // ffmpeg hard-caps chroma radius at 17 regardless of crop size — an
-    // unqualified high luma radius (e.g. 20) can silently blow past that on
-    // the chroma plane and abort the whole export. 16:3 stays under the cap
-    // on both planes while still being a strong, clearly-redacting blur.
-    //
-    // enable='between(t,start,end)' on the overlay is what makes the blur
-    // time-bounded rather than covering the whole clip: crop+boxblur still
-    // run on every frame (cheap relative to the main encode), but overlay
-    // only actually composites the blurred patch onto frames that fall
-    // inside [start,end] — outside that window it passes the sharp frame
-    // through untouched. An unset end time means "through to the end", so
-    // just use a value past any real video length instead of branching the
-    // filter string.
-    const startT = vbBoxStartTime;
-    const endT = vbBoxEndTime === null ? 999999 : vbBoxEndTime;
-    const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=16:3[bl];[bg][bl]overlay=" + bx + ":" + by + ":enable='between(t," + startT + "," + endT + ")'[out]";
+    // Everything from here down, including getFfmpeg() itself, is inside
+    // the try block on purpose — if the wasm fetch/load step fails (a
+    // network hiccup, a browser that rejects DecompressionStream, etc.) it
+    // used to throw uncaught, leaving the status frozen on "Loading video
+    // engine…" forever with Export permanently disabled and no way to
+    // retry short of reloading the page. Thunder Video Downloader already
+    // wrapped its equivalent call; this matches that same pattern.
     try {
+      const ffmpeg = await getFfmpeg((percent) => {
+        setProgress(percent);
+        setStatus('Blurring & converting… ' + percent + '% (can take a while for longer/higher-res clips)', 'ok');
+      });
+
+      const nativeW = video.videoWidth, nativeH = video.videoHeight;
+      const targetW = Math.min(854, nativeW);
+      const scaleRatio = targetW / nativeW;
+      const targetH = Math.max(2, Math.round((nativeH * scaleRatio) / 2) * 2);
+
+      let bx = Math.round(vbBox.x * scaleRatio);
+      let by = Math.round(vbBox.y * scaleRatio);
+      let bw = Math.round(vbBox.w * scaleRatio);
+      let bh = Math.round(vbBox.h * scaleRatio);
+      bx = Math.max(0, Math.min(bx, targetW - 2));
+      by = Math.max(0, Math.min(by, targetH - 2));
+      bw = Math.max(2, Math.min(bw, targetW - bx));
+      bh = Math.max(2, Math.min(bh, targetH - by));
+
+      setStatus('Blurring & converting… 0% (can take a while for longer/higher-res clips)', 'ok');
+      setProgress(0);
+      const inputData = new Uint8Array(await vbFile.arrayBuffer());
+      await ffmpeg.writeFile(inputName, inputData);
+
+      // boxblur's chroma radius defaults to matching the luma radius, and
+      // ffmpeg hard-caps chroma radius at 17 regardless of crop size — an
+      // unqualified high luma radius (e.g. 20) can silently blow past that on
+      // the chroma plane and abort the whole export. 16:3 stays under the cap
+      // on both planes while still being a strong, clearly-redacting blur.
+      //
+      // enable='between(t,start,end)' on the overlay is what makes the blur
+      // time-bounded rather than covering the whole clip: crop+boxblur still
+      // run on every frame (cheap relative to the main encode), but overlay
+      // only actually composites the blurred patch onto frames that fall
+      // inside [start,end] — outside that window it passes the sharp frame
+      // through untouched. An unset end time means "through to the end", so
+      // just use a value past any real video length instead of branching the
+      // filter string.
+      const startT = vbBoxStartTime;
+      const endT = vbBoxEndTime === null ? 999999 : vbBoxEndTime;
+      const filter = "[0:v]scale='min(854,iw)':-2[sc];[sc]split=2[bg][fg];[fg]crop=" + bw + ":" + bh + ":" + bx + ":" + by + ",boxblur=16:3[bl];[bg][bl]overlay=" + bx + ":" + by + ":enable='between(t," + startT + "," + endT + ")'[out]";
       await ffmpeg.exec(['-i', inputName, '-filter_complex', filter, '-map', '[out]', '-map', '0:a?',
         '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p',
         '-c:a', 'aac', '-movflags', '+faststart', outputName]);
