@@ -2104,24 +2104,26 @@
             <div class="utk-reminder">Reminder: local machine only · authorized targets only · never projectsilverbeam.com or this site's backend.</div>
 
             <div class="utk-setup">
-              <div class="utk-block-title">1. Run it locally</div>
+              <div class="utk-block-title">1. One-time setup</div>
+              <div class="utk-note">Run this once, then leave the launcher running (it's tiny — it only knows how to start/check one specific script, nothing else). After that, the Start Server button below works without opening a terminal again.</div>
               <pre>cd special-projects/hexstrike-ai
 python3 -m venv hexstrike_env &amp;&amp; source hexstrike_env/bin/activate
 pip install -r requirements.txt
-python3 hexstrike_server.py</pre>
-              <div class="utk-note">Default dashboard: <code>http://127.0.0.1:8888</code>. Keep it bound to localhost — never <code>0.0.0.0</code> on a network you don't fully control.</div>
+python3 hexstrike_launcher.py</pre>
+              <div class="utk-note">Prefer to run it manually instead? Skip the launcher and just run <code>python3 hexstrike_server.py</code> yourself — the Check Connection / Open Dashboard / Stop Server buttons below work either way. Default dashboard: <code>http://127.0.0.1:8888</code>. Keep it bound to localhost — never <code>0.0.0.0</code> on a network you don't fully control.</div>
             </div>
 
             <div class="utk-setup">
               <div class="utk-block-title">2. Connect</div>
               <input type="text" id="utk-server-url" value="http://127.0.0.1:8888" placeholder="http://127.0.0.1:8888">
               <div class="utk-row">
+                <button id="utk-start-btn" type="button">▶ Start Server</button>
                 <button id="utk-check-btn" type="button">Check Connection</button>
                 <button id="utk-open-dash-btn" type="button">Open Dashboard →</button>
                 <button id="utk-kill-btn" type="button" class="utk-kill">🛑 Stop Server</button>
               </div>
               <div class="utk-status" id="utk-conn-status">Not checked yet.</div>
-              <div class="utk-note">Stop Server sends a one-click shutdown signal to the address above — it only ever terminates that server's own process, nothing else.</div>
+              <div class="utk-note">Start Server needs the one-time launcher from step 1 running. Stop Server talks to hexstrike itself directly and works either way — it only ever terminates that server's own process, nothing else.</div>
             </div>
 
             <div class="utk-setup">
@@ -5039,6 +5041,7 @@ if (REVIEWS_API_BASE) {
   const agreeCheck = root.querySelector('#utk-agree-check');
   const agreeBtn = root.querySelector('#utk-agree-btn');
   const serverInput = root.querySelector('#utk-server-url');
+  const startBtn = root.querySelector('#utk-start-btn');
   const checkBtn = root.querySelector('#utk-check-btn');
   const openDashBtn = root.querySelector('#utk-open-dash-btn');
   const killBtn = root.querySelector('#utk-kill-btn');
@@ -5080,6 +5083,44 @@ if (REVIEWS_API_BASE) {
     if (!agreeCheck.checked) return;
     agreedThisPageLoad = true;
     showControls();
+  });
+
+  function launcherUrlFrom(serverUrl) {
+    const host = hostnameOf(serverUrl) || '127.0.0.1';
+    return 'http://' + host + ':8889';
+  }
+
+  startBtn.addEventListener('click', async () => {
+    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
+    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utk-status bad'; return; }
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utk-status bad';
+      return;
+    }
+    const launcherUrl = launcherUrlFrom(url);
+    connStatus.textContent = 'Asking the launcher to start HexStrike…';
+    connStatus.className = 'utk-status';
+    try {
+      const res = await withTimeout(fetch(launcherUrl + '/start', {
+        method: 'POST',
+        headers: { 'X-HexStrike-Launcher': 'start' },
+      }), 4000);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.status === 'already_running') {
+        connStatus.textContent = 'Already running — use Check Connection to confirm.';
+        connStatus.className = 'utk-status ok';
+      } else if (res.ok) {
+        connStatus.textContent = 'Launcher says it\'s starting — give it a few seconds, then Check Connection.';
+        connStatus.className = 'utk-status ok';
+      } else {
+        connStatus.textContent = 'Launcher refused (HTTP ' + res.status + '). See step 1 for setup.';
+        connStatus.className = 'utk-status bad';
+      }
+    } catch (e) {
+      connStatus.textContent = 'No launcher found at ' + launcherUrl + ' — run the one-time setup in step 1 first.';
+      connStatus.className = 'utk-status bad';
+    }
   });
 
   checkBtn.addEventListener('click', async () => {
