@@ -5047,17 +5047,29 @@ if (REVIEWS_API_BASE) {
   const targetCheckBtn = root.querySelector('#utk-target-check-btn');
   const targetStatus = root.querySelector('#utk-target-status');
 
-  const AGREE_KEY = 'utkHexstrikeAgreed';
+  // Deliberately not persisted (no localStorage) — the disclaimer must be
+  // re-read and re-accepted every time the page loads, not just once ever.
+  let agreedThisPageLoad = false;
 
   function showControls() {
     terms.style.display = 'none';
     controls.style.display = '';
   }
 
+  function showTerms() {
+    terms.style.display = '';
+    controls.style.display = 'none';
+    agreeCheck.checked = false;
+    agreeBtn.disabled = true;
+  }
+
   openBtn.addEventListener('click', () => {
     const willShow = hexPanel.style.display === 'none';
     hexPanel.style.display = willShow ? '' : 'none';
-    if (willShow && localStorage.getItem(AGREE_KEY) === '1') showControls();
+    if (willShow) {
+      if (agreedThisPageLoad) showControls();
+      else showTerms();
+    }
   });
 
   agreeCheck.addEventListener('change', () => {
@@ -5066,7 +5078,7 @@ if (REVIEWS_API_BASE) {
 
   agreeBtn.addEventListener('click', () => {
     if (!agreeCheck.checked) return;
-    localStorage.setItem(AGREE_KEY, '1');
+    agreedThisPageLoad = true;
     showControls();
   });
 
