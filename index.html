@@ -5050,9 +5050,9 @@ if (REVIEWS_API_BASE) {
   const targetCheckBtn = root.querySelector('#utk-target-check-btn');
   const targetStatus = root.querySelector('#utk-target-status');
 
-  // Deliberately not persisted (no localStorage) — the disclaimer must be
-  // re-read and re-accepted every time the page loads, not just once ever.
-  let agreedThisPageLoad = false;
+  // Deliberately never remembered anywhere (no localStorage, no in-memory
+  // flag) — the disclaimer must be re-read and re-checked every single time
+  // the panel is opened, not just once per page load or once ever.
 
   function showControls() {
     terms.style.display = 'none';
@@ -5069,10 +5069,7 @@ if (REVIEWS_API_BASE) {
   openBtn.addEventListener('click', () => {
     const willShow = hexPanel.style.display === 'none';
     hexPanel.style.display = willShow ? '' : 'none';
-    if (willShow) {
-      if (agreedThisPageLoad) showControls();
-      else showTerms();
-    }
+    if (willShow) showTerms();
   });
 
   agreeCheck.addEventListener('change', () => {
@@ -5081,8 +5078,8 @@ if (REVIEWS_API_BASE) {
 
   agreeBtn.addEventListener('click', () => {
     if (!agreeCheck.checked) return;
-    agreedThisPageLoad = true;
     showControls();
+    attemptStart();
   });
 
   function launcherUrlFrom(serverUrl) {
@@ -5090,7 +5087,7 @@ if (REVIEWS_API_BASE) {
     return 'http://' + host + ':8889';
   }
 
-  startBtn.addEventListener('click', async () => {
+  async function attemptStart() {
     const url = (serverInput.value || '').trim().replace(/\/+$/, '');
     if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utk-status bad'; return; }
     if (isBlockedHost(hostnameOf(url))) {
@@ -5121,7 +5118,9 @@ if (REVIEWS_API_BASE) {
       connStatus.textContent = 'No launcher found at ' + launcherUrl + ' — run the one-time setup in step 1 first.';
       connStatus.className = 'utk-status bad';
     }
-  });
+  }
+
+  startBtn.addEventListener('click', attemptStart);
 
   checkBtn.addEventListener('click', async () => {
     const url = (serverInput.value || '').trim().replace(/\/+$/, '');
