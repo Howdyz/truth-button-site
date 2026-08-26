@@ -5,6 +5,8 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Truth Button</title>
+<meta name="description" content="Drop in a photo, video, or audio clip and check it for signs of AI generation or heavy editing — runs locally in your browser, nothing uploaded.">
+<link rel="canonical" href="https://projectsilverbeam.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://projectsilverbeam.com/">
 <meta property="og:title" content="The Truth Button">
@@ -1536,6 +1538,7 @@
     <div class="mode-tab" data-mode="cropper" id="tabCropper">📐 Social Media Cropper</div>
     <div class="mode-tab" data-mode="mp3library" id="tabMp3Library">🎵 Offline MP3 Library</div>
     <div class="mode-tab" data-mode="scamid" id="tabScamId">🚨 Scam Caller ID</div>
+    <div class="mode-tab" data-mode="toolkit" id="tabToolkit">🧰 Ultimate Tool Kit</div>
   </div>
 
   <div class="desk">
@@ -2018,6 +2021,125 @@
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> this is a heuristic pattern scanner, not a security audit or a guarantee of safety. It only checks source files (.py/.js/.jsx/.mjs/.cjs/.ts/.tsx) for known infostealer-style patterns — it won't catch everything, especially deliberately obfuscated code, and it can false-positive on legitimate diagnostics/analytics code. Only public GitHub, GitLab, Bitbucket, Codeberg, or sourcehut URLs are accepted (https:// only); nothing is scanned or stored beyond the scan itself — each run happens in a temporary directory that's deleted before the result comes back.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="toolkitPanel">
+    <div class="lookup-card">
+      <h3>Ultimate Tool Kit</h3>
+      <div class="lc-sub">A hub for security-research tools that run entirely on your own computer — nothing here is hosted, proxied, or logged by Truth Button. Starting with HexStrike AI; more tools land here over time.</div>
+
+      <div id="utk-widget">
+        <style>
+          #utk-widget {
+            --utk-bg: #14110F; --utk-panel: #1C1814; --utk-border: rgba(242,237,225,0.14);
+            --utk-text: #F2EDE1; --utk-text-dim: #8C8377; --utk-accent: #2F8F7A; --utk-warn: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--utk-text); margin-top: 16px;
+          }
+          #utk-widget * { box-sizing: border-box; }
+          #utk-widget .utk-grid { display: grid; gap: 12px; margin-bottom: 14px; }
+          #utk-widget .utk-card { background: var(--utk-panel); border: 1px solid var(--utk-border); border-radius: 8px; padding: 16px; }
+          #utk-widget .utk-card-top { display: flex; gap: 12px; margin-bottom: 12px; }
+          #utk-widget .utk-card-icon { font-size: 22px; line-height: 1; }
+          #utk-widget .utk-card-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+          #utk-widget .utk-card-desc { font-size: 12.5px; color: var(--utk-text-dim); line-height: 1.5; }
+          #utk-widget button { padding: 9px 14px; background: var(--utk-accent); border: none; border-radius: 5px;
+            color: var(--utk-bg); font-weight: 600; font-size: 12.5px; cursor: pointer; font-family: inherit;
+            text-transform: uppercase; letter-spacing: 0.04em; }
+          #utk-widget button:hover { opacity: 0.88; }
+          #utk-widget button:disabled { opacity: .45; cursor: default; }
+          #utk-widget button.utk-kill { background: var(--utk-warn); color: #fff; }
+          #utk-widget input[type=text] { width: 100%; padding: 9px 10px; background: var(--utk-bg);
+            border: 1px solid var(--utk-border); border-radius: 5px; color: var(--utk-text); font-size: 13px;
+            font-family: inherit; margin-bottom: 10px; }
+          #utk-widget .utk-terms { background: rgba(232,64,44,0.08); border: 1px solid var(--utk-warn);
+            border-radius: 8px; padding: 16px 18px; margin-top: 14px; }
+          #utk-widget .utk-terms-title { font-weight: 700; color: var(--utk-warn); margin-bottom: 10px; font-size: 13.5px; }
+          #utk-widget .utk-terms ul { margin: 0 0 14px; padding-left: 20px; font-size: 12.5px; line-height: 1.7; color: var(--utk-text); }
+          #utk-widget .utk-terms li { margin-bottom: 6px; }
+          #utk-widget .utk-terms code { background: var(--utk-bg); border: 1px solid var(--utk-border); border-radius: 4px; padding: 1px 5px; }
+          #utk-widget .utk-agree { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--utk-text); margin-bottom: 12px; cursor: pointer; }
+          #utk-widget .utk-agree input { margin-top: 3px; }
+          #utk-widget .utk-reminder { background: rgba(232,64,44,0.1); border: 1px solid var(--utk-warn); border-radius: 6px;
+            padding: 8px 12px; font-size: 11.5px; color: var(--utk-text); margin-top: 14px; margin-bottom: 14px; }
+          #utk-widget .utk-setup { background: var(--utk-panel); border: 1px solid var(--utk-border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+          #utk-widget .utk-block-title { font-weight: 700; font-size: 12.5px; margin-bottom: 10px; }
+          #utk-widget pre { background: var(--utk-bg); border: 1px solid var(--utk-border); border-radius: 5px;
+            padding: 10px 12px; font-size: 11.5px; overflow-x: auto; color: #c7d0e0; margin: 0 0 8px; white-space: pre-wrap; }
+          #utk-widget .utk-note { font-size: 11.5px; color: var(--utk-text-dim); margin-bottom: 8px; line-height: 1.5; }
+          #utk-widget .utk-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+          #utk-widget .utk-status { font-size: 12px; color: var(--utk-text-dim); min-height: 16px; }
+          #utk-widget .utk-status.ok { color: var(--utk-accent); }
+          #utk-widget .utk-status.bad { color: var(--utk-warn); }
+        </style>
+
+        <div class="utk-grid">
+          <div class="utk-card">
+            <div class="utk-card-top">
+              <span class="utk-card-icon">🛰️</span>
+              <div>
+                <div class="utk-card-title">HexStrike AI</div>
+                <div class="utk-card-desc">AI-orchestrated pentesting framework — 100+ recon, scanning, and exploitation tools behind one API. Runs as its own Python server on your own machine, not on Truth Button.</div>
+              </div>
+            </div>
+            <button id="utk-hex-open-btn" type="button">Open →</button>
+          </div>
+        </div>
+
+        <div id="utk-hex-panel" style="display:none;">
+          <div class="utk-terms" id="utk-terms">
+            <div class="utk-terms-title">⚠️ Read this before you use HexStrike AI</div>
+            <ul>
+              <li>HexStrike AI is a separate, third-party tool. You install and run it <b>entirely on your own computer</b> — Truth Button never runs it, never proxies it, and never sees anything it does.</li>
+              <li>It ships with <b>no built-in login, and an endpoint that can execute arbitrary commands.</b> Only ever run it bound to <code>127.0.0.1</code> / <code>localhost</code>. Never expose it to your LAN or the open internet.</li>
+              <li>Only point it at systems you own or are explicitly, legally authorized to test. Unauthorized scanning or exploitation of someone else's system can be a crime.</li>
+              <li><b>Explicitly prohibited:</b> using this tool, or any target field on this page, against <code>projectsilverbeam.com</code>, <code>www.projectsilverbeam.com</code>, <code>api.projectsilverbeam.com</code>, <code>truth-button-backend.onrender.com</code>, or any of their infrastructure.</li>
+              <li>You are solely responsible for how you use it — this page only links to it and reminds you of the rules.</li>
+            </ul>
+            <label class="utk-agree"><input type="checkbox" id="utk-agree-check"> I've read this and will only use HexStrike AI on systems I own or am explicitly authorized to test.</label>
+            <button id="utk-agree-btn" type="button" disabled>Continue</button>
+          </div>
+
+          <div class="utk-controls" id="utk-controls" style="display:none;">
+            <div class="utk-reminder">Reminder: local machine only · authorized targets only · never projectsilverbeam.com or this site's backend.</div>
+
+            <div class="utk-setup">
+              <div class="utk-block-title">1. Run it locally</div>
+              <pre>cd special-projects/hexstrike-ai
+python3 -m venv hexstrike_env &amp;&amp; source hexstrike_env/bin/activate
+pip install -r requirements.txt
+python3 hexstrike_server.py</pre>
+              <div class="utk-note">Default dashboard: <code>http://127.0.0.1:8888</code>. Keep it bound to localhost — never <code>0.0.0.0</code> on a network you don't fully control.</div>
+            </div>
+
+            <div class="utk-setup">
+              <div class="utk-block-title">2. Connect</div>
+              <input type="text" id="utk-server-url" value="http://127.0.0.1:8888" placeholder="http://127.0.0.1:8888">
+              <div class="utk-row">
+                <button id="utk-check-btn" type="button">Check Connection</button>
+                <button id="utk-open-dash-btn" type="button">Open Dashboard →</button>
+                <button id="utk-kill-btn" type="button" class="utk-kill">🛑 Stop Server</button>
+              </div>
+              <div class="utk-status" id="utk-conn-status">Not checked yet.</div>
+              <div class="utk-note">Stop Server sends a one-click shutdown signal to the address above — it only ever terminates that server's own process, nothing else.</div>
+            </div>
+
+            <div class="utk-setup">
+              <div class="utk-block-title">3. Sanity-check a target</div>
+              <div class="utk-note">Paste anything you're about to point HexStrike at — this blocks Truth Button's own domains before you go any further.</div>
+              <input type="text" id="utk-target-input" placeholder="example.com or 10.0.0.5">
+              <div class="utk-row">
+                <button id="utk-target-check-btn" type="button">Check Target</button>
+              </div>
+              <div class="utk-status" id="utk-target-status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> HexStrike AI (and every tool added to this kit) runs on your own machine, not on Truth Button's servers — this page is a launcher plus guardrails, not a hosted scanning service. For authorized security testing, CTF, and research use only.
     </div>
   </div>
 
@@ -4025,6 +4147,7 @@ const mp3libraryPanel = document.getElementById('mp3libraryPanel');
 const scamidPanel = document.getElementById('scamidPanel');
 const videodlPanel = document.getElementById('videodlPanel');
 const vidblurPanel = document.getElementById('vidblurPanel');
+const toolkitPanel = document.getElementById('toolkitPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'More tools are already cooking. This toolbox keeps growing — free, always.',
@@ -4044,7 +4167,8 @@ const LOOKUP_TAGLINES = {
   mp3library: 'Import your MP3 files once and play them anytime, even with no internet connection — everything is stored locally on this device, nothing is ever uploaded.',
   scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
   videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.',
-  vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.'
+  vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.',
+  toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only.'
 };
 
 function setMode(newMode){
@@ -4054,7 +4178,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'toolkit');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -4077,6 +4201,7 @@ function setMode(newMode){
   scamidPanel.classList.toggle('show', newMode === 'scamid');
   videodlPanel.classList.toggle('show', newMode === 'videodl');
   vidblurPanel.classList.toggle('show', newMode === 'vidblur');
+  toolkitPanel.classList.toggle('show', newMode === 'toolkit');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -4106,6 +4231,7 @@ document.getElementById('tabRadio').addEventListener('click', () => setMode('rad
 document.getElementById('tabCropper').addEventListener('click', () => setMode('cropper'));
 document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
 document.getElementById('tabScamId').addEventListener('click', () => setMode('scamid'));
+document.getElementById('tabToolkit').addEventListener('click', () => setMode('toolkit'));
 document.getElementById('tabVideoDl').addEventListener('click', () => setMode('videodl'));
 document.getElementById('tabVidBlur').addEventListener('click', () => setMode('vidblur'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
@@ -4877,6 +5003,138 @@ if (REVIEWS_API_BASE) {
       renderResults(data);
     } catch (e) {
       setStatus('Error: ' + e.message);
+    }
+  });
+})();
+
+// Ultimate Tool Kit widget — HexStrike AI launcher (runs entirely on the visitor's own machine)
+(function () {
+  const root = document.getElementById('utk-widget');
+  if (!root) return;
+
+  const BLOCKED_HOSTS = ['projectsilverbeam.com', 'www.projectsilverbeam.com', 'api.projectsilverbeam.com', 'truth-button-backend.onrender.com'];
+
+  function hostnameOf(raw) {
+    let s = (raw || '').trim();
+    if (!s) return '';
+    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)) s = 'http://' + s;
+    try { return new URL(s).hostname.toLowerCase(); } catch (e) { return s.toLowerCase().replace(/^www\./, ''); }
+  }
+
+  function isBlockedHost(host) {
+    return !!host && BLOCKED_HOSTS.some(b => host === b || host.endsWith('.' + b));
+  }
+
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+  }
+
+  const openBtn = root.querySelector('#utk-hex-open-btn');
+  const hexPanel = root.querySelector('#utk-hex-panel');
+  const terms = root.querySelector('#utk-terms');
+  const controls = root.querySelector('#utk-controls');
+  const agreeCheck = root.querySelector('#utk-agree-check');
+  const agreeBtn = root.querySelector('#utk-agree-btn');
+  const serverInput = root.querySelector('#utk-server-url');
+  const checkBtn = root.querySelector('#utk-check-btn');
+  const openDashBtn = root.querySelector('#utk-open-dash-btn');
+  const killBtn = root.querySelector('#utk-kill-btn');
+  const connStatus = root.querySelector('#utk-conn-status');
+  const targetInput = root.querySelector('#utk-target-input');
+  const targetCheckBtn = root.querySelector('#utk-target-check-btn');
+  const targetStatus = root.querySelector('#utk-target-status');
+
+  const AGREE_KEY = 'utkHexstrikeAgreed';
+
+  function showControls() {
+    terms.style.display = 'none';
+    controls.style.display = '';
+  }
+
+  openBtn.addEventListener('click', () => {
+    const willShow = hexPanel.style.display === 'none';
+    hexPanel.style.display = willShow ? '' : 'none';
+    if (willShow && localStorage.getItem(AGREE_KEY) === '1') showControls();
+  });
+
+  agreeCheck.addEventListener('change', () => {
+    agreeBtn.disabled = !agreeCheck.checked;
+  });
+
+  agreeBtn.addEventListener('click', () => {
+    if (!agreeCheck.checked) return;
+    localStorage.setItem(AGREE_KEY, '1');
+    showControls();
+  });
+
+  checkBtn.addEventListener('click', async () => {
+    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
+    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utk-status bad'; return; }
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utk-status bad';
+      return;
+    }
+    connStatus.textContent = 'Checking…';
+    connStatus.className = 'utk-status';
+    try {
+      // no-cors: hexstrike ships with no CORS headers, so this can only tell us
+      // *something* answered, not verify it's actually HexStrike.
+      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 4000);
+      connStatus.textContent = 'Something is listening at that address — looks reachable.';
+      connStatus.className = 'utk-status ok';
+    } catch (e) {
+      connStatus.textContent = 'Not reachable — make sure hexstrike_server.py is running locally at that address.';
+      connStatus.className = 'utk-status bad';
+    }
+  });
+
+  openDashBtn.addEventListener('click', () => {
+    const url = (serverInput.value || '').trim();
+    if (!url) return;
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing to open — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utk-status bad';
+      return;
+    }
+    window.open(url, '_blank', 'noopener');
+  });
+
+  killBtn.addEventListener('click', async () => {
+    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
+    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utk-status bad'; return; }
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utk-status bad';
+      return;
+    }
+    if (!window.confirm('Send a shutdown signal to the HexStrike server at ' + url + '? This stops it immediately.')) return;
+    connStatus.textContent = 'Sending shutdown signal…';
+    connStatus.className = 'utk-status';
+    try {
+      // Simple POST, no custom headers/body — stays a CORS "simple request" so it's
+      // actually delivered even though hexstrike sends no CORS headers back.
+      await withTimeout(fetch(url + '/api/kill-switch', { method: 'POST', mode: 'no-cors', cache: 'no-store' }), 4000);
+      connStatus.textContent = 'Shutdown signal sent. Re-check the connection in a moment to confirm it stopped.';
+      connStatus.className = 'utk-status ok';
+    } catch (e) {
+      connStatus.textContent = 'Could not reach that address to send the shutdown signal.';
+      connStatus.className = 'utk-status bad';
+    }
+  });
+
+  targetCheckBtn.addEventListener('click', () => {
+    const raw = (targetInput.value || '').trim();
+    if (!raw) { targetStatus.textContent = 'Enter a target first.'; targetStatus.className = 'utk-status'; return; }
+    if (isBlockedHost(hostnameOf(raw))) {
+      targetStatus.textContent = '🚫 Blocked — this is one of Truth Button\'s own domains. Do not scan it.';
+      targetStatus.className = 'utk-status bad';
+    } else {
+      targetStatus.textContent = '✓ Not a Truth Button domain. This does not confirm you\'re authorized to test it — that\'s still on you.';
+      targetStatus.className = 'utk-status ok';
     }
   });
 })();
@@ -6634,7 +6892,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','toolkit']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -8500,6 +8758,7 @@ processSharedFileIfAny();
   let currentBand = 'all';
   let currentStationUuid = null;
   let stations = [];
+  let mseAbort = null;
 
   function setStatus(msg, cls){
     statusEl.className = 'rd-status' + (cls ? ' ' + cls : '');
@@ -8582,11 +8841,8 @@ processSharedFileIfAny();
 
   function playStation(s){
     currentStationUuid = s.stationuuid;
-    audio.src = s.url_resolved || s.url;
     audio.volume = volumeSlider.value / 100;
-    audio.play().catch(() => {
-      setStatus('Could not play "' + s.name + '" — the stream may be temporarily offline.', 'error');
-    });
+    startPlayback(s.url_resolved || s.url, s.name || 'this station');
 
     playerFavicon.src = s.favicon || '';
     playerFavicon.style.display = s.favicon ? '' : 'none';
@@ -8605,7 +8861,61 @@ processSharedFileIfAny();
     fetch(RB_BASE + '/json/url/' + encodeURIComponent(s.stationuuid)).catch(() => {});
   }
 
+  // Some stations (mostly AAC+/HE-AAC streams from Icecast/Shoutcast-style servers)
+  // send `Content-Type: audio/aacp`, a MIME type Chrome/Firefox/Edge don't support in
+  // a plain <audio src>, so playback fails immediately even though the stream itself
+  // is fine. Try the normal path first; if it's rejected, re-fetch the same bytes and
+  // feed them into a MediaSource under a type the browser does accept ('audio/aac') —
+  // sidesteps the bad Content-Type since MSE only cares about the type we declare.
+  function startPlayback(url, name){
+    if (mseAbort) { mseAbort.abort(); mseAbort = null; }
+    audio.src = url;
+    audio.play().catch(() => {
+      if (window.MediaSource && MediaSource.isTypeSupported('audio/aac')) {
+        playViaMediaSource(url, name);
+      } else {
+        setStatus('Could not play "' + name + '" — the stream may be temporarily offline.', 'error');
+      }
+    });
+  }
+
+  function playViaMediaSource(url, name){
+    const ms = new MediaSource();
+    const controller = new AbortController();
+    mseAbort = controller;
+    audio.src = URL.createObjectURL(ms);
+    ms.addEventListener('sourceopen', () => {
+      let sb;
+      try { sb = ms.addSourceBuffer('audio/aac'); }
+      catch (e) { setStatus('Could not play "' + name + '" — the stream may be temporarily offline.', 'error'); return; }
+
+      fetch(url, { signal: controller.signal }).then(resp => {
+        const reader = resp.body.getReader();
+        function pump(){
+          reader.read().then(({ done, value }) => {
+            if (done) { if (ms.readyState === 'open') { try { ms.endOfStream(); } catch(e){} } return; }
+            const append = () => {
+              sb.addEventListener('updateend', pump, { once: true });
+              try { sb.appendBuffer(value); } catch(e){ /* buffer full/detached, drop this chunk */ }
+            };
+            if (sb.updating) sb.addEventListener('updateend', append, { once: true });
+            else append();
+          }).catch(() => {});
+        }
+        pump();
+        audio.play().catch(() => {
+          setStatus('Could not play "' + name + '" — the stream may be temporarily offline.', 'error');
+        });
+      }).catch(() => {
+        if (!controller.signal.aborted) {
+          setStatus('Could not play "' + name + '" — the stream may be temporarily offline.', 'error');
+        }
+      });
+    }, { once: true });
+  }
+
   function stopPlayback(){
+    if (mseAbort) { mseAbort.abort(); mseAbort = null; }
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
