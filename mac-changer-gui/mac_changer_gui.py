@@ -196,6 +196,56 @@ $result | ConvertTo-Json -Compress | Out-File -FilePath '{result_path}' -Encodin
     return False, "No response — the UAC prompt may have been cancelled."
 
 
+def win_toggle_adapter(iface, direction):
+    """direction: 'up' or 'down'. Returns (success, message)."""
+    result_path = os.path.join(
+        tempfile.gettempdir(), f"macchangergui_toggle_{os.getpid()}_{int(time.time() * 1000)}.json"
+    )
+    verb = "Enable-NetAdapter" if direction == "up" else "Disable-NetAdapter"
+
+    inner = f"""
+$ErrorActionPreference = 'Stop'
+$result = @{{ success = $false; message = '' }}
+try {{
+  {verb} -Name {ps_quote(iface)} -Confirm:$false
+  Start-Sleep -Seconds 1
+  $result.success = $true
+}} catch {{
+  $result.message = $_.Exception.Message
+}}
+$result | ConvertTo-Json -Compress | Out-File -FilePath '{result_path}' -Encoding utf8
+"""
+    inner_b64 = base64.b64encode(inner.encode("utf-16-le")).decode("ascii")
+    launcher = (
+        "$p = Start-Process powershell -ArgumentList "
+        f"'-NoProfile','-EncodedCommand','{inner_b64}' "
+        "-Verb RunAs -Wait -WindowStyle Hidden -PassThru; exit $p.ExitCode"
+    )
+
+    try:
+        subprocess.run(
+            ["powershell", "-NoProfile", "-Command", launcher],
+            capture_output=True, text=True, timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        return False, "Timed out waiting for the elevated PowerShell process."
+    except Exception as exc:
+        return False, str(exc)
+
+    if os.path.exists(result_path):
+        try:
+            with open(result_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        finally:
+            try:
+                os.remove(result_path)
+            except OSError:
+                pass
+        return bool(data.get("success")), data.get("message", "")
+
+    return False, "No response — the UAC prompt may have been cancelled."
+
+
 class MacChangerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -207,6 +257,7 @@ class MacChangerApp(ctk.CTk):
         self.grid_rowconfigure(4, weight=1)
 
         self.busy = False
+        self.current_process = None  # in-flight Popen for the Linux privileged path, so Kill can abort it
 
         if IS_WINDOWS:
             self.macchanger_path = None
@@ -357,9 +408,30 @@ class MacChangerApp(ctk.CTk):
         )
         self.btn_custom.grid(row=0, column=1)
 
+        ctrl = ctk.CTkFrame(actions, fg_color="transparent")
+        ctrl.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        ctrl.grid_columnconfigure((0, 1), weight=1)
+
+        self.btn_start_iface = ctk.CTkButton(
+            ctrl, text="▶ Start Interface (bring up)", height=38,
+            fg_color="#2a2e38", hover_color="#3a3f4b",
+            command=self.start_interface,
+        )
+        self.btn_start_iface.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+
+        self.btn_kill_iface = ctk.CTkButton(
+            ctrl, text="🛑 Kill Interface (bring down)", height=38,
+            fg_color=DANGER, hover_color=DANGER_HOVER,
+            command=self.kill_interface,
+        )
+        self.btn_kill_iface.grid(row=0, column=1, sticky="ew", padx=(6, 0))
+        # Kill is deliberately left out of action_buttons/set_busy's disable list —
+        # it's the escape hatch when something else is stuck (e.g. a hung pkexec
+        # prompt), so it must stay clickable even while the app reports busy.
+
         self.action_buttons = [
             self.btn_random, self.btn_same_vendor, self.btn_new_vendor,
-            self.btn_reset, self.btn_custom,
+            self.btn_reset, self.btn_custom, self.btn_start_iface,
         ]
 
     def _format_custom_entry(self, _event):
@@ -521,6 +593,104 @@ class MacChangerApp(ctk.CTk):
             return
         self._run_privileged(iface, ("custom", mac), f"set the MAC to {mac}")
 
+    def start_interface(self):
+        self._run_interface_toggle("up", "bring the interface up")
+
+    def kill_interface(self):
+        # Kill is the escape hatch: first abort anything stuck (e.g. a hung pkexec
+        # prompt from a previous action), un-stick the busy UI, then force the
+        # interface down directly — regardless of whatever else was happening.
+        if self.current_process is not None and self.current_process.poll() is None:
+            try:
+                self.current_process.kill()
+                self.log("Sent a kill signal to the in-progress privileged command.", "warn")
+            except Exception as exc:
+                self.log(f"Could not kill the in-progress command: {exc}", "err")
+            self.current_process = None
+        if self.busy:
+            self.set_busy(False)
+        self._run_interface_toggle("down", "bring the interface down")
+
+    def _run_interface_toggle(self, direction, description):
+        iface = self.current_interface()
+        if not iface:
+            self.log("No interface selected.", "err")
+            return
+        if self.busy:
+            return
+
+        if IS_WINDOWS:
+            self._run_windows_interface_toggle(iface, direction, description)
+            return
+
+        if not self.pkexec_path:
+            self.log("pkexec is not available; cannot request privileges.", "err")
+            return
+
+        self.log(f"Requesting privileges to {description} on {iface}…", "info")
+        self.set_busy(True, f"Working on {iface}…")
+
+        def work():
+            try:
+                proc = subprocess.Popen(
+                    [self.pkexec_path, "ip", "link", "set", "dev", iface, direction],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                )
+                self.current_process = proc
+                try:
+                    stdout, stderr = proc.communicate(timeout=20)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.communicate()
+                    self.after(0, lambda: self._on_change_error("Command timed out.", iface))
+                    return
+                result = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
+                self.after(0, lambda: self._on_toggle_done(result, iface, direction))
+            except Exception as exc:
+                self.after(0, lambda: self._on_change_error(str(exc), iface))
+            finally:
+                self.current_process = None
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _run_windows_interface_toggle(self, iface, direction, description):
+        if not self.powershell_path:
+            self.log("PowerShell is not available; cannot change the adapter.", "err")
+            return
+
+        self.log(f"Requesting Administrator access (UAC) to {description} on {iface}…", "info")
+        self.set_busy(True, f"Working on {iface}…")
+
+        def work():
+            try:
+                ok, message = win_toggle_adapter(iface, direction)
+            except Exception as exc:
+                ok, message = False, str(exc)
+            self.after(0, lambda: self._on_windows_toggle_done(ok, message, iface, direction))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _on_windows_toggle_done(self, ok, message, iface, direction):
+        self.set_busy(False)
+        if ok:
+            self.log(f"{iface} is now {direction}.", "ok")
+        else:
+            self.log(f"Failed to bring {iface} {direction}: {message}", "err")
+        self.refresh_mac_info()
+
+    def _on_toggle_done(self, result, iface, direction):
+        self.set_busy(False)
+        if result.returncode == 126 or result.returncode == 127:
+            self.log("Authentication cancelled or failed.", "warn")
+        elif result.returncode != 0:
+            self.log(f"Failed to bring {iface} {direction}: exit code {result.returncode}.", "err")
+            err = (result.stderr or "").strip()
+            if err:
+                self.log(err, "err")
+        else:
+            self.log(f"{iface} is now {direction}.", "ok")
+        self.refresh_mac_info()
+
     def _run_privileged(self, iface, action, description):
         if self.busy:
             return
@@ -559,15 +729,24 @@ class MacChangerApp(ctk.CTk):
 
         def work():
             try:
-                result = subprocess.run(
+                proc = subprocess.Popen(
                     [self.pkexec_path, "bash", "-c", cmd_str],
-                    capture_output=True, text=True, timeout=60,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
                 )
+                self.current_process = proc
+                try:
+                    stdout, stderr = proc.communicate(timeout=60)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.communicate()
+                    self.after(0, lambda: self._on_change_error("Command timed out.", iface))
+                    return
+                result = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
                 self.after(0, lambda: self._on_change_done(result, iface, flags))
-            except subprocess.TimeoutExpired:
-                self.after(0, lambda: self._on_change_error("Command timed out.", iface))
             except Exception as exc:
                 self.after(0, lambda: self._on_change_error(str(exc), iface))
+            finally:
+                self.current_process = None
 
         threading.Thread(target=work, daemon=True).start()
 
