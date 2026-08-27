@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Tool Kit — Security Research Tools You Run Locally | The Truth Button</title>
-<meta name="description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF, and research use only.">
-<link rel="canonical" href="https://projectsilverbeam.com/ultimate-tool-kit.html">
+<title>Ultimate Tool Kit — Windows — Security Research Tools, One .exe | The Truth Button</title>
+<meta name="description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI's 100+ recon, scanning, and exploitation tools — packaged as one Windows .exe, no terminal required. For authorized testing, CTF, and research use only.">
+<link rel="canonical" href="https://projectsilverbeam.com/ultimate-tool-kit-windows.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://projectsilverbeam.com/ultimate-tool-kit.html">
-<meta property="og:title" content="Ultimate Tool Kit — Security Research Tools You Run Locally">
-<meta property="og:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI. For authorized testing, CTF, and research use only.">
+<meta property="og:url" content="https://projectsilverbeam.com/ultimate-tool-kit-windows.html">
+<meta property="og:title" content="Ultimate Tool Kit — Windows — Security Research Tools, One .exe">
+<meta property="og:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI — packaged as one Windows .exe, no terminal required. For authorized testing, CTF, and research use only.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Ultimate Tool Kit — Security Research Tools You Run Locally">
-<meta name="twitter:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI. For authorized testing, CTF, and research use only.">
+<meta name="twitter:title" content="Ultimate Tool Kit — Windows — Security Research Tools, One .exe">
+<meta name="twitter:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI — packaged as one Windows .exe, no terminal required. For authorized testing, CTF, and research use only.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,18 +26,18 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Does the Ultimate Tool Kit run on Truth Button's servers?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to run it safely." }
+      "name": "Does the Ultimate Tool Kit — Windows run on Truth Button's servers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to a download and explains how to run it safely." }
     },
     {
       "@type": "Question",
-      "name": "What is HexStrike AI?",
-      "acceptedAnswer": { "@type": "Answer", "text": "An AI-orchestrated penetration testing framework that puts 100+ recon, scanning, and exploitation tools behind one API, designed for bug bounty, CTF, and red-team work." }
+      "name": "Do I need to install Python or open a terminal?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The Windows build is a single self-contained .exe with everything bundled in. Download it and double-click it — that's the entire setup, no terminal and no separate installs." }
     },
     {
       "@type": "Question",
-      "name": "Is it safe to run?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Only if you keep it bound to 127.0.0.1/localhost. It ships with no built-in login and an endpoint that can execute arbitrary commands, so it should never be exposed to your LAN or the open internet." }
+      "name": "Is it exactly the same as the Linux version?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Nearly. A handful of binary-exploitation endpoints built on pwntools can't run on native Windows at all — a real OS limitation, not a bug — and return a normal error instead of working. Every other tool integration works the same as Linux, provided the underlying CLI tool is installed on your Windows PATH." }
     },
     {
       "@type": "Question",
@@ -104,33 +104,33 @@
 <body>
 <div class="wrap">
   <div class="kicker">Free · Runs On Your Machine · Nothing Hosted By Truth Button</div>
-  <h1>The Ultimate <span class="accent">Tool Kit</span></h1>
-  <p class="lede">A growing collection of security-research tools that run entirely on your own computer — not on Truth Button's servers. Starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF competitions, and security research only.</p>
+  <h1>The Ultimate <span class="accent">Tool Kit</span> — Windows</h1>
+  <p class="lede">The same idea as the Linux Ultimate Tool Kit, packaged differently: one self-contained <code>.exe</code>, no terminal, no separate installs. Starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF competitions, and security research only.</p>
 
   <div class="cta-row">
-    <a class="cta-btn" href="index.html?mode=toolkit">Open the Tool Kit →</a>
-    <div class="cta-fine">Disclaimer + setup guide shown before anything unlocks · Linux only</div>
+    <a class="cta-btn" href="index.html?mode=toolkitwin">Open the Tool Kit →</a>
+    <div class="cta-fine">Disclaimer shown before anything unlocks · Windows only</div>
   </div>
 
   <div class="save-badge">
     <div class="save-label">What this actually is</div>
-    A launcher and a set of guardrails, not a hosted attack service — every tool listed here is something <b>you</b> install and run locally.
+    A download link and a set of guardrails, not a hosted attack service — every tool listed here is something <b>you</b> download and run locally.
   </div>
 
   <section>
     <h2>How it works</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Open the Tool Kit tab and pick a tool — currently HexStrike AI, with more planned.</span></li>
+      <li><span class="num">1</span><span>Open the Tool Kit — Windows tab and pick a tool — currently HexStrike AI, with more planned.</span></li>
       <li><span class="num">2</span><span>Read and accept the terms: authorized targets only, localhost-only binding, and Truth Button's own domains are explicitly off-limits.</span></li>
-      <li><span class="num">3</span><span>Follow the setup notes to run the tool's server on your own machine, then check the connection and open its dashboard directly — your browser talks straight to your own localhost, nothing routes through Truth Button.</span></li>
+      <li><span class="num">3</span><span>Download the one <code>.exe</code> and double-click it — that's the whole setup. Then check the connection and open its dashboard directly — your browser talks straight to your own localhost, nothing routes through Truth Button.</span></li>
     </ol>
   </section>
 
   <section>
     <h2>What's in the kit</h2>
     <div class="tool-card">
-      <h3>🛰️ HexStrike AI</h3>
-      <p>An AI-orchestrated penetration testing framework — 100+ recon, scanning, and exploitation tools (nmap, sqlmap, nuclei, amass, hydra, and more) behind one API, built for bug bounty, CTF, and red-team work. Ships as a Python/Flask server with no built-in authentication, so it must stay bound to <code>127.0.0.1</code> and never be exposed to a network you don't fully control.</p>
+      <h3>🛰️ HexStrike AI (Windows)</h3>
+      <p>An AI-orchestrated penetration testing framework — 100+ recon, scanning, and exploitation tools (nmap, sqlmap, nuclei, amass, hydra, and more) behind one API, built for bug bounty, CTF, and red-team work. This build runs the exact same server code as the Linux version, frozen into a single Windows executable — no Python install, no terminal. It ships with no built-in authentication, so it must stay bound to <code>127.0.0.1</code> and never be exposed to a network you don't fully control. A small handful of binary-exploitation endpoints built on <code>pwntools</code> can't run on native Windows at all (a real OS limitation, not a bug); everything else works the same as Linux if you have the underlying CLI tool installed.</p>
     </div>
   </section>
 
@@ -139,6 +139,7 @@
       <b>Read this before you open anything here:</b>
       <ul>
         <li>Every tool in this kit runs on <b>your own computer</b>. Truth Button never runs it, proxies it, or logs anything it does.</li>
+        <li>Windows may show a "Windows protected your PC" SmartScreen warning, because the .exe isn't from a paid code-signing certificate. That's expected for a small free tool — click <b>More info → Run anyway</b> if you trust the source.</li>
         <li>Only use these tools on systems you own or are explicitly, legally authorized to test. Unauthorized scanning or exploitation of someone else's system can be a crime.</li>
         <li><b>Explicitly prohibited:</b> pointing any tool here at projectsilverbeam.com, its subdomains, or Truth Button's backend. The in-app version blocks this by domain check before it'll open a connection or check a target.</li>
         <li>You are solely responsible for how you use these tools.</li>
@@ -149,16 +150,16 @@
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">Does the Ultimate Tool Kit run on Truth Button's servers?</div>
-      <p class="faq-a">No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to run it safely.</p>
+      <div class="faq-q">Does the Ultimate Tool Kit — Windows run on Truth Button's servers?</div>
+      <p class="faq-a">No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to a download and explains how to run it safely.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">What is HexStrike AI?</div>
-      <p class="faq-a">An AI-orchestrated penetration testing framework that puts 100+ recon, scanning, and exploitation tools behind one API, designed for bug bounty, CTF, and red-team work.</p>
+      <div class="faq-q">Do I need to install Python or open a terminal?</div>
+      <p class="faq-a">No. The Windows build is a single self-contained .exe with everything bundled in. Download it and double-click it — that's the entire setup, no terminal and no separate installs.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Is it safe to run?</div>
-      <p class="faq-a">Only if you keep it bound to 127.0.0.1/localhost. It ships with no built-in login and an endpoint that can execute arbitrary commands, so it should never be exposed to your LAN or the open internet.</p>
+      <div class="faq-q">Is it exactly the same as the Linux version?</div>
+      <p class="faq-a">Nearly. A handful of binary-exploitation endpoints built on pwntools can't run on native Windows at all — a real OS limitation, not a bug — and return a normal error instead of working. Every other tool integration works the same as Linux, provided the underlying CLI tool is installed on your Windows PATH.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Can I use it against projectsilverbeam.com?</div>
@@ -167,14 +168,14 @@
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> this page is a launcher plus guardrails, not a hosted scanning service. Tools linked here are separate, third-party projects you install and run yourself — Truth Button doesn't audit their code, guarantee their behavior, or take responsibility for how they're used. For authorized security testing, CTF, and research use only.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> this page is a download link plus guardrails, not a hosted scanning service. Tools linked here are separate, third-party projects you download and run yourself — Truth Button doesn't audit their code, guarantee their behavior, or take responsibility for how they're used. For authorized security testing, CTF, and research use only.</div>
   </section>
 
   <section>
     <div class="other-tools">
       <h2 style="margin-bottom:12px; font-size:18px;">Also on The Truth Button</h2>
       <ul>
-        <li><a href="ultimate-tool-kit-windows.html">Ultimate Tool Kit — Windows — the same kit, one .exe, no terminal</a></li>
+        <li><a href="ultimate-tool-kit.html">Ultimate Tool Kit — Linux — the same kit for Linux machines</a></li>
         <li><a href="index.html?mode=photo">Check if a photo, video, or audio clip is AI-generated</a></li>
         <li><a href="index.html?mode=flock">Find Flock Safety / ALPR surveillance cameras near you</a></li>
         <li><a href="index.html?mode=datacenter">Look up data center facilities by state</a></li>
