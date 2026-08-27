@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Tool Kit — Security Research Tools You Run Locally | The Truth Button</title>
-<meta name="description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF, and research use only.">
-<link rel="canonical" href="https://projectsilverbeam.com/ultimate-tool-kit.html">
+<title>Mac_Changer GUI — Change Your MAC Address on Linux &amp; Windows | The Truth Button</title>
+<meta name="description" content="A free desktop GUI for randomizing or setting your network interface's MAC address. Randomize, keep the current vendor, assign a new random vendor, reset to your permanent hardware MAC, or set a custom MAC address — all with a few clicks. Linux and Windows, runs entirely on your own computer.">
+<link rel="canonical" href="https://projectsilverbeam.com/mac-changer-gui.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://projectsilverbeam.com/ultimate-tool-kit.html">
-<meta property="og:title" content="Ultimate Tool Kit — Security Research Tools You Run Locally">
-<meta property="og:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI. For authorized testing, CTF, and research use only.">
+<meta property="og:url" content="https://projectsilverbeam.com/mac-changer-gui.html">
+<meta property="og:title" content="Mac_Changer GUI — Change Your MAC Address on Linux & Windows">
+<meta property="og:description" content="A free desktop GUI for randomizing or setting your network interface's MAC address in a few clicks. Linux and Windows, runs entirely on your own computer.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Ultimate Tool Kit — Security Research Tools You Run Locally">
-<meta name="twitter:description" content="A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI. For authorized testing, CTF, and research use only.">
+<meta name="twitter:title" content="Mac_Changer GUI — Change Your MAC Address on Linux & Windows">
+<meta name="twitter:description" content="A free desktop GUI for randomizing or setting your network interface's MAC address in a few clicks. Linux and Windows, runs entirely on your own computer.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,23 +26,23 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Does the Ultimate Tool Kit run on Truth Button's servers?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to run it safely." }
+      "name": "Does Mac_Changer GUI run on Truth Button's servers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It's a separate desktop app you download and run entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to set it up." }
     },
     {
       "@type": "Question",
-      "name": "What is HexStrike AI?",
-      "acceptedAnswer": { "@type": "Answer", "text": "An AI-orchestrated penetration testing framework that puts 100+ recon, scanning, and exploitation tools behind one API, designed for bug bounty, CTF, and red-team work." }
+      "name": "How does Mac_Changer GUI work on Linux vs. Windows?",
+      "acceptedAnswer": { "@type": "Answer", "text": "On Linux it's a friendlier point-and-click front end for GNU macchanger. On Windows there's no macchanger, so it drives PowerShell directly — setting the adapter's NetworkAddress registry override and restarting the adapter to apply it. Both are built with Python and customtkinter." }
     },
     {
       "@type": "Question",
-      "name": "Is it safe to run?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Only if you keep it bound to 127.0.0.1/localhost. It ships with no built-in login and an endpoint that can execute arbitrary commands, so it should never be exposed to your LAN or the open internet." }
+      "name": "Does it work on macOS?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Only Linux and Windows are supported." }
     },
     {
       "@type": "Question",
-      "name": "Can I use it against projectsilverbeam.com?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Using HexStrike AI, or any tool in this kit, against projectsilverbeam.com or its backend is explicitly prohibited. Only use these tools on systems you own or are explicitly authorized to test." }
+      "name": "Does it need administrator/root access?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, for the actual MAC change. The app itself never runs elevated the whole time — on Linux it requests privileges through pkexec, on Windows through a standard UAC prompt, each time you change or reset an address." }
     }
   ]
 }
@@ -104,44 +104,57 @@
 <body>
 <div class="wrap">
   <div class="kicker">Free · Runs On Your Machine · Nothing Hosted By Truth Button</div>
-  <h1>The Ultimate <span class="accent">Tool Kit</span></h1>
-  <p class="lede">A growing collection of security-research tools that run entirely on your own computer — not on Truth Button's servers. Starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF competitions, and security research only.</p>
+  <h1>Mac_Changer <span class="accent">GUI</span></h1>
+  <p class="lede">A friendlier desktop app for changing your network interface's MAC address — on Linux (via GNU macchanger) or Windows (via a built-in PowerShell changer). Randomize, keep the current vendor, assign a new random vendor, reset to the permanent hardware MAC, or set a custom one — all with a few clicks instead of memorizing flags.</p>
 
   <div class="cta-row">
-    <a class="cta-btn" href="index.html?mode=toolkit">Open the Tool Kit →</a>
-    <div class="cta-fine">Disclaimer + setup guide shown before anything unlocks · Not compatible with mobile devices</div>
+    <a class="cta-btn" href="index.html?mode=macchanger">Open Mac_Changer GUI →</a>
+    <div class="cta-fine">Disclaimer + setup guide shown first · Linux &amp; Windows · Not compatible with mobile devices or macOS</div>
   </div>
 
   <div class="save-badge">
     <div class="save-label">What this actually is</div>
-    A launcher and a set of guardrails, not a hosted attack service — every tool listed here is something <b>you</b> install and run locally.
+    A small, free, open Python/customtkinter app — not a hosted service. You download a couple of files, install a couple of dependencies, and run it on your own machine.
   </div>
 
   <section>
     <h2>How it works</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Open the Tool Kit tab and pick a tool — currently HexStrike AI, with more planned.</span></li>
-      <li><span class="num">2</span><span>Read and accept the terms: authorized targets only, localhost-only binding, and Truth Button's own domains are explicitly off-limits.</span></li>
-      <li><span class="num">3</span><span>Follow the setup notes to run the tool's server on your own machine, then check the connection and open its dashboard directly — your browser talks straight to your own localhost, nothing routes through Truth Button.</span></li>
+      <li><span class="num">1</span><span>Open the Mac_Changer GUI tab and read the disclaimer — it requires elevated privileges (<code>pkexec</code> on Linux, a UAC prompt on Windows) to actually change an address.</span></li>
+      <li><span class="num">2</span><span>Download <code>mac_changer_gui.py</code>, plus the launcher for your OS: <code>run.sh</code> (Linux) or <code>run.bat</code> (Windows).</span></li>
+      <li><span class="num">3</span><span>Install requirements — Linux: <code>macchanger</code>, <code>policykit-1</code>, <code>customtkinter</code>. Windows: Python 3 and <code>customtkinter</code> (PowerShell is already built in). Then run the launcher and pick your interface.</span></li>
     </ol>
   </section>
 
   <section>
-    <h2>What's in the kit</h2>
+    <h2>What it can do</h2>
     <div class="tool-card">
-      <h3>🛰️ HexStrike AI</h3>
-      <p>An AI-orchestrated penetration testing framework — 100+ recon, scanning, and exploitation tools (nmap, sqlmap, nuclei, amass, hydra, and more) behind one API, built for bug bounty, CTF, and red-team work. Ships as a Python/Flask server with no built-in authentication, so it must stay bound to <code>127.0.0.1</code> and never be exposed to a network you don't fully control.</p>
+      <h3>🔀 Randomize / vendor control</h3>
+      <p>Fully random MAC, random host bytes while keeping your current vendor, or a fresh random vendor entirely — one click each.</p>
+    </div>
+    <div class="tool-card">
+      <h3>↩️ Reset to permanent</h3>
+      <p>Restore the interface's original, burned-in hardware MAC. (Some NIC drivers don't fully honor this while the interface is up — a replug or driver reload fixes it.)</p>
+    </div>
+    <div class="tool-card">
+      <h3>✏️ Custom MAC</h3>
+      <p>Type or paste an exact address; the field auto-formats it as you go and validates it before applying it.</p>
+    </div>
+    <div class="tool-card">
+      <h3>📋 Live info + activity log</h3>
+      <p>See current vs. permanent MAC and vendor at a glance, plus a timestamped, color-coded log of every action and its result.</p>
     </div>
   </section>
 
   <section>
     <div class="warn">
-      <b>Read this before you open anything here:</b>
+      <b>Read this before you download anything:</b>
       <ul>
-        <li>Every tool in this kit runs on <b>your own computer</b>. Truth Button never runs it, proxies it, or logs anything it does.</li>
-        <li>Only use these tools on systems you own or are explicitly, legally authorized to test. Unauthorized scanning or exploitation of someone else's system can be a crime.</li>
-        <li><b>Explicitly prohibited:</b> pointing any tool here at projectsilverbeam.com, its subdomains, or Truth Button's backend. The in-app version blocks this by domain check before it'll open a connection or check a target.</li>
-        <li>You are solely responsible for how you use these tools.</li>
+        <li><b>Linux and Windows only</b> — macOS isn't supported. Linux shells out to <code>macchanger</code>, <code>ip</code>, and <code>pkexec</code>; Windows drives PowerShell and the adapter's registry directly.</li>
+        <li>It's a separate app. You download and run it <b>entirely on your own computer</b> — Truth Button never runs it, proxies it, or sees anything it does.</li>
+        <li>Changing a MAC address requires elevated privileges — <code>pkexec</code> on Linux, a UAC prompt on Windows — each time; it never runs elevated the whole time.</li>
+        <li>Only change the MAC on interfaces you own or are authorized to manage. Some networks treat MAC spoofing as a policy violation — know your network's rules first.</li>
+        <li>You are solely responsible for how you use it.</li>
       </ul>
     </div>
   </section>
@@ -149,25 +162,25 @@
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">Does the Ultimate Tool Kit run on Truth Button's servers?</div>
-      <p class="faq-a">No. Every tool in the kit — starting with HexStrike AI — runs entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to run it safely.</p>
+      <div class="faq-q">Does Mac_Changer GUI run on Truth Button's servers?</div>
+      <p class="faq-a">No. It's a separate desktop app you download and run entirely on your own computer. Truth Button never runs it, proxies it, or sees anything it does; this page only links to it and explains how to set it up.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">What is HexStrike AI?</div>
-      <p class="faq-a">An AI-orchestrated penetration testing framework that puts 100+ recon, scanning, and exploitation tools behind one API, designed for bug bounty, CTF, and red-team work.</p>
+      <div class="faq-q">How does Mac_Changer GUI work on Linux vs. Windows?</div>
+      <p class="faq-a">On Linux it's a friendlier point-and-click front end for GNU macchanger. On Windows there's no macchanger, so it drives PowerShell directly — setting the adapter's NetworkAddress registry override and restarting the adapter to apply it. Both are built with Python and customtkinter.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Is it safe to run?</div>
-      <p class="faq-a">Only if you keep it bound to 127.0.0.1/localhost. It ships with no built-in login and an endpoint that can execute arbitrary commands, so it should never be exposed to your LAN or the open internet.</p>
+      <div class="faq-q">Does it work on macOS?</div>
+      <p class="faq-a">No. Only Linux and Windows are supported.</p>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Can I use it against projectsilverbeam.com?</div>
-      <p class="faq-a">No. Using HexStrike AI, or any tool in this kit, against projectsilverbeam.com or its backend is explicitly prohibited. Only use these tools on systems you own or are explicitly authorized to test.</p>
+      <div class="faq-q">Does it need administrator/root access?</div>
+      <p class="faq-a">Yes, for the actual MAC change. The app itself never runs elevated the whole time — on Linux it requests privileges through pkexec, on Windows through a standard UAC prompt, each time you change or reset an address.</p>
     </div>
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> this page is a launcher plus guardrails, not a hosted scanning service. Tools linked here are separate, third-party projects you install and run yourself — Truth Button doesn't audit their code, guarantee their behavior, or take responsibility for how they're used. For authorized security testing, CTF, and research use only.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> this page is a download and setup guide, not a hosted service. Mac_Changer GUI is a small open tool you install and run yourself — Truth Button doesn't take responsibility for how it's used.</div>
   </section>
 
   <section>
@@ -180,6 +193,7 @@
         <li><a href="index.html?mode=reviews">Real reviews on prices, work, and local experiences by state</a></li>
         <li><a href="index.html?mode=peptide">Peptide reconstitution &amp; dose calculator</a></li>
         <li><a href="index.html?mode=scanner">Scan a GitHub repo for infostealer patterns</a></li>
+        <li><a href="index.html?mode=toolkit">Ultimate Tool Kit — security-research tools you run on your own machine, starting with HexStrike AI</a></li>
         <li><a href="index.html?mode=pdf">Merge, split, rotate, or watermark a PDF</a></li>
         <li><a href="index.html?mode=downloader">Record music or audio from a browser tab, then download the MP3</a></li>
         <li><a href="index.html?mode=qrcode">Generate a QR code from any URL or text</a></li>
@@ -190,8 +204,7 @@
         <li><a href="index.html?mode=scamid">Check a phone number against real FTC scam/robocall complaint data</a></li>
         <li><a href="index.html?mode=videodl">Record a browser tab, window, or your screen with Thunder Video Downloader, and save it as an MP4</a></li>
         <li><a href="index.html?mode=vidblur">Upload a video and blur out a face, plate, or anything else for the whole clip</a></li>
-              <li><a href="index.html?mode=macchanger">Randomize or set your network interface's MAC address with a downloadable desktop app</a></li>
-</ul>
+      </ul>
     </div>
   </section>
 
