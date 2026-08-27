@@ -2112,7 +2112,7 @@
 python3 -m venv hexstrike_env &amp;&amp; source hexstrike_env/bin/activate
 pip install -r requirements.txt
 python3 hexstrike_launcher.py</pre>
-              <div class="utk-note">Prefer to run it manually instead? Skip the launcher and just run <code>python3 hexstrike_server.py</code> yourself — the Check Connection / Open Dashboard / Stop Server buttons below work either way. Default dashboard: <code>http://127.0.0.1:8888</code>. Keep it bound to localhost — never <code>0.0.0.0</code> on a network you don't fully control.</div>
+              <div class="utk-note">Prefer to run it manually instead? Skip the launcher and just run <code>python3 hexstrike_server.py</code> yourself — the Check Connection / View Status / Stop Server buttons below work either way. Default: <code>http://127.0.0.1:8888</code>. Keep it bound to localhost — never <code>0.0.0.0</code> on a network you don't fully control.</div>
             </div>
 
             <div class="utk-setup">
@@ -2121,7 +2121,7 @@ python3 hexstrike_launcher.py</pre>
               <div class="utk-row">
                 <button id="utk-start-btn" type="button">▶ Start Server</button>
                 <button id="utk-check-btn" type="button">Check Connection</button>
-                <button id="utk-open-dash-btn" type="button">Open Dashboard →</button>
+                <button id="utk-open-dash-btn" type="button">View Status →</button>
                 <button id="utk-kill-btn" type="button" class="utk-kill">🛑 Stop Server</button>
               </div>
               <div class="utk-status" id="utk-conn-status">Not checked yet.</div>
@@ -2234,7 +2234,7 @@ python3 hexstrike_launcher.py</pre>
               <div class="utkw-row">
                 <a id="utkw-download-link" href="#" target="_blank" rel="noopener"><button class="utkw-download" type="button">⬇ Download HexStrikeAI-Windows.exe</button></a>
               </div>
-              <div class="utkw-note">A small status window opens when it runs — leave it open while you use HexStrike; closing it stops the server. Default dashboard: <code>http://127.0.0.1:8888</code>.</div>
+              <div class="utkw-note">A small status window opens when it runs — leave it open while you use HexStrike; closing it stops the server. Default address: <code>http://127.0.0.1:8888</code>.</div>
             </div>
 
             <div class="utkw-setup">
@@ -2242,7 +2242,7 @@ python3 hexstrike_launcher.py</pre>
               <input type="text" id="utkw-server-url" value="http://127.0.0.1:8888" placeholder="http://127.0.0.1:8888">
               <div class="utkw-row">
                 <button id="utkw-check-btn" type="button">Check Connection</button>
-                <button id="utkw-open-dash-btn" type="button">Open Dashboard →</button>
+                <button id="utkw-open-dash-btn" type="button">View Status →</button>
                 <button id="utkw-kill-btn" type="button" class="utkw-kill">🛑 Stop Server</button>
               </div>
               <div class="utkw-status" id="utkw-conn-status">Not checked yet.</div>
@@ -5283,7 +5283,9 @@ if (REVIEWS_API_BASE) {
       connStatus.className = 'utk-status bad';
       return;
     }
-    window.open(url, '_blank', 'noopener');
+    // hexstrike ships no dashboard page at the bare root — that 404s. /health
+    // is the one endpoint guaranteed to exist and return something readable.
+    window.open(url.replace(/\/+$/, '') + '/health', '_blank', 'noopener');
   });
 
   killBtn.addEventListener('click', async () => {
@@ -5434,7 +5436,9 @@ if (REVIEWS_API_BASE) {
       connStatus.className = 'utkw-status bad';
       return;
     }
-    window.open(url, '_blank', 'noopener');
+    // hexstrike ships no dashboard page at the bare root — that 404s. /health
+    // is the one endpoint guaranteed to exist and return something readable.
+    window.open(url.replace(/\/+$/, '') + '/health', '_blank', 'noopener');
   });
 
   killBtn.addEventListener('click', async () => {
