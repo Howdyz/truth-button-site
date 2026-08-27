@@ -5261,8 +5261,12 @@ if (REVIEWS_API_BASE) {
     connStatus.className = 'utk-status';
     try {
       // no-cors: hexstrike ships with no CORS headers, so this can only tell us
-      // *something* answered, not verify it's actually HexStrike.
-      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 4000);
+      // *something* answered, not verify it's actually HexStrike. Timeout is
+      // generous (15s, not the usual few seconds) because /health shells out
+      // `which <tool>` for 100+ tools on an uncached first call, which is
+      // genuinely slow — a short timeout here just gives up before the real,
+      // otherwise-successful response ever arrives.
+      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 15000);
       connStatus.textContent = 'Something is listening at that address — looks reachable.';
       connStatus.className = 'utk-status ok';
     } catch (e) {
@@ -5408,8 +5412,12 @@ if (REVIEWS_API_BASE) {
     connStatus.className = 'utkw-status';
     try {
       // no-cors: hexstrike ships with no CORS headers, so this can only tell us
-      // *something* answered, not verify it's actually HexStrike.
-      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 4000);
+      // *something* answered, not verify it's actually HexStrike. Timeout is
+      // generous (15s, not the usual few seconds) because /health shells out
+      // `where <tool>` for 100+ tools on an uncached first call, which is
+      // genuinely slow — a short timeout here just gives up before the real,
+      // otherwise-successful response ever arrives.
+      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 15000);
       connStatus.textContent = 'Something is listening at that address — looks reachable.';
       connStatus.className = 'utkw-status ok';
     } catch (e) {
