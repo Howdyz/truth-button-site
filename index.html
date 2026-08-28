@@ -1539,6 +1539,7 @@
     <div class="mode-tab" data-mode="mp3library" id="tabMp3Library">🎵 Offline MP3 Library</div>
     <div class="mode-tab" data-mode="scamid" id="tabScamId">🚨 Scam Caller ID</div>
     <div class="mode-tab" data-mode="toolkit" id="tabToolkit">🧰 Ultimate Tool Kit (Linux only)</div>
+    <div class="mode-tab" data-mode="toolkitwin" id="tabToolkitWin">🧰 Ultimate Tool Kit (Windows only)</div>
   </div>
 
   <div class="desk">
@@ -2143,6 +2144,126 @@ python3 hexstrike_launcher.py</pre>
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> HexStrike AI (and every tool added to this kit) runs on your own machine, not on Truth Button's servers — this page is a launcher plus guardrails, not a hosted scanning service. For authorized security testing, CTF, and research use only.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="toolkitWinPanel">
+    <div class="lookup-card">
+      <h3>Ultimate Tool Kit — Windows</h3>
+      <div class="lc-sub">The same idea as the Linux Ultimate Tool Kit, running the real thing underneath: one launcher sets up a small dedicated Linux environment (WSL2, built into Windows) with HexStrike AI and its actual tool ecosystem installed via apt — the same tools, not a cut-down Windows-only subset. Starting with HexStrike AI; more tools land here over time.<br><b>Windows only</b> — this build won't run on Linux, macOS, or mobile devices (use the Linux tab for that). Needs Windows 10 (2004+) or Windows 11, with virtualization enabled — true on almost every PC made in the last decade.</div>
+
+      <div id="utk-win-widget">
+        <style>
+          #utk-win-widget {
+            --utkw-bg: #14110F; --utkw-panel: #1C1814; --utkw-border: rgba(242,237,225,0.14);
+            --utkw-text: #F2EDE1; --utkw-text-dim: #8C8377; --utkw-accent: #2F8F7A; --utkw-warn: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--utkw-text); margin-top: 16px;
+          }
+          #utk-win-widget * { box-sizing: border-box; }
+          #utk-win-widget .utkw-grid { display: grid; gap: 12px; margin-bottom: 14px; }
+          #utk-win-widget .utkw-card { background: var(--utkw-panel); border: 1px solid var(--utkw-border); border-radius: 8px; padding: 16px; }
+          #utk-win-widget .utkw-card-top { display: flex; gap: 12px; margin-bottom: 12px; }
+          #utk-win-widget .utkw-card-icon { font-size: 22px; line-height: 1; }
+          #utk-win-widget .utkw-card-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+          #utk-win-widget .utkw-card-desc { font-size: 12.5px; color: var(--utkw-text-dim); line-height: 1.5; }
+          #utk-win-widget button { padding: 9px 14px; background: var(--utkw-accent); border: none; border-radius: 5px;
+            color: var(--utkw-bg); font-weight: 600; font-size: 12.5px; cursor: pointer; font-family: inherit;
+            text-transform: uppercase; letter-spacing: 0.04em; }
+          #utk-win-widget button:hover { opacity: 0.88; }
+          #utk-win-widget button:disabled { opacity: .45; cursor: default; }
+          #utk-win-widget button.utkw-kill { background: var(--utkw-warn); color: #fff; }
+          #utk-win-widget button.utkw-download { font-size: 14px; padding: 12px 20px; }
+          #utk-win-widget input[type=text] { width: 100%; padding: 9px 10px; background: var(--utkw-bg);
+            border: 1px solid var(--utkw-border); border-radius: 5px; color: var(--utkw-text); font-size: 13px;
+            font-family: inherit; margin-bottom: 10px; }
+          #utk-win-widget .utkw-terms { background: rgba(232,64,44,0.08); border: 1px solid var(--utkw-warn);
+            border-radius: 8px; padding: 16px 18px; margin-top: 14px; }
+          #utk-win-widget .utkw-terms-title { font-weight: 700; color: var(--utkw-warn); margin-bottom: 10px; font-size: 13.5px; }
+          #utk-win-widget .utkw-terms ul { margin: 0 0 14px; padding-left: 20px; font-size: 12.5px; line-height: 1.7; color: var(--utkw-text); }
+          #utk-win-widget .utkw-terms li { margin-bottom: 6px; }
+          #utk-win-widget .utkw-terms code { background: var(--utkw-bg); border: 1px solid var(--utkw-border); border-radius: 4px; padding: 1px 5px; }
+          #utk-win-widget .utkw-agree { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--utkw-text); margin-bottom: 12px; cursor: pointer; }
+          #utk-win-widget .utkw-agree input { margin-top: 3px; }
+          #utk-win-widget .utkw-reminder { background: rgba(232,64,44,0.1); border: 1px solid var(--utkw-warn); border-radius: 6px;
+            padding: 8px 12px; font-size: 11.5px; color: var(--utkw-text); margin-top: 14px; margin-bottom: 14px; }
+          #utk-win-widget .utkw-setup { background: var(--utkw-panel); border: 1px solid var(--utkw-border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+          #utk-win-widget .utkw-block-title { font-weight: 700; font-size: 12.5px; margin-bottom: 10px; }
+          #utk-win-widget .utkw-note { font-size: 11.5px; color: var(--utkw-text-dim); margin-bottom: 8px; line-height: 1.5; }
+          #utk-win-widget .utkw-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+          #utk-win-widget .utkw-status { font-size: 12px; color: var(--utkw-text-dim); min-height: 16px; }
+          #utk-win-widget .utkw-status.ok { color: var(--utkw-accent); }
+          #utk-win-widget .utkw-status.bad { color: var(--utkw-warn); }
+        </style>
+
+        <div class="utkw-grid">
+          <div class="utkw-card">
+            <div class="utkw-card-top">
+              <span class="utkw-card-icon">🛰️</span>
+              <div>
+                <div class="utkw-card-title">HexStrike AI (Windows / WSL2)</div>
+                <div class="utkw-card-desc">AI-orchestrated pentesting framework — 100+ recon, scanning, and exploitation tools behind one API. Runs inside a small dedicated Linux environment on your own machine (WSL2), not on Truth Button — real apt-installed tools, not a cut-down Windows subset.</div>
+              </div>
+            </div>
+            <button id="utkw-hex-open-btn" type="button">Open →</button>
+          </div>
+        </div>
+
+        <div id="utkw-hex-panel" style="display:none;">
+          <div class="utkw-terms" id="utkw-terms">
+            <div class="utkw-terms-title">⚠️ Read this before you use HexStrike AI</div>
+            <ul>
+              <li><b>Windows only, and not compatible with mobile devices.</b> A phone or tablet can't run this at all.</li>
+              <li>HexStrike AI is a separate, third-party tool. You download and run it <b>entirely on your own computer</b> — Truth Button never runs it, never proxies it, and never sees anything it does.</li>
+              <li><b>First run sets things up automatically:</b> if WSL2 isn't already enabled on your PC, Windows will show its own admin permission prompt (approving that is required — this app can't silently bypass Windows' own security gate for enabling system features). It then downloads the HexStrike Linux environment — a multi-gigabyte one-time download — and imports it. After that first setup, starting it is instant.</li>
+              <li>It ships with <b>no built-in login, and an endpoint that can execute arbitrary commands.</b> WSL2's networking keeps it off your LAN by default — but don't go out of your way to expose it (e.g. manual port-proxy rules) to a network you don't fully control.</li>
+              <li>Only point it at systems you own or are explicitly, legally authorized to test. Unauthorized scanning or exploitation of someone else's system can be a crime.</li>
+              <li><b>Explicitly prohibited:</b> using this tool, or any target field on this page, against <code>projectsilverbeam.com</code>, <code>www.projectsilverbeam.com</code>, <code>api.projectsilverbeam.com</code>, <code>truth-button-backend.onrender.com</code>, or any of their infrastructure.</li>
+              <li>You are solely responsible for how you use it — this page only links to it and reminds you of the rules.</li>
+            </ul>
+            <label class="utkw-agree"><input type="checkbox" id="utkw-agree-check"> I've read this and will only use HexStrike AI on systems I own or am explicitly authorized to test.</label>
+            <button id="utkw-agree-btn" type="button" disabled>Continue</button>
+          </div>
+
+          <div class="utkw-controls" id="utkw-controls" style="display:none;">
+            <div class="utkw-reminder">Reminder: local machine only · authorized targets only · never projectsilverbeam.com or this site's backend.</div>
+
+            <div class="utkw-setup">
+              <div class="utkw-block-title">1. Download and run</div>
+              <div class="utkw-note">One file, no terminal typing on your part. Double-click it, then use its own Start / Open Dashboard / Stop buttons — first launch handles WSL2 setup and the tool download for you (approve the one Windows admin prompt if it appears).</div>
+              <div class="utkw-row">
+                <a id="utkw-download-link" href="#" target="_blank" rel="noopener"><button class="utkw-download" type="button">⬇ Download HexStrikeAI-Windows.exe</button></a>
+              </div>
+              <div class="utkw-note">Default address once running: <code>http://127.0.0.1:8888</code> — WSL2 automatically forwards this to the Linux environment underneath.</div>
+            </div>
+
+            <div class="utkw-setup">
+              <div class="utkw-block-title">2. Connect</div>
+              <input type="text" id="utkw-server-url" value="http://127.0.0.1:8888" placeholder="http://127.0.0.1:8888">
+              <div class="utkw-row">
+                <button id="utkw-check-btn" type="button">Check Connection</button>
+                <button id="utkw-open-dash-btn" type="button">Open Dashboard →</button>
+                <button id="utkw-kill-btn" type="button" class="utkw-kill">🛑 Stop Server</button>
+              </div>
+              <div class="utkw-status" id="utkw-conn-status">Not checked yet.</div>
+              <div class="utkw-note">These work once you've clicked Start in the app itself. Stop Server talks to HexStrike directly and only ever terminates that process, nothing else.</div>
+            </div>
+
+            <div class="utkw-setup">
+              <div class="utkw-block-title">3. Sanity-check a target</div>
+              <div class="utkw-note">Paste anything you're about to point HexStrike at — this blocks Truth Button's own domains before you go any further.</div>
+              <input type="text" id="utkw-target-input" placeholder="example.com or 10.0.0.5">
+              <div class="utkw-row">
+                <button id="utkw-target-check-btn" type="button">Check Target</button>
+              </div>
+              <div class="utkw-status" id="utkw-target-status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> HexStrike AI (and every tool added to this kit) runs on your own machine, not on Truth Button's servers — this page is a download link plus guardrails, not a hosted scanning service. For authorized security testing, CTF, and research use only.
     </div>
   </div>
 
@@ -4151,6 +4272,7 @@ const scamidPanel = document.getElementById('scamidPanel');
 const videodlPanel = document.getElementById('videodlPanel');
 const vidblurPanel = document.getElementById('vidblurPanel');
 const toolkitPanel = document.getElementById('toolkitPanel');
+const toolkitWinPanel = document.getElementById('toolkitWinPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'More tools are already cooking. This toolbox keeps growing — free, always.',
@@ -4171,7 +4293,8 @@ const LOOKUP_TAGLINES = {
   scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
   videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.',
   vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.',
-  toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Linux only.'
+  toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Linux only.',
+  toolkitwin: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Windows only, real Kali tools via WSL2, no terminal.'
 };
 
 function setMode(newMode){
@@ -4181,7 +4304,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'toolkit');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'toolkit' || newMode === 'toolkitwin');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -4205,6 +4328,7 @@ function setMode(newMode){
   videodlPanel.classList.toggle('show', newMode === 'videodl');
   vidblurPanel.classList.toggle('show', newMode === 'vidblur');
   toolkitPanel.classList.toggle('show', newMode === 'toolkit');
+  toolkitWinPanel.classList.toggle('show', newMode === 'toolkitwin');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -4235,6 +4359,7 @@ document.getElementById('tabCropper').addEventListener('click', () => setMode('c
 document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
 document.getElementById('tabScamId').addEventListener('click', () => setMode('scamid'));
 document.getElementById('tabToolkit').addEventListener('click', () => setMode('toolkit'));
+document.getElementById('tabToolkitWin').addEventListener('click', () => setMode('toolkitwin'));
 document.getElementById('tabVideoDl').addEventListener('click', () => setMode('videodl'));
 document.getElementById('tabVidBlur').addEventListener('click', () => setMode('vidblur'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
@@ -5194,6 +5319,149 @@ if (REVIEWS_API_BASE) {
     } else {
       targetStatus.textContent = '✓ Not a Truth Button domain. This does not confirm you\'re authorized to test it — that\'s still on you.';
       targetStatus.className = 'utk-status ok';
+    }
+  });
+})();
+
+// Ultimate Tool Kit — Windows widget (HexStrike AI running inside WSL2)
+(function () {
+  const root = document.getElementById('utk-win-widget');
+  if (!root) return;
+
+  const WINDOWS_EXE_URL = 'https://github.com/Howdyz/hexstrike-ai/releases/latest/download/HexStrikeAI-Windows.exe';
+
+  const BLOCKED_HOSTS = ['projectsilverbeam.com', 'www.projectsilverbeam.com', 'api.projectsilverbeam.com', 'truth-button-backend.onrender.com'];
+
+  function hostnameOf(raw) {
+    let s = (raw || '').trim();
+    if (!s) return '';
+    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)) s = 'http://' + s;
+    try { return new URL(s).hostname.toLowerCase(); } catch (e) { return s.toLowerCase().replace(/^www\./, ''); }
+  }
+
+  function isBlockedHost(host) {
+    return !!host && BLOCKED_HOSTS.some(b => host === b || host.endsWith('.' + b));
+  }
+
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+  }
+
+  const openBtn = root.querySelector('#utkw-hex-open-btn');
+  const hexPanel = root.querySelector('#utkw-hex-panel');
+  const terms = root.querySelector('#utkw-terms');
+  const controls = root.querySelector('#utkw-controls');
+  const agreeCheck = root.querySelector('#utkw-agree-check');
+  const agreeBtn = root.querySelector('#utkw-agree-btn');
+  const downloadLink = root.querySelector('#utkw-download-link');
+  const serverInput = root.querySelector('#utkw-server-url');
+  const checkBtn = root.querySelector('#utkw-check-btn');
+  const openDashBtn = root.querySelector('#utkw-open-dash-btn');
+  const killBtn = root.querySelector('#utkw-kill-btn');
+  const connStatus = root.querySelector('#utkw-conn-status');
+  const targetInput = root.querySelector('#utkw-target-input');
+  const targetCheckBtn = root.querySelector('#utkw-target-check-btn');
+  const targetStatus = root.querySelector('#utkw-target-status');
+
+  downloadLink.href = WINDOWS_EXE_URL;
+
+  // Deliberately never remembered anywhere (no localStorage, no in-memory
+  // flag) — the disclaimer must be re-read and re-checked every single time
+  // the panel is opened, not just once per page load or once ever.
+
+  function showControls() {
+    terms.style.display = 'none';
+    controls.style.display = '';
+  }
+
+  function showTerms() {
+    terms.style.display = '';
+    controls.style.display = 'none';
+    agreeCheck.checked = false;
+    agreeBtn.disabled = true;
+  }
+
+  openBtn.addEventListener('click', () => {
+    const willShow = hexPanel.style.display === 'none';
+    hexPanel.style.display = willShow ? '' : 'none';
+    if (willShow) showTerms();
+  });
+
+  agreeCheck.addEventListener('change', () => {
+    agreeBtn.disabled = !agreeCheck.checked;
+  });
+
+  agreeBtn.addEventListener('click', () => {
+    if (!agreeCheck.checked) return;
+    showControls();
+  });
+
+  checkBtn.addEventListener('click', async () => {
+    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
+    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utkw-status bad'; return; }
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utkw-status bad';
+      return;
+    }
+    connStatus.textContent = 'Checking…';
+    connStatus.className = 'utkw-status';
+    try {
+      // no-cors: hexstrike ships with no CORS headers, so this can only tell us
+      // *something* answered, not verify it's actually HexStrike.
+      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 90000);
+      connStatus.textContent = 'Something is listening at that address — looks reachable.';
+      connStatus.className = 'utkw-status ok';
+    } catch (e) {
+      connStatus.textContent = 'Not reachable — make sure HexStrikeAI-Windows.exe is running and has finished starting.';
+      connStatus.className = 'utkw-status bad';
+    }
+  });
+
+  openDashBtn.addEventListener('click', () => {
+    const url = (serverInput.value || '').trim();
+    if (!url) return;
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing to open — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utkw-status bad';
+      return;
+    }
+    window.open(url, '_blank', 'noopener');
+  });
+
+  killBtn.addEventListener('click', async () => {
+    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
+    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utkw-status bad'; return; }
+    if (isBlockedHost(hostnameOf(url))) {
+      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
+      connStatus.className = 'utkw-status bad';
+      return;
+    }
+    if (!window.confirm('Send a shutdown signal to the HexStrike server at ' + url + '? This stops it immediately.')) return;
+    connStatus.textContent = 'Sending shutdown signal…';
+    connStatus.className = 'utkw-status';
+    try {
+      await withTimeout(fetch(url + '/api/kill-switch', { method: 'POST', mode: 'no-cors', cache: 'no-store' }), 4000);
+      connStatus.textContent = 'Shutdown signal sent. Re-check the connection in a moment to confirm it stopped.';
+      connStatus.className = 'utkw-status ok';
+    } catch (e) {
+      connStatus.textContent = 'Could not reach that address to send the shutdown signal.';
+      connStatus.className = 'utkw-status bad';
+    }
+  });
+
+  targetCheckBtn.addEventListener('click', () => {
+    const raw = (targetInput.value || '').trim();
+    if (!raw) { targetStatus.textContent = 'Enter a target first.'; targetStatus.className = 'utkw-status'; return; }
+    if (isBlockedHost(hostnameOf(raw))) {
+      targetStatus.textContent = '🚫 Blocked — this is one of Truth Button\'s own domains. Do not scan it.';
+      targetStatus.className = 'utkw-status bad';
+    } else {
+      targetStatus.textContent = '✓ Not a Truth Button domain. This does not confirm you\'re authorized to test it — that\'s still on you.';
+      targetStatus.className = 'utkw-status ok';
     }
   });
 })();
@@ -6951,7 +7219,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','toolkit']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','toolkit','toolkitwin']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
