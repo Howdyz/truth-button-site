@@ -53,8 +53,35 @@
       "@type": "Question",
       "name": "Is the PDF compressor effective?",
       "acceptedAnswer": { "@type": "Answer", "text": "It re-packs the file's internal structure to shave off overhead, which works best on PDFs with lots of repeated fonts or objects. It won't meaningfully shrink a file that's mostly large images, since that requires actual image recompression, which this tool doesn't do." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I merge PDFs in a different order than I uploaded them?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Files merge in the order you select them — pick them one at a time in the order you want the final document to read, or reselect if you need to change that order before clicking Merge." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a file size limit?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No hard limit is imposed by this tool itself. Since every operation runs in your own browser rather than a server, the practical ceiling is your device's available memory, not a cap we enforce." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the PDF editor work on a phone or tablet?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — it runs in any modern mobile browser. Very large or image-heavy PDFs may process more slowly on a phone than on a desktop, since the work is being done by your device either way." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF Editor — The Truth Button",
+  "description": "Merge, split, rotate, watermark, or compress a PDF entirely in your browser, with no upload and no account.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/pdf-editor.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -134,6 +161,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>Most people only need a PDF editor a few times a year, which is exactly why paying for one never makes sense — this covers the handful of things people actually ask a PDF for, without a subscription attached.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Students merging scanned homework pages, one photo per page, into a single PDF for submission</li>
+        <li>Job seekers combining a resume, cover letter, and writing samples into one applicant packet</li>
+        <li>Freelancers watermarking a draft contract or proposal before sending it out for review</li>
+        <li>Anyone pulling a handful of pages out of a huge scanned document instead of emailing the whole thing</li>
+        <li>Small business owners compressing an oversized PDF that keeps bouncing off an email attachment limit</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I merge PDF files online for free?</div>
@@ -158,6 +199,18 @@
     <div class="faq-item">
       <div class="faq-q">Is the PDF compressor effective?</div>
       <p class="faq-a">It re-packs the file's internal structure to shave off overhead, which works best on PDFs with lots of repeated fonts or objects. It won't meaningfully shrink a file that's mostly large images, since that requires actual image recompression, which this tool doesn't do.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I merge PDFs in a different order than I uploaded them?</div>
+      <p class="faq-a">Files merge in the order you select them — pick them one at a time in the order you want the final document to read, or reselect if you need to change that order before clicking Merge.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is there a file size limit?</div>
+      <p class="faq-a">No hard limit is imposed by this tool itself. Since every operation runs in your own browser rather than a server, the practical ceiling is your device's available memory, not a cap we enforce.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does the PDF editor work on a phone or tablet?</div>
+      <p class="faq-a">Yes — it runs in any modern mobile browser. Very large or image-heavy PDFs may process more slowly on a phone than on a desktop, since the work is being done by your device either way.</p>
     </div>
   </section>
 

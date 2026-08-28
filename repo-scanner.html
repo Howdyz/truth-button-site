@@ -43,8 +43,35 @@
       "@type": "Question",
       "name": "Is my code or repo saved anywhere?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Every scan runs in a temporary directory that's deleted before the result comes back — nothing is saved to a server or local filesystem." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it scan compiled binaries or only source code?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Only source code — .py/.js/.jsx/.mjs/.cjs/.ts/.tsx files. Compiled binaries, obfuscated bundles, or minified production JS are outside what this heuristic scan can meaningfully read." }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does a scan take?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Usually a few seconds for a small repo, longer for large ones — the scanner clones the repo temporarily, checks every matching source file, then deletes the copy." }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I do if it finds something?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Treat it as a reason to actually read the flagged file before running the code, not an automatic verdict. Open the specific lines it points to and judge for yourself whether the behavior is legitimate." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Repo Scanner — The Truth Button",
+  "description": "Scan a public GitHub, GitLab, Bitbucket, Codeberg, or sourcehut repo, or a .zip, for infostealer and data-exfiltration patterns before you trust it.",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/repo-scanner.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -121,6 +148,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>The specific pattern this checks for — recon plus an outbound call, in the same file — is the signature that shows up right before someone's cookies or credentials end up on a Discord webhook.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Developers about to clone a random GitHub tool or "grabber" script from a forum post or Discord link</li>
+        <li>Security-conscious hobbyists vetting a script before running it with elevated permissions</li>
+        <li>Students downloading course-related code from an unfamiliar source</li>
+        <li>Open-source maintainers doing a quick sanity check on a pull request before merging</li>
+        <li>IT support staff triaging a suspicious script a user downloaded</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I check if a GitHub repo is safe before running it?</div>
@@ -137,6 +178,18 @@
     <div class="faq-item">
       <div class="faq-q">Is my code or repo saved anywhere?</div>
       <p class="faq-a">No. Every scan runs in a temporary directory that's deleted before the result comes back — nothing is saved to a server or local filesystem.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it scan compiled binaries or only source code?</div>
+      <p class="faq-a">Only source code — .py/.js/.jsx/.mjs/.cjs/.ts/.tsx files. Compiled binaries, obfuscated bundles, or minified production JS are outside what this heuristic scan can meaningfully read.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long does a scan take?</div>
+      <p class="faq-a">Usually a few seconds for a small repo, longer for large ones — the scanner clones the repo temporarily, checks every matching source file, then deletes the copy.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What should I do if it finds something?</div>
+      <p class="faq-a">Treat it as a reason to actually read the flagged file before running the code, not an automatic verdict. Open the specific lines it points to and judge for yourself whether the behavior is legitimate.</p>
     </div>
   </section>
 

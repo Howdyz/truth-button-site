@@ -38,8 +38,35 @@
       "@type": "Question",
       "name": "Are data center directories complete?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Inventories are inherently incomplete since not every operator discloses locations, especially newer hyperscale and government-adjacent facilities." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this tell me a data center's water or power usage?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Not directly — the linked directory lists facility locations and operators, not utility consumption. For power or water figures, check the operator's own sustainability disclosures or local utility permit filings, where available." }
+    },
+    {
+      "@type": "Question",
+      "name": "How often is the map updated?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It's maintained by an independent third party, Data Center Map, on their own schedule — very recently announced projects may take time to appear." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I search internationally, or just the US?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Data Center Map covers facilities worldwide, though coverage varies by country. The state filter on this page is US-focused, but the underlying directory isn't limited to the US." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Data Center Finder — The Truth Button",
+  "description": "Search documented data center and colocation facilities by state, plus context on how AI-buildout land deals actually get done.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/data-centers.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -108,6 +135,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>The AI buildout is happening in specific towns and counties right now, often before residents realize what's being proposed — this exists for the people trying to catch up to that.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Homeowners near a proposed development trying to find out if it's actually a data center before it's built</li>
+        <li>Community organizers researching land-use filings ahead of a zoning hearing</li>
+        <li>Journalists tracking the AI infrastructure buildout state by state</li>
+        <li>IT buyers scouting colocation options in a specific region</li>
+        <li>Researchers studying the environmental and water-use footprint of AI infrastructure</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I find data centers near me?</div>
@@ -120,6 +161,18 @@
     <div class="faq-item">
       <div class="faq-q">Are data center directories complete?</div>
       <p class="faq-a">No. Inventories are inherently incomplete since not every operator discloses locations, especially newer hyperscale and government-adjacent facilities.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does this tell me a data center's water or power usage?</div>
+      <p class="faq-a">Not directly — the linked directory lists facility locations and operators, not utility consumption. For power or water figures, check the operator's own sustainability disclosures or local utility permit filings, where available.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How often is the map updated?</div>
+      <p class="faq-a">It's maintained by an independent third party, Data Center Map, on their own schedule — very recently announced projects may take time to appear.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I search internationally, or just the US?</div>
+      <p class="faq-a">Data Center Map covers facilities worldwide, though coverage varies by country. The state filter on this page is US-focused, but the underlying directory isn't limited to the US.</p>
     </div>
   </section>
 

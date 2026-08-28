@@ -48,8 +48,35 @@
       "@type": "Question",
       "name": "Why did loading my image URL fail?",
       "acceptedAnswer": { "@type": "Answer", "text": "Some image hosts block cross-origin access, which stops a browser from reading the image's pixel data even though it can display it. If pasting a URL fails, download the file and use \"Choose a Photo\" instead — that always works regardless of the source." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does cropping reduce image quality?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No more than any crop — you're selecting a region of the original pixels, not recompressing them beyond the final PNG export step." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I crop more than one photo at a time?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — it handles one photo at a time. For batches, repeat the same platform preset and repositioning step per image." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it add any watermark or branding?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — the exported PNG is exactly your cropped photo, with nothing added." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Social Media Cropper — The Truth Button",
+  "description": "Crop a photo to the exact recommended ratio for Facebook, Instagram, Pinterest, or YouTube thumbnails, entirely in your browser.",
+  "applicationCategory": "PhotoApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/screenshot-cropper.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -144,6 +171,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>Every platform quietly assumes a different shape for the same photo — this is for whoever got tired of letting the platform decide what gets cut off.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Bloggers and marketers prepping a link-preview image before sharing a post</li>
+        <li>Online sellers cropping product photos to Pinterest's exact pin ratio</li>
+        <li>YouTubers making a properly-sized thumbnail without opening a full design app</li>
+        <li>Social media managers batching the same photo across several differently-shaped platforms</li>
+        <li>Anyone tired of a platform's auto-crop cutting off exactly the wrong part of a photo</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">What image size does Facebook actually want?</div>
@@ -164,6 +205,18 @@
     <div class="faq-item">
       <div class="faq-q">Why did loading my image URL fail?</div>
       <p class="faq-a">Some image hosts block cross-origin access, which stops a browser from reading the image's pixel data even though it can display it. If pasting a URL fails, download the file and use "Choose a Photo" instead — that always works regardless of the source.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does cropping reduce image quality?</div>
+      <p class="faq-a">No more than any crop — you're selecting a region of the original pixels, not recompressing them beyond the final PNG export step.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I crop more than one photo at a time?</div>
+      <p class="faq-a">No — it handles one photo at a time. For batches, repeat the same platform preset and repositioning step per image.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it add any watermark or branding?</div>
+      <p class="faq-a">No — the exported PNG is exactly your cropped photo, with nothing added.</p>
     </div>
   </section>
 

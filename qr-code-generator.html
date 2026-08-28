@@ -48,8 +48,35 @@
       "@type": "Question",
       "name": "Can I see or delete my trackable links?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes — once signed in, turning on the trackable-link toggle reveals a \"My Trackable Links\" list with every link you've created, its click count, and a delete button. Deleting one breaks that QR code's destination immediately." }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the largest amount of text a QR code can hold?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Roughly 4,000 alphanumeric characters at the lowest error-correction level, though very dense codes get harder for phone cameras to scan reliably — shorter text or a URL scans faster." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will the QR code expire?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — a plain QR code encodes your text directly and never expires. Only the optional trackable-link version depends on this site staying up, since it redirects through our server." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I print it at a large size, like a poster?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — QR codes are simple vector-like patterns, so scaling up doesn't blur the way a photo would. Download at the largest size setting for print use." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "QR Code Generator — The Truth Button",
+  "description": "Generate a QR code from any URL or text, entirely in your browser, and download it as a PNG. Free, no account needed.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/qr-code-generator.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -126,6 +153,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>A QR code is a five-second problem that a lot of tools turn into a paywall — this keeps it a five-second problem.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Small business owners putting a QR code on a flyer, menu, or storefront sign</li>
+        <li>Event organizers linking a printed program straight to a digital schedule</li>
+        <li>Anyone sharing wifi credentials with guests without reading out a password</li>
+        <li>Sellers adding a scannable link to a listing photo or product tag</li>
+        <li>Marketers who want click analytics on a printed QR code via the trackable-link option</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I make a QR code for free?</div>
@@ -146,6 +187,18 @@
     <div class="faq-item">
       <div class="faq-q">Can I see or delete my trackable links?</div>
       <p class="faq-a">Yes — once signed in, turning on the trackable-link toggle reveals a "My Trackable Links" list with every link you've created, its click count, and a delete button. Deleting one breaks that QR code's destination immediately.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's the largest amount of text a QR code can hold?</div>
+      <p class="faq-a">Roughly 4,000 alphanumeric characters at the lowest error-correction level, though very dense codes get harder for phone cameras to scan reliably — shorter text or a URL scans faster.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Will the QR code expire?</div>
+      <p class="faq-a">No — a plain QR code encodes your text directly and never expires. Only the optional trackable-link version depends on this site staying up, since it redirects through our server.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I print it at a large size, like a poster?</div>
+      <p class="faq-a">Yes — QR codes are simple vector-like patterns, so scaling up doesn't blur the way a photo would. Download at the largest size setting for print use.</p>
     </div>
   </section>
 

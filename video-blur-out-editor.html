@@ -53,8 +53,35 @@
       "@type": "Question",
       "name": "Is this free?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, no account or install required." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I preview the blur before exporting?",
+      "acceptedAnswer": { "@type": "Answer", "text": "You can review the box position and time window you set before clicking Blur & Export, but the actual blurred result only renders during export." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the blur strength adjust automatically?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — it applies a fixed blur intensity strong enough to obscure typical detail like a face or plate; it isn't adjustable per box." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to audio during the blurred section?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Audio is untouched — only the visual region you selected is affected, for the whole clip." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Video Blur Out Editor — The Truth Button",
+  "description": "Upload a video and blur a fixed region — a face, plate, or screen — for a chosen time window, entirely in your browser.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/video-blur-out-editor.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -137,6 +164,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>Redaction software is built for newsrooms and forensics teams, priced accordingly — most people just need to hide one thing for one stretch of one clip.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Journalists protecting a source's identity in video footage before publishing</li>
+        <li>Parents blurring a child's face before posting a video publicly</li>
+        <li>Landlords or building managers redacting a license plate or unit number from footage before sharing it</li>
+        <li>Creators removing a visible screen, document, or sensitive detail from a screen-recorded tutorial</li>
+        <li>Anyone complying with a request to redact part of a video before sending it somewhere</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I blur part of a video?</div>
@@ -161,6 +202,18 @@
     <div class="faq-item">
       <div class="faq-q">Is this free?</div>
       <p class="faq-a">Yes, completely free, no account or install required.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I preview the blur before exporting?</div>
+      <p class="faq-a">You can review the box position and time window you set before clicking Blur & Export, but the actual blurred result only renders during export.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does the blur strength adjust automatically?</div>
+      <p class="faq-a">No — it applies a fixed blur intensity strong enough to obscure typical detail like a face or plate; it isn't adjustable per box.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What happens to audio during the blurred section?</div>
+      <p class="faq-a">Audio is untouched — only the visual region you selected is affected, for the whole clip.</p>
     </div>
   </section>
 

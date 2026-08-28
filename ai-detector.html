@@ -48,8 +48,35 @@
       "@type": "Question",
       "name": "Is it 100% accurate?",
       "acceptedAnswer": { "@type": "Answer", "text": "No — it's a heuristic demo, not a certified forensic tool. Treat results as a data point to inform your judgment, not a final verdict." }
+    },
+    {
+      "@type": "Question",
+      "name": "What file types are supported?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Common image formats (JPG, PNG, WebP), video formats (MP4, WebM, MOV), and audio formats (MP3, WAV, M4A)." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I analyze a social media post directly?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — paste a link, or use the screen-capture option to grab a frame from a post that's already open in another tab, without needing to download the file first." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why did two different AI detectors give me different scores for the same file?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Heuristic detectors weigh different signals (compression artifacts, noise patterns, frequency analysis) differently, so scores are a directional read rather than a shared standard — that's true of every detector on the market, not just this one." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "AI Photo, Video & Audio Detector — The Truth Button",
+  "description": "A free, browser-based heuristic check for whether a photo, video, or audio clip was AI-generated or heavily edited.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/ai-detector.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -206,6 +233,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>AI-generated and heavily-edited media shows up in ordinary situations now, not just viral news stories — a first-pass check often settles the question faster than staring at it and guessing.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Someone deciding whether to trust a viral photo or clip before sharing it further</li>
+        <li>Online marketplace buyers checking a listing photo before committing to a purchase</li>
+        <li>Journalists and researchers doing a fast first-pass check on user-submitted media</li>
+        <li>Anyone checking a suspicious voice note or video sent by an unfamiliar contact</li>
+        <li>Content moderators triaging a queue of reports before escalating</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How can I tell if a photo is AI-generated?</div>
@@ -226,6 +267,18 @@
     <div class="faq-item">
       <div class="faq-q">Is it 100% accurate?</div>
       <p class="faq-a">No — it's a heuristic demo, not a certified forensic tool. Treat results as a data point that informs your judgment, not a final verdict.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What file types are supported?</div>
+      <p class="faq-a">Common image formats (JPG, PNG, WebP), video formats (MP4, WebM, MOV), and audio formats (MP3, WAV, M4A).</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I analyze a social media post directly?</div>
+      <p class="faq-a">Yes — paste a link, or use the screen-capture option to grab a frame from a post that's already open in another tab, without needing to download the file first.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why did two different AI detectors give me different scores for the same file?</div>
+      <p class="faq-a">Heuristic detectors weigh different signals (compression artifacts, noise patterns, frequency analysis) differently, so scores are a directional read rather than a shared standard — that's true of every detector on the market, not just this one.</p>
     </div>
   </section>
 

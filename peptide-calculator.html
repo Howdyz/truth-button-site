@@ -38,8 +38,35 @@
       "@type": "Question",
       "name": "Is this calculator free?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free, no account required." }
+    },
+    {
+      "@type": "Question",
+      "name": "What units does the calculator use?",
+      "acceptedAnswer": { "@type": "Answer", "text": "mg or mcg for peptide amount, mL for water volume, and both mL and insulin-syringe (IU) units for the final draw volume." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it store or send my inputs anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No — every calculation runs locally in your browser. Nothing you enter is saved or transmitted." }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my vial size isn't a round number?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Enter the exact number printed on your vial or lab certificate — the calculator doesn't round or assume standard sizes, so precision in equals precision out." }
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Peptide Reconstitution & Dose Calculator — The Truth Button",
+  "description": "Convert a known peptide dose into a measurable syringe volume. A free arithmetic tool, not medical advice.",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "url": "https://projectsilverbeam.com/peptide-calculator.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 <style>
@@ -108,6 +135,20 @@
   </section>
 
   <section>
+    <h2>Who this is for</h2>
+    <p>This kind of math is simple in theory and easy to get wrong under time pressure — this exists to double-check a number, not to decide it for you.</p>
+    <div class="other-tools">
+      <ul>
+        <li>Patients following a prescribed reconstitution protocol who want to double-check the math before drawing a dose</li>
+        <li>Clinic staff cross-checking a calculation quickly between patients</li>
+        <li>Researchers working with lab compounds who need to convert a known amount into a working solution</li>
+        <li>Anyone re-deriving a calculation they were taught once and don't fully remember</li>
+        <li>People switching between insulin-unit and mL syringe markings who want both figures side by side</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
       <div class="faq-q">How do I calculate peptide reconstitution?</div>
@@ -120,6 +161,18 @@
     <div class="faq-item">
       <div class="faq-q">Is this calculator free?</div>
       <p class="faq-a">Yes, completely free, no account required.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What units does the calculator use?</div>
+      <p class="faq-a">mg or mcg for peptide amount, mL for water volume, and both mL and insulin-syringe (IU) units for the final draw volume.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it store or send my inputs anywhere?</div>
+      <p class="faq-a">No — every calculation runs locally in your browser. Nothing you enter is saved or transmitted.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if my vial size isn't a round number?</div>
+      <p class="faq-a">Enter the exact number printed on your vial or lab certificate — the calculator doesn't round or assume standard sizes, so precision in equals precision out.</p>
     </div>
   </section>
 
