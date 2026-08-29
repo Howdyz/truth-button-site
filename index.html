@@ -1532,6 +1532,7 @@
     <div class="mode-tab" data-mode="downloader" id="tabDownloader">⚡ Lightning Downloader</div>
     <div class="mode-tab" data-mode="videodl" id="tabVideoDl">🌩️ Thunder Video Downloader</div>
     <div class="mode-tab" data-mode="vidblur" id="tabVidBlur">🎞️ Video Blur Out Editor</div>
+    <div class="mode-tab" data-mode="picvideo" id="tabPicVideo">🎬 Photo to Video Maker</div>
     <div class="mode-tab" data-mode="qrcode" id="tabQrCode">📱 QR Generator</div>
     <div class="mode-tab" data-mode="stego" id="tabStego">🕵️ Pro Link Maker</div>
     <div class="mode-tab" data-mode="radio" id="tabRadio">📻 FlashBackMan Radio</div>
@@ -2744,6 +2745,121 @@ python3 hexstrike_launcher.py</pre>
 
     <div class="lookup-disclaimer">
       <b>Being straight about this:</b> the whole video is analyzed and re-encoded locally in your browser using ffmpeg compiled to WebAssembly — nothing is ever uploaded to a server. The blur box stays in the exact same position on screen for the time window you set (or through to the end if you don't set one) — it does not track a moving subject. You're responsible for making sure the box actually stays over what you intend to hide for that entire window before you share it.
+    </div>
+  </div>
+
+  <div class="lookup-panel" id="picvideoPanel">
+    <div class="lookup-card">
+      <h3>🎬 Photo to Video Maker</h3>
+      <div class="lc-sub">Turn a still photo and a song into a real, downloadable video — with a gentle cinematic zoom — so you can share it anywhere a plain photo can't play music. Everything runs locally in your browser; nothing is ever uploaded.</div>
+
+      <div id="photo-video-maker-widget">
+        <style>
+          #photo-video-maker-widget {
+            --pv-bg: #14110F; --pv-panel: #1C1814; --pv-border: rgba(242,237,225,0.14);
+            --pv-text: #F2EDE1; --pv-text-dim: #8C8377; --pv-accent: #2F8F7A; --pv-gold: #E8C23C; --pv-red: #E8402C;
+            font-family: 'IBM Plex Mono', monospace; color: var(--pv-text); margin-top: 16px;
+          }
+          #photo-video-maker-widget *{box-sizing:border-box;}
+          #photo-video-maker-widget .pv-desc{font-size:12.5px; color:var(--pv-text-dim); line-height:1.6; margin-bottom:16px;}
+          #photo-video-maker-widget .pv-slots{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;}
+          #photo-video-maker-widget .pv-dropzone{
+            border:2px dashed var(--pv-border); border-radius:8px; padding:28px 16px; text-align:center;
+            cursor:pointer; transition:border-color .15s ease, transform .15s ease;
+          }
+          #photo-video-maker-widget .pv-dropzone:hover, #photo-video-maker-widget .pv-dropzone.dragover{border-color:var(--pv-accent); transform:translateY(-2px);}
+          #photo-video-maker-widget .pv-dz-icon{font-size:26px; margin-bottom:8px;}
+          #photo-video-maker-widget .pv-dz-text{font-size:13px; color:var(--pv-text);}
+          #photo-video-maker-widget .pv-dz-sub{font-size:11.5px; color:var(--pv-text-dim); margin-top:4px;}
+          #photo-video-maker-widget .pv-preview-thumb{background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px; padding:14px; text-align:center;}
+          #photo-video-maker-widget .pv-preview-thumb img{max-width:100%; max-height:140px; border-radius:6px; display:block; margin:0 auto 10px;}
+          #photo-video-maker-widget .pv-preview-thumb audio{width:100%; margin-bottom:10px;}
+          #photo-video-maker-widget .pv-options{margin-top:16px; padding:12px 14px; background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px;}
+          #photo-video-maker-widget .pv-checkbox-row{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--pv-text); cursor:pointer;}
+          #photo-video-maker-widget .pv-checkbox-row input{accent-color:var(--pv-accent); width:15px; height:15px; cursor:pointer;}
+          #photo-video-maker-widget .pv-controls-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+          #photo-video-maker-widget button.pv-action{
+            padding:10px 16px; background:var(--pv-accent); border:none;
+            border-radius:5px; color:var(--pv-bg); font-weight:600; font-size:12.5px; cursor:pointer;
+            font-family:inherit; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #photo-video-maker-widget button.pv-action:hover{opacity:0.88;}
+          #photo-video-maker-widget button.pv-action:disabled{opacity:.5; cursor:default;}
+          #photo-video-maker-widget button.pv-reset{
+            padding:10px 16px; background:none; border:1px solid var(--pv-border); color:var(--pv-text-dim);
+            border-radius:5px; font-size:12.5px; cursor:pointer; font-family:inherit;
+          }
+          #photo-video-maker-widget button.pv-reset:hover{border-color:var(--pv-accent); color:var(--pv-accent);}
+          #photo-video-maker-widget .pv-progress-wrap{background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:5px; height:10px; margin:14px 0; overflow:hidden; display:none; max-width:480px;}
+          #photo-video-maker-widget .pv-progress-wrap.show{display:block;}
+          #photo-video-maker-widget .pv-progress{height:100%; width:0%; background:linear-gradient(90deg, var(--pv-accent), var(--pv-gold)); transition:width .15s linear;}
+          #photo-video-maker-widget .pv-status{font-size:12.5px; color:var(--pv-text-dim); margin-top:10px; min-height:18px;}
+          #photo-video-maker-widget .pv-status.error{color:var(--pv-red);}
+          #photo-video-maker-widget .pv-status.ok{color:var(--pv-accent);}
+          #photo-video-maker-widget .pv-result{display:none; margin-top:16px; background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px; padding:14px;}
+          #photo-video-maker-widget .pv-result.show{display:block;}
+          #photo-video-maker-widget .pv-result video{width:100%; max-width:480px; margin-bottom:10px; border-radius:6px;}
+          #photo-video-maker-widget .pv-result-row{display:flex; gap:10px; flex-wrap:wrap;}
+          #photo-video-maker-widget a.pv-download{
+            padding:10px 16px; background:var(--pv-gold); border:none; border-radius:5px; color:var(--pv-bg);
+            font-weight:700; font-size:12.5px; text-decoration:none; text-transform:uppercase; letter-spacing:0.04em;
+          }
+          #photo-video-maker-widget a.pv-download:hover{opacity:0.88;}
+        </style>
+
+        <div class="pv-desc">Pick a photo and a song below. We'll combine them into an MP4 — the photo held on screen (with a subtle zoom, if you leave that on) for the length of the song — ready to post to Facebook, Instagram, TikTok, or anywhere else that plays video.</div>
+
+        <div class="pv-slots">
+          <div class="pv-slot" id="pvPhotoSlot">
+            <div class="pv-dropzone" id="pvPhotoDropzone">
+              <div class="pv-dz-icon">🖼️</div>
+              <div class="pv-dz-text">Choose a photo</div>
+              <div class="pv-dz-sub">JPG, PNG, WebP — stays on your device</div>
+            </div>
+            <input type="file" id="pvPhotoInput" accept="image/*" style="display:none;" aria-label="Choose a photo">
+            <div class="pv-preview-thumb" id="pvPhotoPreviewWrap" style="display:none;">
+              <img id="pvPhotoPreview" alt="Selected photo">
+              <button class="pv-reset" id="pvPhotoChangeBtn" type="button">Change Photo</button>
+            </div>
+          </div>
+          <div class="pv-slot" id="pvAudioSlot">
+            <div class="pv-dropzone" id="pvAudioDropzone">
+              <div class="pv-dz-icon">🎵</div>
+              <div class="pv-dz-text">Choose a song</div>
+              <div class="pv-dz-sub">MP3, WAV, M4A — stays on your device</div>
+            </div>
+            <input type="file" id="pvAudioInput" accept="audio/*" style="display:none;" aria-label="Choose a song">
+            <div class="pv-preview-thumb" id="pvAudioPreviewWrap" style="display:none;">
+              <audio id="pvAudioPreview" controls></audio>
+              <button class="pv-reset" id="pvAudioChangeBtn" type="button">Change Song</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pv-options" id="pvOptions" style="display:none;">
+          <label class="pv-checkbox-row"><input type="checkbox" id="pvZoomToggle" checked> Add a gentle cinematic zoom (recommended)</label>
+        </div>
+
+        <div class="pv-controls-row" id="pvControlsRow" style="display:none;">
+          <button class="pv-action" id="pvExportBtn" type="button" disabled>🎬 Create Video</button>
+          <button class="pv-reset" id="pvStartOverBtn" type="button">Start Over</button>
+        </div>
+
+        <div class="pv-progress-wrap" id="pvProgressWrap"><div class="pv-progress" id="pvProgress"></div></div>
+        <div class="pv-status" id="pvStatus"></div>
+
+        <div class="pv-result" id="pvResult">
+          <video controls id="pvResultVideo"></video>
+          <div class="pv-result-row">
+            <a class="pv-download" id="pvDownloadLink" download="photo-video.mp4">⬇ Download MP4</a>
+            <button class="pv-reset" id="pvResetBtn" type="button">Make Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookup-disclaimer">
+      <b>Being straight about this:</b> the photo and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — neither ever leaves your device. Works best for songs around 5 minutes or under; longer tracks take proportionally longer to process since there's no server doing the encoding for you. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.
     </div>
   </div>
 
@@ -4271,6 +4387,7 @@ const mp3libraryPanel = document.getElementById('mp3libraryPanel');
 const scamidPanel = document.getElementById('scamidPanel');
 const videodlPanel = document.getElementById('videodlPanel');
 const vidblurPanel = document.getElementById('vidblurPanel');
+const picvideoPanel = document.getElementById('picvideoPanel');
 const toolkitPanel = document.getElementById('toolkitPanel');
 const toolkitWinPanel = document.getElementById('toolkitWinPanel');
 
@@ -4293,6 +4410,7 @@ const LOOKUP_TAGLINES = {
   scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
   videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.',
   vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.',
+  picvideo: 'Combine a photo and a song into a real, downloadable MP4 — with a gentle cinematic zoom — so you can share it anywhere a plain photo can\'t play music. Converted entirely on your device, nothing uploaded.',
   toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Linux only.',
   toolkitwin: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Windows only, real Kali tools via WSL2, no terminal.'
 };
@@ -4304,7 +4422,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'toolkit' || newMode === 'toolkitwin');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'picvideo' || newMode === 'toolkit' || newMode === 'toolkitwin');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   captureBar.style.display = (newMode === 'photo' && !isMobileDevice) ? '' : 'none';
@@ -4327,6 +4445,7 @@ function setMode(newMode){
   scamidPanel.classList.toggle('show', newMode === 'scamid');
   videodlPanel.classList.toggle('show', newMode === 'videodl');
   vidblurPanel.classList.toggle('show', newMode === 'vidblur');
+  picvideoPanel.classList.toggle('show', newMode === 'picvideo');
   toolkitPanel.classList.toggle('show', newMode === 'toolkit');
   toolkitWinPanel.classList.toggle('show', newMode === 'toolkitwin');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
@@ -4362,6 +4481,7 @@ document.getElementById('tabToolkit').addEventListener('click', () => setMode('t
 document.getElementById('tabToolkitWin').addEventListener('click', () => setMode('toolkitwin'));
 document.getElementById('tabVideoDl').addEventListener('click', () => setMode('videodl'));
 document.getElementById('tabVidBlur').addEventListener('click', () => setMode('vidblur'));
+document.getElementById('tabPicVideo').addEventListener('click', () => setMode('picvideo'));
 document.getElementById('tabAudio').addEventListener('click', () => setMode('audio'));
 document.getElementById('tabVideo').addEventListener('click', () => setMode('video'));
 document.getElementById('tabFlock').addEventListener('click', () => setMode('flock'));
@@ -7219,7 +7339,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','toolkit','toolkitwin']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','picvideo','toolkit','toolkitwin']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -8355,6 +8475,267 @@ processSharedFileIfAny();
     if (vbResultObjectUrl) { URL.revokeObjectURL(vbResultObjectUrl); vbResultObjectUrl = null; }
     resultVideo.removeAttribute('src');
     resetToDropzone();
+  });
+})();
+
+// --- Photo to Video Maker: combine a still photo + a song into an MP4 via ffmpeg.wasm ---
+(function(){
+  const root = document.getElementById('photo-video-maker-widget');
+  if (!root) return;
+
+  const photoDropzone = document.getElementById('pvPhotoDropzone');
+  const photoInput = document.getElementById('pvPhotoInput');
+  const photoPreviewWrap = document.getElementById('pvPhotoPreviewWrap');
+  const photoPreview = document.getElementById('pvPhotoPreview');
+  const photoChangeBtn = document.getElementById('pvPhotoChangeBtn');
+
+  const audioDropzone = document.getElementById('pvAudioDropzone');
+  const audioInput = document.getElementById('pvAudioInput');
+  const audioPreviewWrap = document.getElementById('pvAudioPreviewWrap');
+  const audioPreview = document.getElementById('pvAudioPreview');
+  const audioChangeBtn = document.getElementById('pvAudioChangeBtn');
+
+  const optionsEl = document.getElementById('pvOptions');
+  const zoomToggle = document.getElementById('pvZoomToggle');
+  const controlsRow = document.getElementById('pvControlsRow');
+  const exportBtn = document.getElementById('pvExportBtn');
+  const startOverBtn = document.getElementById('pvStartOverBtn');
+  const progressWrap = document.getElementById('pvProgressWrap');
+  const progressBar = document.getElementById('pvProgress');
+  const statusEl = document.getElementById('pvStatus');
+  const resultEl = document.getElementById('pvResult');
+  const resultVideo = document.getElementById('pvResultVideo');
+  const downloadLink = document.getElementById('pvDownloadLink');
+  const resetBtn = document.getElementById('pvResetBtn');
+
+  let pvPhotoFile = null;
+  let pvAudioFile = null;
+  let pvPhotoObjectUrl = null;
+  let pvAudioObjectUrl = null;
+  let pvResultObjectUrl = null;
+  let pvFileCounter = 0;
+
+  function setStatus(msg, cls){
+    statusEl.className = 'pv-status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function setProgress(percent){
+    progressWrap.classList.add('show');
+    progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  }
+
+  function updateReadyState(){
+    const ready = !!(pvPhotoFile && pvAudioFile);
+    optionsEl.style.display = ready ? '' : 'none';
+    controlsRow.style.display = ready ? '' : 'none';
+    exportBtn.disabled = !ready;
+  }
+
+  function loadPhoto(file){
+    if (!file || !file.type.startsWith('image/')) {
+      setStatus('That doesn\'t look like an image file.', 'error');
+      return;
+    }
+    pvPhotoFile = file;
+    if (pvPhotoObjectUrl) URL.revokeObjectURL(pvPhotoObjectUrl);
+    pvPhotoObjectUrl = URL.createObjectURL(file);
+    photoPreview.src = pvPhotoObjectUrl;
+    photoDropzone.style.display = 'none';
+    photoPreviewWrap.style.display = '';
+    resultEl.classList.remove('show');
+    setStatus('');
+    updateReadyState();
+  }
+
+  function loadAudio(file){
+    if (!file || !file.type.startsWith('audio/')) {
+      setStatus('That doesn\'t look like an audio file.', 'error');
+      return;
+    }
+    pvAudioFile = file;
+    if (pvAudioObjectUrl) URL.revokeObjectURL(pvAudioObjectUrl);
+    pvAudioObjectUrl = URL.createObjectURL(file);
+    audioPreview.src = pvAudioObjectUrl;
+    audioDropzone.style.display = 'none';
+    audioPreviewWrap.style.display = '';
+    resultEl.classList.remove('show');
+    setStatus('');
+    updateReadyState();
+  }
+
+  photoDropzone.addEventListener('click', () => photoInput.click());
+  photoInput.addEventListener('change', () => { if (photoInput.files[0]) loadPhoto(photoInput.files[0]); });
+  ['dragenter', 'dragover'].forEach(evt => photoDropzone.addEventListener(evt, (e) => { e.preventDefault(); photoDropzone.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(evt => photoDropzone.addEventListener(evt, (e) => { e.preventDefault(); photoDropzone.classList.remove('dragover'); }));
+  photoDropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) loadPhoto(e.dataTransfer.files[0]); });
+  photoChangeBtn.addEventListener('click', () => {
+    pvPhotoFile = null;
+    if (pvPhotoObjectUrl) { URL.revokeObjectURL(pvPhotoObjectUrl); pvPhotoObjectUrl = null; }
+    photoPreview.removeAttribute('src');
+    photoInput.value = '';
+    photoPreviewWrap.style.display = 'none';
+    photoDropzone.style.display = '';
+    updateReadyState();
+  });
+
+  audioDropzone.addEventListener('click', () => audioInput.click());
+  audioInput.addEventListener('change', () => { if (audioInput.files[0]) loadAudio(audioInput.files[0]); });
+  ['dragenter', 'dragover'].forEach(evt => audioDropzone.addEventListener(evt, (e) => { e.preventDefault(); audioDropzone.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(evt => audioDropzone.addEventListener(evt, (e) => { e.preventDefault(); audioDropzone.classList.remove('dragover'); }));
+  audioDropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) loadAudio(e.dataTransfer.files[0]); });
+  audioChangeBtn.addEventListener('click', () => {
+    pvAudioFile = null;
+    if (pvAudioObjectUrl) { URL.revokeObjectURL(pvAudioObjectUrl); pvAudioObjectUrl = null; }
+    audioPreview.removeAttribute('src');
+    audioInput.value = '';
+    audioPreviewWrap.style.display = 'none';
+    audioDropzone.style.display = '';
+    updateReadyState();
+  });
+
+  // ---- MP4 encode via ffmpeg.wasm (self-hosted, single-threaded core).
+  // Independent copy of the same self-hosted-gzip-decompress loading approach
+  // used by Thunder Video Downloader and Video Blur Out Editor, kept separate
+  // per this codebase's existing per-tool convention rather than shared.
+  let ffmpegInstance = null;
+  let ffmpegLoadPromise = null;
+  let ffmpegScriptPromise = null;
+
+  function loadFfmpegScript(){
+    if (ffmpegScriptPromise) return ffmpegScriptPromise;
+    ffmpegScriptPromise = new Promise((resolve, reject) => {
+      if (window.FFmpegWASM) { resolve(); return; }
+      const script = document.createElement('script');
+      script.src = 'ffmpeg.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('ffmpeg.js failed to load'));
+      document.head.appendChild(script);
+    });
+    return ffmpegScriptPromise;
+  }
+
+  async function fetchDecompressedWasmUrl(){
+    const res = await fetch('ffmpeg-core.wasm.gz');
+    if (!res.ok) throw new Error('ffmpeg-core.wasm.gz failed to load (HTTP ' + res.status + ')');
+    const decompressedStream = res.body.pipeThrough(new DecompressionStream('gzip'));
+    const wasmBlob = await new Response(decompressedStream).blob();
+    return URL.createObjectURL(new Blob([wasmBlob], { type: 'application/wasm' }));
+  }
+
+  async function getFfmpeg(onProgress){
+    if (ffmpegInstance) return ffmpegInstance;
+    if (!ffmpegLoadPromise) {
+      ffmpegLoadPromise = (async () => {
+        try {
+          await loadFfmpegScript();
+          const wasmURL = await fetchDecompressedWasmUrl();
+          const ffmpeg = new FFmpegWASM.FFmpeg();
+          ffmpeg.on('progress', ({ progress }) => {
+            if (onProgress && typeof progress === 'number' && isFinite(progress)) {
+              onProgress(Math.max(0, Math.min(100, Math.round(progress * 100))));
+            }
+          });
+          await ffmpeg.load({ coreURL: 'ffmpeg-core.js', wasmURL });
+          ffmpegInstance = ffmpeg;
+          return ffmpeg;
+        } catch (err) {
+          ffmpegLoadPromise = null;
+          throw err;
+        }
+      })();
+    }
+    return ffmpegLoadPromise;
+  }
+
+  // Fixed 1280x720 output frame regardless of the source photo's own aspect
+  // ratio — scale-to-cover then center-crop, same "fill the frame, don't
+  // letterbox" approach used by the site's Social Media Cropper. With the
+  // zoom option on, zoompan re-samples that same 1280x720 frame at a slowly
+  // increasing zoom factor (capped at 1.2x) every output frame — the classic
+  // ffmpeg recipe for a Ken-Burns-style effect on a single looped image.
+  // -tune stillimage only applies when the frame genuinely never changes;
+  // it's skipped when zoom is on since the frame changes every tick there.
+  async function exportVideo(){
+    if (!pvPhotoFile || !pvAudioFile) return;
+    const photoInputName = 'pvimg_' + pvFileCounter + '.' + (pvPhotoFile.name.split('.').pop() || 'jpg');
+    const audioInputName = 'pvaud_' + pvFileCounter + '.' + (pvAudioFile.name.split('.').pop() || 'mp3');
+    const outputName = 'pvout_' + pvFileCounter + '.mp4';
+    pvFileCounter++;
+
+    exportBtn.disabled = true;
+    setStatus('Loading video engine (one-time, ~10MB — hang tight)…', 'ok');
+    try {
+      const ffmpeg = await getFfmpeg((percent) => {
+        setProgress(percent);
+        setStatus('Building your video… ' + percent + '% (can take a while for longer songs)', 'ok');
+      });
+
+      setStatus('Building your video… 0% (can take a while for longer songs)', 'ok');
+      setProgress(0);
+      const photoData = new Uint8Array(await pvPhotoFile.arrayBuffer());
+      const audioData = new Uint8Array(await pvAudioFile.arrayBuffer());
+      await ffmpeg.writeFile(photoInputName, photoData);
+      await ffmpeg.writeFile(audioInputName, audioData);
+
+      const W = 1280, H = 720, FPS = 15;
+      const zoomOn = zoomToggle.checked;
+      const vf = zoomOn
+        ? "scale=" + W + ":" + H + ":force_original_aspect_ratio=increase,crop=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
+        : "scale=" + W + ":" + H + ":force_original_aspect_ratio=increase,crop=" + W + ":" + H;
+      const args = ['-loop', '1', '-framerate', String(FPS), '-i', photoInputName, '-i', audioInputName,
+        '-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p'];
+      if (!zoomOn) args.push('-tune', 'stillimage');
+      args.push('-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', outputName);
+
+      await ffmpeg.exec(args);
+      const outputData = await ffmpeg.readFile(outputName);
+      await ffmpeg.deleteFile(photoInputName);
+      await ffmpeg.deleteFile(audioInputName);
+      await ffmpeg.deleteFile(outputName);
+
+      const blob = new Blob([outputData.buffer], { type: 'video/mp4' });
+      if (pvResultObjectUrl) URL.revokeObjectURL(pvResultObjectUrl);
+      pvResultObjectUrl = URL.createObjectURL(blob);
+      resultVideo.src = pvResultObjectUrl;
+      downloadLink.href = pvResultObjectUrl;
+      downloadLink.download = 'photo-video-' + Date.now() + '.mp4';
+      resultEl.classList.add('show');
+      setStatus('Your video is ready below — preview it, then download.', 'ok');
+    } catch (err) {
+      setStatus('Video creation failed: ' + ((err && err.message) ? err.message : String(err)), 'error');
+      console.error('Photo to Video Maker export failed:', err);
+    }
+    progressWrap.classList.remove('show');
+    progressBar.style.width = '0%';
+    exportBtn.disabled = false;
+  }
+
+  exportBtn.addEventListener('click', exportVideo);
+
+  function resetToStart(){
+    pvPhotoFile = null;
+    pvAudioFile = null;
+    if (pvPhotoObjectUrl) { URL.revokeObjectURL(pvPhotoObjectUrl); pvPhotoObjectUrl = null; }
+    if (pvAudioObjectUrl) { URL.revokeObjectURL(pvAudioObjectUrl); pvAudioObjectUrl = null; }
+    photoPreview.removeAttribute('src');
+    audioPreview.removeAttribute('src');
+    photoInput.value = '';
+    audioInput.value = '';
+    photoPreviewWrap.style.display = 'none';
+    audioPreviewWrap.style.display = 'none';
+    photoDropzone.style.display = '';
+    audioDropzone.style.display = '';
+    resultEl.classList.remove('show');
+    updateReadyState();
+    setStatus('');
+  }
+
+  startOverBtn.addEventListener('click', resetToStart);
+  resetBtn.addEventListener('click', () => {
+    if (pvResultObjectUrl) { URL.revokeObjectURL(pvResultObjectUrl); pvResultObjectUrl = null; }
+    resultVideo.removeAttribute('src');
+    resetToStart();
   });
 })();
 
