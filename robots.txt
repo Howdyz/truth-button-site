@@ -4,3 +4,5 @@ Disallow: /stats.html
 Disallow: /ads-admin.html
 
 Sitemap: https://projectsilverbeam.com/sitemap.xml
+
+# AI agents: machine-readable site summary at https://projectsilverbeam.com/llms.txt
