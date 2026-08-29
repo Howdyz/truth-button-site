@@ -72,4 +72,16 @@
     <loc>https://projectsilverbeam.com/photo-to-video-maker.html</loc>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://projectsilverbeam.com/flock-updates.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://projectsilverbeam.com/data-center-updates.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://projectsilverbeam.com/social-listen.html</loc>
+    <priority>0.8</priority>
+  </url>
 </urlset>
