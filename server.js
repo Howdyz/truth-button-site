@@ -50,6 +50,7 @@ const dns = require('dns').promises;
 const net = require('net');
 const Stripe = require('stripe');
 const scannerRoutes = require('./scanner/publicRoutes');
+const mcpRoutes = require('./mcp/publicRoutes');
 
 // Express 4 does NOT catch a rejected promise from an async handler — it becomes an
 // unhandled rejection, which crashes the whole process on modern Node (terminates by
@@ -161,6 +162,24 @@ function readQotd(){ return storeGet('tb:qotd', { qotd: null }); }
 function writeQotd(data){ return storeSet('tb:qotd', data); }
 function readVisits(){ return storeGet('tb:visits', { totalViews: 0, byDay: {}, byPath: {}, byReferrer: {}, firstSeen: null, lastSeen: null }); }
 function writeVisits(data){ return storeSet('tb:visits', data); }
+
+// byPath/byReferrer only ever need to answer "what are the top N" (see /api/stats
+// below), so once either grows past MAX_TRACKED_KEYS distinct entries, only the
+// current top MAX_TRACKED_KEYS by count are kept. Without this, a single caller
+// hitting the public, unauthenticated POST /api/visit with a stream of unique
+// path/referrer values would grow this object forever — it's read and rewritten
+// in full on every single hit, so unbounded growth directly degrades that route's
+// latency and Redis storage/egress over time. Cheap to skip on every normal
+// request: only does the sort/rebuild once the cap is actually exceeded.
+const MAX_TRACKED_KEYS = 500;
+function trimToTopN(obj, maxKeys){
+  const keys = Object.keys(obj);
+  if (keys.length <= maxKeys) return;
+  const kept = new Set(keys.sort((a, b) => obj[b] - obj[a]).slice(0, maxKeys));
+  for (const k of keys) {
+    if (!kept.has(k)) delete obj[k];
+  }
+}
 function readAds(){ return storeGet('tb:ads', { ads: [] }); }
 function writeAds(data){ return storeSet('tb:ads', data); }
 function readQrLinks(){ return storeGet('tb:qrlinks', { links: [] }); }
@@ -367,7 +386,7 @@ if (allowedOrigin) {
 // Stripe webhook needs the raw, unparsed request body to verify the signature —
 // it MUST be registered before the global express.json() below, or that middleware
 // would consume/transform the body first and signature verification would fail.
-app.post('/api/downloader/webhook', express.raw({ type: 'application/json' }), asyncHandler(async (req, res) => {
+app.post('/api/downloader/webhook', perMinute(60), express.raw({ type: 'application/json' }), asyncHandler(async (req, res) => {
   if (!stripe || !STRIPE_DOWNLOADER_WEBHOOK_SECRET) return res.status(503).send('Webhook not configured.');
 
   let event;
@@ -410,7 +429,7 @@ app.post('/api/downloader/webhook', express.raw({ type: 'application/json' }), a
 // (avoiding the "endpoint failing" emails a registered-but-unhandled URL would cause),
 // and so a future feature (e.g. a public "total raised" counter) has a verified event
 // stream to build on without re-doing the signature-verification wiring.
-app.post('/api/donate/webhook', express.raw({ type: 'application/json' }), asyncHandler(async (req, res) => {
+app.post('/api/donate/webhook', perMinute(60), express.raw({ type: 'application/json' }), asyncHandler(async (req, res) => {
   if (!stripe || !STRIPE_DONATE_WEBHOOK_SECRET) return res.status(503).send('Webhook not configured.');
 
   let event;
@@ -481,6 +500,12 @@ app.post('/api/photos', express.json({ limit: '2mb' }), requireAuth, perMinute(1
   res.status(201).json({ id, url: `${req.protocol}://${req.get('host')}/photos/${id}`, expiresInDays: PHOTO_TTL_SECONDS / 86400 });
 }));
 
+// MCP (Model Context Protocol) endpoint — POST /mcp. Mounted here, before the
+// global express.json() below, for the same reason as the Stripe webhook and
+// /api/photos above: the MCP SDK's Node adapter needs the raw, unparsed
+// request body to build a Web-standard Request. See mcp/publicRoutes.js.
+app.use(mcpRoutes);
+
 app.use(express.json({ limit: '100kb' }));
 
 // per-route rate limiting (express-rate-limit: bounded memory, auto-expiring buckets —
@@ -528,6 +553,8 @@ app.post('/api/visit', perMinute(30), asyncHandler(async (req, res) => {
   for (const day of Object.keys(visits.byDay)) {
     if (day < cutoff) delete visits.byDay[day];
   }
+  trimToTopN(visits.byPath, MAX_TRACKED_KEYS);
+  trimToTopN(visits.byReferrer, MAX_TRACKED_KEYS);
 
   await writeVisits(visits);
   res.status(201).json({ ok: true });
@@ -1055,6 +1082,25 @@ app.get('/api/scamid/lookup/:number', perMinute(10), asyncHandler(async (req, re
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 
+// Global (not per-IP) budget on outbound Twilio CNAM calls — each one costs real
+// money (~$0.01) on the site's own Twilio account. The sign-in requirement above
+// adds some friction, but a determined abuser could still create multiple accounts
+// and feed many distinct, uncached phone numbers through; the per-route rate limit
+// below only throttles how often ONE client can hit this server, same gap the FTC
+// budget above exists to close for that (free) API. This caps total spend
+// regardless of how requests are distributed. Resets on a rolling hourly window;
+// deliberately in-memory (a soft circuit breaker, not billing-critical enforcement —
+// Twilio's own account-level spend limits are the real backstop) rather than
+// persisted to Redis.
+const CNAM_HOURLY_BUDGET = 200; // ~$2/hour worst case, ~$48/day if sustained non-stop — adjust to taste
+let cnamCallsThisWindow = 0;
+let cnamWindowStart = Date.now();
+function cnamBudgetAvailable(){
+  const now = Date.now();
+  if (now - cnamWindowStart > 3600000) { cnamCallsThisWindow = 0; cnamWindowStart = now; }
+  return cnamCallsThisWindow < CNAM_HOURLY_BUDGET;
+}
+
 app.get('/api/scamid/cnam/:number', requireAuth, perMinute(10), asyncHandler(async (req, res) => {
   const number = normalizeUsPhoneNumber(req.params.number);
   if (!number) return res.status(400).json({ error: 'Enter a valid 10-digit US phone number.' });
@@ -1065,6 +1111,11 @@ app.get('/api/scamid/cnam/:number', requireAuth, perMinute(10), asyncHandler(asy
   const cacheKey = 'tb:scamid:cnam:' + number;
   const cached = await storeGet(cacheKey, null);
   if (cached) return res.json({ ...cached, cached: true });
+
+  if (!cnamBudgetAvailable()) {
+    return res.status(503).json({ error: 'Caller name lookups are temporarily limited — try again in a few minutes.' });
+  }
+  cnamCallsThisWindow++;
 
   const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
   const resp = await fetch(`https://lookups.twilio.com/v2/PhoneNumbers/+1${number}?Fields=caller_name`, {
