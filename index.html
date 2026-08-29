@@ -8648,12 +8648,22 @@ processSharedFileIfAny();
     return ffmpegLoadPromise;
   }
 
-  // Fixed 1280x720 output frame regardless of the source photo's own aspect
-  // ratio — scale-to-cover then center-crop, same "fill the frame, don't
-  // letterbox" approach used by the site's Social Media Cropper. With the
-  // zoom option on, zoompan re-samples that same 1280x720 frame at a slowly
+  // The output frame matches the source photo's OWN aspect ratio — scaled
+  // down only if it's larger than necessary, never cropped. An earlier
+  // version force-fit every photo into a fixed 1280x720 landscape box via
+  // scale-to-cover + center-crop, which silently sliced off anything outside
+  // that box (a head near the top of a taller photo, for instance). With no
+  // cropping at all, nothing is ever lost regardless of the photo's shape —
+  // and every major platform (Instagram, TikTok, Facebook) plays non-16:9
+  // video just fine, often preferring portrait video anyway.
+  //
+  // With the zoom option on, zoompan re-samples that same frame at a slowly
   // increasing zoom factor (capped at 1.2x) every output frame — the classic
   // ffmpeg recipe for a Ken-Burns-style effect on a single looped image.
+  // zoompan's x/y default to anchoring the zoom at the frame's top-left
+  // corner, which drifts the visible area toward that corner as it zooms in
+  // — explicit centered expressions here make it push in from the middle
+  // instead, which is what "zoom in on a photo" actually means to a viewer.
   // -tune stillimage only applies when the frame genuinely never changes;
   // it's skipped when zoom is on since the frame changes every tick there.
   async function exportVideo(){
@@ -8678,11 +8688,25 @@ processSharedFileIfAny();
       await ffmpeg.writeFile(photoInputName, photoData);
       await ffmpeg.writeFile(audioInputName, audioData);
 
-      const W = 1280, H = 720, FPS = 15;
+      const naturalDims = await new Promise((resolve) => {
+        const probe = new Image();
+        probe.onload = () => resolve({ w: probe.naturalWidth || 1280, h: probe.naturalHeight || 720 });
+        probe.onerror = () => resolve({ w: 1280, h: 720 });
+        probe.src = pvPhotoObjectUrl;
+      });
+      const MAX_DIM = 1280, FPS = 15;
+      let W = naturalDims.w, H = naturalDims.h;
+      if (Math.max(W, H) > MAX_DIM) {
+        const ratio = MAX_DIM / Math.max(W, H);
+        W = Math.round(W * ratio);
+        H = Math.round(H * ratio);
+      }
+      W = Math.max(2, W - (W % 2));
+      H = Math.max(2, H - (H % 2));
       const zoomOn = zoomToggle.checked;
       const vf = zoomOn
-        ? "scale=" + W + ":" + H + ":force_original_aspect_ratio=increase,crop=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
-        : "scale=" + W + ":" + H + ":force_original_aspect_ratio=increase,crop=" + W + ":" + H;
+        ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
+        : "scale=" + W + ":" + H;
       const args = ['-loop', '1', '-framerate', String(FPS), '-i', photoInputName, '-i', audioInputName,
         '-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p'];
       if (!zoomOn) args.push('-tune', 'stillimage');
