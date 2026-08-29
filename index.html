@@ -2777,6 +2777,13 @@ python3 hexstrike_launcher.py</pre>
           #photo-video-maker-widget .pv-options{margin-top:16px; padding:12px 14px; background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px;}
           #photo-video-maker-widget .pv-checkbox-row{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--pv-text); cursor:pointer;}
           #photo-video-maker-widget .pv-checkbox-row input{accent-color:var(--pv-accent); width:15px; height:15px; cursor:pointer;}
+          #photo-video-maker-widget .pv-time-row{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--pv-text); margin-top:12px; flex-wrap:wrap;}
+          #photo-video-maker-widget .pv-time-input{
+            width:90px; padding:7px 9px; background:var(--pv-panel); border:1px solid var(--pv-border);
+            border-radius:5px; color:var(--pv-text); font-family:inherit; font-size:12.5px;
+          }
+          #photo-video-maker-widget .pv-time-input:focus{outline:none; border-color:var(--pv-accent);}
+          #photo-video-maker-widget .pv-time-hint{font-size:11.5px; color:var(--pv-text-dim); width:100%;}
           #photo-video-maker-widget .pv-controls-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
           #photo-video-maker-widget button.pv-action{
             padding:10px 16px; background:var(--pv-accent); border:none;
@@ -2838,6 +2845,11 @@ python3 hexstrike_launcher.py</pre>
 
         <div class="pv-options" id="pvOptions" style="display:none;">
           <label class="pv-checkbox-row"><input type="checkbox" id="pvZoomToggle" checked> Add a gentle cinematic zoom (recommended)</label>
+          <div class="pv-time-row">
+            <label for="pvStopTime">Stop after:</label>
+            <input type="text" class="pv-time-input" id="pvStopTime" placeholder="e.g. 0:30">
+            <span class="pv-time-hint">Optional — leave blank to use the whole song. Enter seconds (30) or minutes:seconds (1:30).</span>
+          </div>
         </div>
 
         <div class="pv-controls-row" id="pvControlsRow" style="display:none;">
@@ -8497,6 +8509,7 @@ processSharedFileIfAny();
 
   const optionsEl = document.getElementById('pvOptions');
   const zoomToggle = document.getElementById('pvZoomToggle');
+  const stopTimeInput = document.getElementById('pvStopTime');
   const controlsRow = document.getElementById('pvControlsRow');
   const exportBtn = document.getElementById('pvExportBtn');
   const startOverBtn = document.getElementById('pvStartOverBtn');
@@ -8523,6 +8536,19 @@ processSharedFileIfAny();
   function setProgress(percent){
     progressWrap.classList.add('show');
     progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  }
+
+  // Accepts plain seconds ("30", "12.5") or minutes:seconds ("1:30"). Empty
+  // input means "no limit, use the whole song" (null); anything else that
+  // doesn't match either shape is reported back as NaN so the caller can
+  // show an error instead of silently guessing what the user meant.
+  function parseStopTime(text){
+    text = (text || '').trim();
+    if (!text) return null;
+    if (/^\d+(\.\d+)?$/.test(text)) return parseFloat(text);
+    const m = text.match(/^(\d+):([0-5]?\d(?:\.\d+)?)$/);
+    if (m) return parseInt(m[1], 10) * 60 + parseFloat(m[2]);
+    return NaN;
   }
 
   function updateReadyState(){
@@ -8668,6 +8694,13 @@ processSharedFileIfAny();
   // it's skipped when zoom is on since the frame changes every tick there.
   async function exportVideo(){
     if (!pvPhotoFile || !pvAudioFile) return;
+    const stopSecondsRaw = parseStopTime(stopTimeInput.value);
+    if (Number.isNaN(stopSecondsRaw)) {
+      setStatus('That stop time doesn\'t look right — use seconds (e.g. 30) or minutes:seconds (e.g. 1:30), or leave it blank for the whole song.', 'error');
+      return;
+    }
+    const stopSeconds = (stopSecondsRaw !== null && stopSecondsRaw > 0) ? stopSecondsRaw : null;
+
     const photoInputName = 'pvimg_' + pvFileCounter + '.' + (pvPhotoFile.name.split('.').pop() || 'jpg');
     const audioInputName = 'pvaud_' + pvFileCounter + '.' + (pvAudioFile.name.split('.').pop() || 'mp3');
     const outputName = 'pvout_' + pvFileCounter + '.mp4';
@@ -8703,6 +8736,25 @@ processSharedFileIfAny();
       }
       W = Math.max(2, W - (W % 2));
       H = Math.max(2, H - (H % 2));
+
+      // A stop time only ever trims the audio (and, since the video is only
+      // ever as long as the audio to begin with, the video along with it) —
+      // it never changes the image or the zoom, just how much of the song
+      // plays before the whole thing cuts off. Capped against the song's
+      // real length so entering something longer than the song just plays
+      // the whole thing, same as leaving it blank.
+      let targetDuration = null;
+      if (stopSeconds !== null) {
+        const audioDuration = await new Promise((resolve) => {
+          if (audioPreview.duration && isFinite(audioPreview.duration)) { resolve(audioPreview.duration); return; }
+          const probe = new Audio();
+          probe.onloadedmetadata = () => resolve(isFinite(probe.duration) ? probe.duration : null);
+          probe.onerror = () => resolve(null);
+          probe.src = pvAudioObjectUrl;
+        });
+        targetDuration = audioDuration ? Math.min(stopSeconds, audioDuration) : stopSeconds;
+      }
+
       const zoomOn = zoomToggle.checked;
       const vf = zoomOn
         ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
@@ -8710,7 +8762,9 @@ processSharedFileIfAny();
       const args = ['-loop', '1', '-framerate', String(FPS), '-i', photoInputName, '-i', audioInputName,
         '-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p'];
       if (!zoomOn) args.push('-tune', 'stillimage');
-      args.push('-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', outputName);
+      args.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
+      if (targetDuration !== null) args.push('-t', String(targetDuration));
+      args.push('-movflags', '+faststart', outputName);
 
       await ffmpeg.exec(args);
       const outputData = await ffmpeg.readFile(outputName);

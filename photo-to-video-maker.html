@@ -62,12 +62,17 @@
     {
       "@type": "Question",
       "name": "Can I use a portrait (vertical) photo?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes — it scales and center-crops to fill the 1280×720 frame regardless of your photo's original shape, so there are no black bars." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — the output frame matches your photo's own shape (portrait, landscape, or square), scaled down only if it's larger than necessary. Nothing is ever cropped, and every major platform plays non-16:9 video just fine." }
     },
     {
       "@type": "Question",
       "name": "Is there a file size or resolution limit?",
       "acceptedAnswer": { "@type": "Answer", "text": "No hard limit from the tool itself — processing time and your device's memory are the real constraints, same as any browser-based tool on this site." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use just part of a song instead of the whole thing?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — enter a stop time (in seconds, like 30, or minutes:seconds, like 1:30) and the video cuts off there instead of running the full song. Leave it blank to use the whole track." }
     }
   ]
 }
@@ -243,11 +248,15 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">Can I use a portrait (vertical) photo?</div>
-      <p class="faq-a">Yes — it scales and center-crops to fill the 1280×720 frame regardless of your photo's original shape, so there are no black bars.</p>
+      <p class="faq-a">Yes — the output frame matches your photo's own shape (portrait, landscape, or square), scaled down only if it's larger than necessary. Nothing is ever cropped, and every major platform plays non-16:9 video just fine.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Is there a file size or resolution limit?</div>
       <p class="faq-a">No hard limit from the tool itself — processing time and your device's memory are the real constraints, same as any browser-based tool on this site.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I use just part of a song instead of the whole thing?</div>
+      <p class="faq-a">Yes — enter a stop time (in seconds, like 30, or minutes:seconds, like 1:30) and the video cuts off there instead of running the full song. Leave it blank to use the whole track.</p>
     </div>
   </section>
 
