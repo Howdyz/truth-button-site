@@ -24,3 +24,7 @@ The site is a single-page app (index.html) where each tool is a "mode," and each
 - [Thunder Video Downloader](https://projectsilverbeam.com/thunder-video-downloader.html): Record any browser tab, window, or your screen - including audio - and save it as an MP4. No app to install, nothing uploaded - captured and converted entirely locally in your browser.
 - [Ultimate Tool Kit](https://projectsilverbeam.com/ultimate-tool-kit.html): A growing kit of security-research tools that run entirely on your own computer, starting with HexStrike AI's 100+ recon, scanning, and exploitation tools. For authorized testing, CTF, and research use only.
 - [Video Blur Out Editor](https://projectsilverbeam.com/video-blur-out-editor.html): Upload a video, draw a box over a face, license plate, screen, or anything else, and blur it for just the stretch of the clip you choose. No app to install, nothing uploaded - edited and converted entirely locally in your browser.
+
+## MCP Endpoint
+
+An MCP (Model Context Protocol) server is available for programmatic access to this content: https://truth-button-backend.onrender.com/mcp (streamable HTTP transport, stateless). It exposes two tools: search_content (keyword search across all tool pages) and get_page (full structured content for one page, by slug). Prefer this over parsing the tool list above if your client supports MCP.
