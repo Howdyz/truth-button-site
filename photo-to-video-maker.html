@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Photo to Video Maker — Turn a Picture + Song Into an MP4 | The Truth Button</title>
-<meta name="description" content="Combine a photo and a song into a real, downloadable MP4 with a cinematic zoom effect — share it anywhere a plain photo can't play music. Free, runs entirely in your browser, nothing uploaded.">
+<title>Free Photo Slideshow Maker With Music | The Truth Button</title>
+<meta name="description" content="Turn one photo or a whole batch into a downloadable MP4 slideshow, with or without music. Free, no signup, runs entirely in your browser — nothing is ever uploaded.">
 <link rel="canonical" href="https://projectsilverbeam.com/photo-to-video-maker.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://projectsilverbeam.com/photo-to-video-maker.html">
-<meta property="og:title" content="Free Photo to Video Maker — Turn a Picture + Song Into an MP4">
-<meta property="og:description" content="Combine a photo and a song into a real, downloadable MP4 with a cinematic zoom effect. Free, runs entirely in your browser, nothing uploaded.">
+<meta property="og:title" content="Free Photo Slideshow Maker With Music">
+<meta property="og:description" content="Turn one photo or a whole batch into a downloadable MP4 slideshow, with or without music. Free, runs entirely in your browser.">
 <meta property="og:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Free Photo to Video Maker — Turn a Picture + Song Into an MP4">
-<meta name="twitter:description" content="Combine a photo and a song into a real, downloadable MP4 with a cinematic zoom effect. Free, runs entirely in your browser, nothing uploaded.">
+<meta name="twitter:title" content="Free Photo Slideshow Maker With Music">
+<meta name="twitter:description" content="Turn one photo or a whole batch into a downloadable MP4 slideshow, with or without music. Free, runs entirely in your browser.">
 <meta name="twitter:image" content="https://projectsilverbeam.com/washington-backdrop.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14110F">
@@ -26,8 +26,28 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "How do I turn a photo into a video with music?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Open Photo to Video Maker, choose a photo and a song, and click Create Video. It combines them into an MP4 — the photo held on screen (with a gentle zoom, if left on) for the length of the song — ready to download and share." }
+      "name": "How do I make a photo slideshow with music?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Open Photo to Video Maker, choose your photos, and add a song. Put the photos in the order you want with the arrows under each thumbnail, set how many seconds each one stays on screen, and click Create Slideshow. You get an MP4 ready to download and share." }
+    },
+    {
+      "@type": "Question",
+      "name": "How many photos can I use?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Up to forty in one slideshow. The limit exists because your own device does the encoding — there is no server doing it for you — and forty photos at four seconds each is already more than two minutes of video for a browser tab to encode on its own." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I have to add music?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Music is optional. Leave the song slot empty and you get a silent video, which is what you want if you are adding your own audio later, or posting somewhere that plays muted by default." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I make the slideshow last exactly as long as the song?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — tick \"Stretch the slideshow to fill the whole song\" and it divides the song's length evenly across your photos, so the last picture and the last note land together. Otherwise each photo holds for however many seconds you set, and a song longer than the slideshow is trimmed to fit." }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my photos are different shapes?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The video takes its shape from your first photo, so put a portrait picture first if you want a portrait video. Every other photo is fitted inside that frame and padded with black where it does not fill — never cropped, so nothing is ever sliced off the edge of a picture." }
     },
     {
       "@type": "Question",
@@ -42,7 +62,7 @@
     {
       "@type": "Question",
       "name": "What's the cinematic zoom effect?",
-      "acceptedAnswer": { "@type": "Answer", "text": "An optional subtle Ken-Burns-style zoom that gradually pushes in on the photo over the course of the video, so it feels more like a real video than a static slide. Leave the checkbox off for a plain still frame instead." }
+      "acceptedAnswer": { "@type": "Answer", "text": "An optional subtle Ken-Burns-style zoom that gradually pushes in on the photo over the course of the video, so it feels more like a real video than a static slide. Leave the checkbox off for a plain still frame instead. It applies when you use a single photo — a slideshow already has movement in it, so the option is hidden there." }
     },
     {
       "@type": "Question",
@@ -82,7 +102,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Photo to Video Maker — The Truth Button",
-  "description": "Combine a photo and a song into a real, downloadable MP4 with a cinematic zoom effect, entirely in your browser.",
+  "description": "Turn one photo or a whole batch into a downloadable MP4 slideshow, with or without music, entirely in your browser.",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Any (runs in web browser)",
   "url": "https://projectsilverbeam.com/photo-to-video-maker.html",
@@ -174,25 +194,25 @@
 <canvas id="ember-canvas" aria-hidden="true"></canvas>
 <div class="wrap">
   <div class="kicker">Free · Converts Locally · Nothing Uploaded</div>
-  <h1>🎬 <span class="accent">Photo to Video Maker</span></h1>
-  <p class="lede">Turn a still photo and a song into a real, downloadable video — with a gentle cinematic zoom — so you can share it anywhere a plain photo can't play music. No app to install, no account, nothing ever leaves your browser.</p>
+  <h1>🎬 <span class="accent">Photo to Video &amp; Slideshow Maker</span></h1>
+  <p class="lede">Turn one photo or a whole batch into a real, downloadable video. Several photos become a slideshow, playing in the order you arrange them. Add a song if you want one — it's optional. No app to install, no account, nothing ever leaves your browser.</p>
 
   <div class="cta-row">
     <a class="cta-btn" href="index.html?mode=picvideo">Open Photo to Video Maker →</a>
-    <div class="cta-fine">Pick a photo and a song, click Create Video, download the MP4</div>
+    <div class="cta-fine">Pick your photos, add a song if you want, download the MP4</div>
   </div>
 
   <div class="save-badge">
     <div class="save-label">What this saves you</div>
-    Skip a <b>full video editor</b> just to put a song behind a photo for social media.
+    Skip a <b>full video editor</b> just to put a song behind some photos for social media.
   </div>
 
   <section>
     <h2>What this actually is</h2>
     <ol class="steps">
-      <li><span class="num">1</span><span>Choose a photo and a song — both stay on your device, no upload step at all.</span></li>
-      <li><span class="num">2</span><span>Leave the cinematic zoom on for a subtle push-in effect, or turn it off for a plain still frame.</span></li>
-      <li><span class="num">3</span><span>Click Create Video. It's encoded locally into a real MP4, sized to the length of your song.</span></li>
+      <li><span class="num">1</span><span>Choose your photos — one, or as many as forty. They stay on your device, with no upload step at all.</span></li>
+      <li><span class="num">2</span><span>Drag them into the order you want, set how long each one stays on screen, and add a song if you’d like one behind it.</span></li>
+      <li><span class="num">3</span><span>Click Create Slideshow. It’s encoded locally into a real MP4 — and it can stretch itself to fill the whole song if you tick that box.</span></li>
       <li><span class="num">4</span><span>Download it and post it anywhere that plays video — Facebook, Instagram, TikTok, text messages — sound included.</span></li>
     </ol>
   </section>
@@ -204,13 +224,13 @@
 
   <section>
     <h2>Who this is for</h2>
-    <p>A lot of "put a song behind a photo" moments don't need a full video editor — they need one photo, one song, and a download button.</p>
+    <p>A lot of "put a song behind some photos" moments don't need a full video editor — they need a handful of pictures, maybe a song, and a download button.</p>
     <div class="other-tools">
       <ul>
         <li>Musicians and creators sharing a single or album art with a preview clip</li>
-        <li>Anyone posting a memorial or tribute photo paired with a meaningful song</li>
+        <li>Anyone building a memorial or tribute slideshow from family photos and a meaningful song</li>
         <li>DJs and producers making a quick "now playing" post for social media</li>
-        <li>People turning a wedding, birthday, or event photo into a shareable video with music</li>
+        <li>People turning wedding, birthday, or event photos into one shareable video with music</li>
         <li>Content creators who want a quick video post without opening full video-editing software</li>
       </ul>
     </div>
@@ -219,8 +239,24 @@
   <section>
     <h2>Frequently asked questions</h2>
     <div class="faq-item">
-      <div class="faq-q">How do I turn a photo into a video with music?</div>
-      <p class="faq-a">Open Photo to Video Maker, choose a photo and a song, and click Create Video. It combines them into an MP4 — the photo held on screen (with a gentle zoom, if left on) for the length of the song — ready to download and share.</p>
+      <div class="faq-q">How do I make a photo slideshow with music?</div>
+      <p class="faq-a">Open Photo to Video Maker, choose your photos, and add a song. Put the photos in the order you want with the arrows under each thumbnail, set how many seconds each one stays on screen, and click Create Slideshow. You get an MP4 ready to download and share.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How many photos can I use?</div>
+      <p class="faq-a">Up to forty in one slideshow. The limit exists because your own device does the encoding — there is no server doing it for you — and forty photos at four seconds each is already more than two minutes of video for a browser tab to encode on its own.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I have to add music?</div>
+      <p class="faq-a">No. Music is optional. Leave the song slot empty and you get a silent video, which is what you want if you are adding your own audio later, or posting somewhere that plays muted by default.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I make the slideshow last exactly as long as the song?</div>
+      <p class="faq-a">Yes — tick "Stretch the slideshow to fill the whole song" and it divides the song's length evenly across your photos, so the last picture and the last note land together. Otherwise each photo holds for however many seconds you set, and a song longer than the slideshow is trimmed to fit.</p>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if my photos are different shapes?</div>
+      <p class="faq-a">The video takes its shape from your first photo, so put a portrait picture first if you want a portrait video. Every other photo is fitted inside that frame and padded with black where it does not fill — never cropped, so nothing is ever sliced off the edge of a picture.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">Will this actually work when I post it to Facebook or Instagram?</div>
@@ -232,7 +268,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">What's the cinematic zoom effect?</div>
-      <p class="faq-a">An optional subtle Ken-Burns-style zoom that gradually pushes in on the photo over the course of the video, so it feels more like a real video than a static slide. Leave the checkbox off for a plain still frame instead.</p>
+      <p class="faq-a">An optional subtle Ken-Burns-style zoom that gradually pushes in on the photo over the course of the video, so it feels more like a real video than a static slide. Leave the checkbox off for a plain still frame instead. It applies when you use a single photo — a slideshow already has movement in it, so the option is hidden there.</p>
     </div>
     <div class="faq-item">
       <div class="faq-q">How long can the song be?</div>
@@ -261,7 +297,7 @@
   </section>
 
   <section>
-    <div class="disclaimer"><b>Being straight about this:</b> the photo and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — neither ever leaves your device. Works best for songs around 5 minutes or under; longer tracks take proportionally longer to process since there's no server doing the encoding for you. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.</div>
+    <div class="disclaimer"><b>Being straight about this:</b> your photos and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — none of them ever leaves your device. Works best for songs around 5 minutes or under; longer tracks take proportionally longer to process since there's no server doing the encoding for you. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.</div>
   </section>
 
   <section>

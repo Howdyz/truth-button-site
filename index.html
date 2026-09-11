@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>if (top !== self) top.location = self.location;</script>
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Truth Button</title>
@@ -1564,7 +1565,6 @@ AI agents: for a complete, structured summary of every tool on this site, fetch 
     <div class="mode-tab" data-mode="mp3library" id="tabMp3Library">🎵 Offline MP3 Library</div>
     <div class="mode-tab" data-mode="scamid" id="tabScamId">🚨 Scam Caller ID</div>
     <div class="mode-tab" data-mode="toolkit" id="tabToolkit">🧰 Ultimate Tool Kit (Linux only)</div>
-    <div class="mode-tab" data-mode="toolkitwin" id="tabToolkitWin">🧰 Ultimate Tool Kit (Windows only)</div>
   </div>
 
   <button class="tool-close-btn" id="toolCloseBtn" type="button" title="Close this tool" aria-label="Close this tool">✕ Close</button>
@@ -2174,126 +2174,6 @@ python3 hexstrike_launcher.py</pre>
     </div>
   </div>
 
-  <div class="lookup-panel" id="toolkitWinPanel">
-    <div class="lookup-card">
-      <h3>Ultimate Tool Kit — Windows</h3>
-      <div class="lc-sub">The same idea as the Linux Ultimate Tool Kit, running the real thing underneath: one launcher sets up a small dedicated Linux environment (WSL2, built into Windows) with HexStrike AI and its actual tool ecosystem installed via apt — the same tools, not a cut-down Windows-only subset. Starting with HexStrike AI; more tools land here over time.<br><b>Windows only</b> — this build won't run on Linux, macOS, or mobile devices (use the Linux tab for that). Needs Windows 10 (2004+) or Windows 11, with virtualization enabled — true on almost every PC made in the last decade.</div>
-
-      <div id="utk-win-widget">
-        <style>
-          #utk-win-widget {
-            --utkw-bg: #14110F; --utkw-panel: #1C1814; --utkw-border: rgba(242,237,225,0.14);
-            --utkw-text: #F2EDE1; --utkw-text-dim: #8C8377; --utkw-accent: #2F8F7A; --utkw-warn: #E8402C;
-            font-family: 'IBM Plex Mono', monospace; color: var(--utkw-text); margin-top: 16px;
-          }
-          #utk-win-widget * { box-sizing: border-box; }
-          #utk-win-widget .utkw-grid { display: grid; gap: 12px; margin-bottom: 14px; }
-          #utk-win-widget .utkw-card { background: var(--utkw-panel); border: 1px solid var(--utkw-border); border-radius: 8px; padding: 16px; }
-          #utk-win-widget .utkw-card-top { display: flex; gap: 12px; margin-bottom: 12px; }
-          #utk-win-widget .utkw-card-icon { font-size: 22px; line-height: 1; }
-          #utk-win-widget .utkw-card-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-          #utk-win-widget .utkw-card-desc { font-size: 12.5px; color: var(--utkw-text-dim); line-height: 1.5; }
-          #utk-win-widget button { padding: 9px 14px; background: var(--utkw-accent); border: none; border-radius: 5px;
-            color: var(--utkw-bg); font-weight: 600; font-size: 12.5px; cursor: pointer; font-family: inherit;
-            text-transform: uppercase; letter-spacing: 0.04em; }
-          #utk-win-widget button:hover { opacity: 0.88; }
-          #utk-win-widget button:disabled { opacity: .45; cursor: default; }
-          #utk-win-widget button.utkw-kill { background: var(--utkw-warn); color: #fff; }
-          #utk-win-widget button.utkw-download { font-size: 14px; padding: 12px 20px; }
-          #utk-win-widget input[type=text] { width: 100%; padding: 9px 10px; background: var(--utkw-bg);
-            border: 1px solid var(--utkw-border); border-radius: 5px; color: var(--utkw-text); font-size: 13px;
-            font-family: inherit; margin-bottom: 10px; }
-          #utk-win-widget .utkw-terms { background: rgba(232,64,44,0.08); border: 1px solid var(--utkw-warn);
-            border-radius: 8px; padding: 16px 18px; margin-top: 14px; }
-          #utk-win-widget .utkw-terms-title { font-weight: 700; color: var(--utkw-warn); margin-bottom: 10px; font-size: 13.5px; }
-          #utk-win-widget .utkw-terms ul { margin: 0 0 14px; padding-left: 20px; font-size: 12.5px; line-height: 1.7; color: var(--utkw-text); }
-          #utk-win-widget .utkw-terms li { margin-bottom: 6px; }
-          #utk-win-widget .utkw-terms code { background: var(--utkw-bg); border: 1px solid var(--utkw-border); border-radius: 4px; padding: 1px 5px; }
-          #utk-win-widget .utkw-agree { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--utkw-text); margin-bottom: 12px; cursor: pointer; }
-          #utk-win-widget .utkw-agree input { margin-top: 3px; }
-          #utk-win-widget .utkw-reminder { background: rgba(232,64,44,0.1); border: 1px solid var(--utkw-warn); border-radius: 6px;
-            padding: 8px 12px; font-size: 11.5px; color: var(--utkw-text); margin-top: 14px; margin-bottom: 14px; }
-          #utk-win-widget .utkw-setup { background: var(--utkw-panel); border: 1px solid var(--utkw-border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
-          #utk-win-widget .utkw-block-title { font-weight: 700; font-size: 12.5px; margin-bottom: 10px; }
-          #utk-win-widget .utkw-note { font-size: 11.5px; color: var(--utkw-text-dim); margin-bottom: 8px; line-height: 1.5; }
-          #utk-win-widget .utkw-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-          #utk-win-widget .utkw-status { font-size: 12px; color: var(--utkw-text-dim); min-height: 16px; }
-          #utk-win-widget .utkw-status.ok { color: var(--utkw-accent); }
-          #utk-win-widget .utkw-status.bad { color: var(--utkw-warn); }
-        </style>
-
-        <div class="utkw-grid">
-          <div class="utkw-card">
-            <div class="utkw-card-top">
-              <span class="utkw-card-icon">🛰️</span>
-              <div>
-                <div class="utkw-card-title">HexStrike AI (Windows / WSL2)</div>
-                <div class="utkw-card-desc">AI-orchestrated pentesting framework — 100+ recon, scanning, and exploitation tools behind one API. Runs inside a small dedicated Linux environment on your own machine (WSL2), not on Truth Button — real apt-installed tools, not a cut-down Windows subset.</div>
-              </div>
-            </div>
-            <button id="utkw-hex-open-btn" type="button">Open →</button>
-          </div>
-        </div>
-
-        <div id="utkw-hex-panel" style="display:none;">
-          <div class="utkw-terms" id="utkw-terms">
-            <div class="utkw-terms-title">⚠️ Read this before you use HexStrike AI</div>
-            <ul>
-              <li><b>Windows only, and not compatible with mobile devices.</b> A phone or tablet can't run this at all.</li>
-              <li>HexStrike AI is a separate, third-party tool. You download and run it <b>entirely on your own computer</b> — Truth Button never runs it, never proxies it, and never sees anything it does.</li>
-              <li><b>First run sets things up automatically:</b> if WSL2 isn't already enabled on your PC, Windows will show its own admin permission prompt (approving that is required — this app can't silently bypass Windows' own security gate for enabling system features). It then downloads the HexStrike Linux environment — a multi-gigabyte one-time download — and imports it. After that first setup, starting it is instant.</li>
-              <li>It ships with <b>no built-in login, and an endpoint that can execute arbitrary commands.</b> WSL2's networking keeps it off your LAN by default — but don't go out of your way to expose it (e.g. manual port-proxy rules) to a network you don't fully control.</li>
-              <li>Only point it at systems you own or are explicitly, legally authorized to test. Unauthorized scanning or exploitation of someone else's system can be a crime.</li>
-              <li><b>Explicitly prohibited:</b> using this tool, or any target field on this page, against <code>projectsilverbeam.com</code>, <code>www.projectsilverbeam.com</code>, <code>api.projectsilverbeam.com</code>, <code>truth-button-backend.onrender.com</code>, or any of their infrastructure.</li>
-              <li>You are solely responsible for how you use it — this page only links to it and reminds you of the rules.</li>
-            </ul>
-            <label class="utkw-agree"><input type="checkbox" id="utkw-agree-check"> I've read this and will only use HexStrike AI on systems I own or am explicitly authorized to test.</label>
-            <button id="utkw-agree-btn" type="button" disabled>Continue</button>
-          </div>
-
-          <div class="utkw-controls" id="utkw-controls" style="display:none;">
-            <div class="utkw-reminder">Reminder: local machine only · authorized targets only · never projectsilverbeam.com or this site's backend.</div>
-
-            <div class="utkw-setup">
-              <div class="utkw-block-title">1. Download and run</div>
-              <div class="utkw-note">One file, no terminal typing on your part. Double-click it, then use its own Start / Open Dashboard / Stop buttons — first launch handles WSL2 setup and the tool download for you (approve the one Windows admin prompt if it appears).</div>
-              <div class="utkw-row">
-                <a id="utkw-download-link" href="#" target="_blank" rel="noopener"><button class="utkw-download" type="button">⬇ Download HexStrikeAI-Windows.exe</button></a>
-              </div>
-              <div class="utkw-note">Default address once running: <code>http://127.0.0.1:8888</code> — WSL2 automatically forwards this to the Linux environment underneath.</div>
-            </div>
-
-            <div class="utkw-setup">
-              <div class="utkw-block-title">2. Connect</div>
-              <input type="text" id="utkw-server-url" value="http://127.0.0.1:8888" placeholder="http://127.0.0.1:8888">
-              <div class="utkw-row">
-                <button id="utkw-check-btn" type="button">Check Connection</button>
-                <button id="utkw-open-dash-btn" type="button">Open Dashboard →</button>
-                <button id="utkw-kill-btn" type="button" class="utkw-kill">🛑 Stop Server</button>
-              </div>
-              <div class="utkw-status" id="utkw-conn-status">Not checked yet.</div>
-              <div class="utkw-note">These work once you've clicked Start in the app itself. Stop Server talks to HexStrike directly and only ever terminates that process, nothing else.</div>
-            </div>
-
-            <div class="utkw-setup">
-              <div class="utkw-block-title">3. Sanity-check a target</div>
-              <div class="utkw-note">Paste anything you're about to point HexStrike at — this blocks Truth Button's own domains before you go any further.</div>
-              <input type="text" id="utkw-target-input" placeholder="example.com or 10.0.0.5">
-              <div class="utkw-row">
-                <button id="utkw-target-check-btn" type="button">Check Target</button>
-              </div>
-              <div class="utkw-status" id="utkw-target-status"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> HexStrike AI (and every tool added to this kit) runs on your own machine, not on Truth Button's servers — this page is a download link plus guardrails, not a hosted scanning service. For authorized security testing, CTF, and research use only.
-    </div>
-  </div>
-
   <div class="lookup-panel" id="pdfPanel">
     <div class="lookup-card">
       <h3>PDF Editor</h3>
@@ -2829,6 +2709,23 @@ python3 hexstrike_launcher.py</pre>
           #photo-video-maker-widget .pv-status{font-size:12.5px; color:var(--pv-text-dim); margin-top:10px; min-height:18px;}
           #photo-video-maker-widget .pv-status.error{color:var(--pv-red);}
           #photo-video-maker-widget .pv-status.ok{color:var(--pv-accent);}
+          #photo-video-maker-widget .pv-thumbs{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+          #photo-video-maker-widget .pv-thumb{position:relative; width:84px; border:1px solid var(--pv-border); border-radius:6px; overflow:hidden; background:var(--pv-bg);}
+          #photo-video-maker-widget .pv-thumb img{width:100%; height:64px; object-fit:cover; display:block;}
+          #photo-video-maker-widget .pv-thumb-n{position:absolute; top:2px; left:2px; background:rgba(20,17,15,0.82); color:var(--pv-gold); font-size:10px; font-weight:700; padding:1px 5px; border-radius:3px;}
+          #photo-video-maker-widget .pv-thumb-x{position:absolute; top:2px; right:2px; background:rgba(20,17,15,0.82); color:var(--pv-red); border:none; font-size:11px; line-height:1; padding:3px 5px; border-radius:3px; cursor:pointer; font-family:inherit;}
+          #photo-video-maker-widget .pv-thumb-move{display:flex; border-top:1px solid var(--pv-border);}
+          #photo-video-maker-widget .pv-thumb-move button{flex:1; background:var(--pv-panel); border:none; color:var(--pv-text-dim); font-size:11px; padding:3px 0; cursor:pointer; font-family:inherit;}
+          #photo-video-maker-widget .pv-thumb-move button:hover:not(:disabled){color:var(--pv-accent);}
+          #photo-video-maker-widget .pv-thumb-move button:disabled{opacity:.3; cursor:default;}
+          #photo-video-maker-widget .pv-thumb-move button + button{border-left:1px solid var(--pv-border);}
+          #photo-video-maker-widget .pv-addmore{margin-top:10px;}
+          #photo-video-maker-widget .pv-optional-tag{font-size:10.5px; color:var(--pv-gold); border:1px solid var(--pv-gold); border-radius:3px; padding:1px 5px; margin-left:6px; letter-spacing:.03em;}
+          #photo-video-maker-widget .pv-num-input{
+            width:70px; padding:6px 8px; background:var(--pv-panel); border:1px solid var(--pv-border);
+            border-radius:5px; color:var(--pv-text); font-family:inherit; font-size:12.5px;
+          }
+          #photo-video-maker-widget .pv-num-input:focus{outline:none; border-color:var(--pv-accent);}
           #photo-video-maker-widget .pv-result{display:none; margin-top:16px; background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px; padding:14px;}
           #photo-video-maker-widget .pv-result.show{display:block;}
           #photo-video-maker-widget .pv-result video{width:100%; max-width:480px; margin-bottom:10px; border-radius:6px;}
@@ -2840,41 +2737,49 @@ python3 hexstrike_launcher.py</pre>
           #photo-video-maker-widget a.pv-download:hover{opacity:0.88;}
         </style>
 
-        <div class="pv-desc">Pick a photo and a song below. We'll combine them into an MP4 — the photo held on screen (with a subtle zoom, if you leave that on) for the length of the song — ready to post to Facebook, Instagram, TikTok, or anywhere else that plays video.</div>
+        <div class="pv-desc">Pick one photo or a whole batch. One photo gives you a still held on screen; several become a slideshow, playing in the order you arrange them. Add a song if you want one — it's optional. Out comes an MP4 ready to post to Facebook, Instagram, TikTok, or anywhere else that plays video.</div>
 
         <div class="pv-slots">
           <div class="pv-slot" id="pvPhotoSlot">
             <div class="pv-dropzone" id="pvPhotoDropzone">
               <div class="pv-dz-icon">🖼️</div>
-              <div class="pv-dz-text">Choose a photo</div>
-              <div class="pv-dz-sub">JPG, PNG, WebP — stays on your device</div>
+              <div class="pv-dz-text">Choose photos</div>
+              <div class="pv-dz-sub">JPG, PNG, WebP — pick several for a slideshow. Stays on your device.</div>
             </div>
-            <input type="file" id="pvPhotoInput" accept="image/*" style="display:none;" aria-label="Choose a photo">
+            <input type="file" id="pvPhotoInput" accept="image/*" multiple style="display:none;" aria-label="Choose photos">
             <div class="pv-preview-thumb" id="pvPhotoPreviewWrap" style="display:none;">
-              <img id="pvPhotoPreview" alt="Selected photo">
-              <button class="pv-reset" id="pvPhotoChangeBtn" type="button">Change Photo</button>
+              <div class="pv-thumbs" id="pvThumbs"></div>
+              <div class="pv-addmore">
+                <button class="pv-reset" id="pvPhotoChangeBtn" type="button">+ Add More Photos</button>
+              </div>
             </div>
           </div>
           <div class="pv-slot" id="pvAudioSlot">
             <div class="pv-dropzone" id="pvAudioDropzone">
               <div class="pv-dz-icon">🎵</div>
-              <div class="pv-dz-text">Choose a song</div>
-              <div class="pv-dz-sub">MP3, WAV, M4A — stays on your device</div>
+              <div class="pv-dz-text">Choose a song <span class="pv-optional-tag">OPTIONAL</span></div>
+              <div class="pv-dz-sub">MP3, WAV, M4A — skip it for a silent video. Stays on your device.</div>
             </div>
             <input type="file" id="pvAudioInput" accept="audio/*" style="display:none;" aria-label="Choose a song">
             <div class="pv-preview-thumb" id="pvAudioPreviewWrap" style="display:none;">
               <audio id="pvAudioPreview" controls></audio>
-              <button class="pv-reset" id="pvAudioChangeBtn" type="button">Change Song</button>
+              <button class="pv-reset" id="pvAudioChangeBtn" type="button">Remove Song</button>
             </div>
           </div>
         </div>
 
         <div class="pv-options" id="pvOptions" style="display:none;">
-          <label class="pv-checkbox-row"><input type="checkbox" id="pvZoomToggle" checked> Add a gentle cinematic zoom (recommended)</label>
-          <div class="pv-time-row">
+          <label class="pv-checkbox-row" id="pvZoomRow"><input type="checkbox" id="pvZoomToggle" checked> Add a gentle cinematic zoom (recommended)</label>
+          <div class="pv-time-row" id="pvPerPhotoRow" style="display:none;">
+            <label for="pvPerPhoto">Seconds per photo:</label>
+            <input type="number" class="pv-num-input" id="pvPerPhoto" value="4" min="0.5" max="60" step="0.5">
+            <span class="pv-time-hint" id="pvLengthHint"></span>
+          </div>
+          <label class="pv-checkbox-row" id="pvFitSongRow" style="display:none; margin-top:12px;"><input type="checkbox" id="pvFitSong"> Stretch the slideshow to fill the whole song</label>
+          <div class="pv-time-row" id="pvStopRow">
             <label for="pvStopTime">Stop after:</label>
             <input type="text" class="pv-time-input" id="pvStopTime" placeholder="e.g. 0:30">
-            <span class="pv-time-hint">Optional — leave blank to use the whole song. Enter seconds (30) or minutes:seconds (1:30).</span>
+            <span class="pv-time-hint" id="pvStopHint">Optional — leave blank to use the whole song. Enter seconds (30) or minutes:seconds (1:30).</span>
           </div>
         </div>
 
@@ -2897,7 +2802,7 @@ python3 hexstrike_launcher.py</pre>
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> the photo and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — neither ever leaves your device. Works best for songs around 5 minutes or under; longer tracks take proportionally longer to process since there's no server doing the encoding for you. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.
+      <b>Being straight about this:</b> your photos and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — none of them ever leaves your device. That also sets the ceiling: a long song or a big pile of photos takes proportionally longer, because your own device is doing the encoding and there is no server to hand it to. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.
     </div>
   </div>
 
@@ -4427,7 +4332,6 @@ const videodlPanel = document.getElementById('videodlPanel');
 const vidblurPanel = document.getElementById('vidblurPanel');
 const picvideoPanel = document.getElementById('picvideoPanel');
 const toolkitPanel = document.getElementById('toolkitPanel');
-const toolkitWinPanel = document.getElementById('toolkitWinPanel');
 
 const LOOKUP_TAGLINES = {
   flock: 'More tools are already cooking. This toolbox keeps growing — free, always.',
@@ -4450,7 +4354,6 @@ const LOOKUP_TAGLINES = {
   vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.',
   picvideo: 'Combine a photo and a song into a real, downloadable MP4 — with a gentle cinematic zoom — so you can share it anywhere a plain photo can\'t play music. Converted entirely on your device, nothing uploaded.',
   toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Linux only.',
-  toolkitwin: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Windows only, real Kali tools via WSL2, no terminal.'
 };
 
 function setMode(newMode){
@@ -4460,7 +4363,7 @@ function setMode(newMode){
   mode = newMode;
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === newMode));
 
-  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'picvideo' || newMode === 'toolkit' || newMode === 'toolkitwin');
+  const isLookup = (newMode === 'flock' || newMode === 'flockupdates' || newMode === 'datacenter' || newMode === 'datacenterupdates' || newMode === 'ytlisten' || newMode === 'reviews' || newMode === 'peptide' || newMode === 'scanner' || newMode === 'pdf' || newMode === 'downloader' || newMode === 'qrcode' || newMode === 'stego' || newMode === 'radio' || newMode === 'cropper' || newMode === 'mp3library' || newMode === 'scamid' || newMode === 'videodl' || newMode === 'vidblur' || newMode === 'picvideo' || newMode === 'toolkit');
   desk.style.display = isLookup ? 'none' : '';
   reportBar.style.display = isLookup ? 'none' : '';
   toolCloseBtn.classList.toggle('show', isLookup);
@@ -4486,7 +4389,6 @@ function setMode(newMode){
   vidblurPanel.classList.toggle('show', newMode === 'vidblur');
   picvideoPanel.classList.toggle('show', newMode === 'picvideo');
   toolkitPanel.classList.toggle('show', newMode === 'toolkit');
-  toolkitWinPanel.classList.toggle('show', newMode === 'toolkitwin');
   if (newMode === 'reviews' && !reviewsInitialized) initReviews();
 
   if (isLookup) {
@@ -4520,7 +4422,6 @@ document.getElementById('tabCropper').addEventListener('click', () => setMode('c
 document.getElementById('tabMp3Library').addEventListener('click', () => setMode('mp3library'));
 document.getElementById('tabScamId').addEventListener('click', () => setMode('scamid'));
 document.getElementById('tabToolkit').addEventListener('click', () => setMode('toolkit'));
-document.getElementById('tabToolkitWin').addEventListener('click', () => setMode('toolkitwin'));
 document.getElementById('tabVideoDl').addEventListener('click', () => setMode('videodl'));
 document.getElementById('tabVidBlur').addEventListener('click', () => setMode('vidblur'));
 document.getElementById('tabPicVideo').addEventListener('click', () => setMode('picvideo'));
@@ -5485,149 +5386,6 @@ if (REVIEWS_API_BASE) {
     } else {
       targetStatus.textContent = '✓ Not a Truth Button domain. This does not confirm you\'re authorized to test it — that\'s still on you.';
       targetStatus.className = 'utk-status ok';
-    }
-  });
-})();
-
-// Ultimate Tool Kit — Windows widget (HexStrike AI running inside WSL2)
-(function () {
-  const root = document.getElementById('utk-win-widget');
-  if (!root) return;
-
-  const WINDOWS_EXE_URL = 'https://github.com/Howdyz/hexstrike-ai/releases/latest/download/HexStrikeAI-Windows.exe';
-
-  const BLOCKED_HOSTS = ['projectsilverbeam.com', 'www.projectsilverbeam.com', 'api.projectsilverbeam.com', 'truth-button-backend.onrender.com'];
-
-  function hostnameOf(raw) {
-    let s = (raw || '').trim();
-    if (!s) return '';
-    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)) s = 'http://' + s;
-    try { return new URL(s).hostname.toLowerCase(); } catch (e) { return s.toLowerCase().replace(/^www\./, ''); }
-  }
-
-  function isBlockedHost(host) {
-    return !!host && BLOCKED_HOSTS.some(b => host === b || host.endsWith('.' + b));
-  }
-
-  function withTimeout(promise, ms) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
-    ]);
-  }
-
-  const openBtn = root.querySelector('#utkw-hex-open-btn');
-  const hexPanel = root.querySelector('#utkw-hex-panel');
-  const terms = root.querySelector('#utkw-terms');
-  const controls = root.querySelector('#utkw-controls');
-  const agreeCheck = root.querySelector('#utkw-agree-check');
-  const agreeBtn = root.querySelector('#utkw-agree-btn');
-  const downloadLink = root.querySelector('#utkw-download-link');
-  const serverInput = root.querySelector('#utkw-server-url');
-  const checkBtn = root.querySelector('#utkw-check-btn');
-  const openDashBtn = root.querySelector('#utkw-open-dash-btn');
-  const killBtn = root.querySelector('#utkw-kill-btn');
-  const connStatus = root.querySelector('#utkw-conn-status');
-  const targetInput = root.querySelector('#utkw-target-input');
-  const targetCheckBtn = root.querySelector('#utkw-target-check-btn');
-  const targetStatus = root.querySelector('#utkw-target-status');
-
-  downloadLink.href = WINDOWS_EXE_URL;
-
-  // Deliberately never remembered anywhere (no localStorage, no in-memory
-  // flag) — the disclaimer must be re-read and re-checked every single time
-  // the panel is opened, not just once per page load or once ever.
-
-  function showControls() {
-    terms.style.display = 'none';
-    controls.style.display = '';
-  }
-
-  function showTerms() {
-    terms.style.display = '';
-    controls.style.display = 'none';
-    agreeCheck.checked = false;
-    agreeBtn.disabled = true;
-  }
-
-  openBtn.addEventListener('click', () => {
-    const willShow = hexPanel.style.display === 'none';
-    hexPanel.style.display = willShow ? '' : 'none';
-    if (willShow) showTerms();
-  });
-
-  agreeCheck.addEventListener('change', () => {
-    agreeBtn.disabled = !agreeCheck.checked;
-  });
-
-  agreeBtn.addEventListener('click', () => {
-    if (!agreeCheck.checked) return;
-    showControls();
-  });
-
-  checkBtn.addEventListener('click', async () => {
-    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
-    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utkw-status bad'; return; }
-    if (isBlockedHost(hostnameOf(url))) {
-      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
-      connStatus.className = 'utkw-status bad';
-      return;
-    }
-    connStatus.textContent = 'Checking…';
-    connStatus.className = 'utkw-status';
-    try {
-      // no-cors: hexstrike ships with no CORS headers, so this can only tell us
-      // *something* answered, not verify it's actually HexStrike.
-      await withTimeout(fetch(url + '/health', { mode: 'no-cors', cache: 'no-store' }), 90000);
-      connStatus.textContent = 'Something is listening at that address — looks reachable.';
-      connStatus.className = 'utkw-status ok';
-    } catch (e) {
-      connStatus.textContent = 'Not reachable — make sure HexStrikeAI-Windows.exe is running and has finished starting.';
-      connStatus.className = 'utkw-status bad';
-    }
-  });
-
-  openDashBtn.addEventListener('click', () => {
-    const url = (serverInput.value || '').trim();
-    if (!url) return;
-    if (isBlockedHost(hostnameOf(url))) {
-      connStatus.textContent = '🚫 Refusing to open — that address matches a blocked Truth Button domain.';
-      connStatus.className = 'utkw-status bad';
-      return;
-    }
-    window.open(url, '_blank', 'noopener');
-  });
-
-  killBtn.addEventListener('click', async () => {
-    const url = (serverInput.value || '').trim().replace(/\/+$/, '');
-    if (!url) { connStatus.textContent = 'Enter a server address first.'; connStatus.className = 'utkw-status bad'; return; }
-    if (isBlockedHost(hostnameOf(url))) {
-      connStatus.textContent = '🚫 Refusing — that address matches a blocked Truth Button domain.';
-      connStatus.className = 'utkw-status bad';
-      return;
-    }
-    if (!window.confirm('Send a shutdown signal to the HexStrike server at ' + url + '? This stops it immediately.')) return;
-    connStatus.textContent = 'Sending shutdown signal…';
-    connStatus.className = 'utkw-status';
-    try {
-      await withTimeout(fetch(url + '/api/kill-switch', { method: 'POST', mode: 'no-cors', cache: 'no-store' }), 4000);
-      connStatus.textContent = 'Shutdown signal sent. Re-check the connection in a moment to confirm it stopped.';
-      connStatus.className = 'utkw-status ok';
-    } catch (e) {
-      connStatus.textContent = 'Could not reach that address to send the shutdown signal.';
-      connStatus.className = 'utkw-status bad';
-    }
-  });
-
-  targetCheckBtn.addEventListener('click', () => {
-    const raw = (targetInput.value || '').trim();
-    if (!raw) { targetStatus.textContent = 'Enter a target first.'; targetStatus.className = 'utkw-status'; return; }
-    if (isBlockedHost(hostnameOf(raw))) {
-      targetStatus.textContent = '🚫 Blocked — this is one of Truth Button\'s own domains. Do not scan it.';
-      targetStatus.className = 'utkw-status bad';
-    } else {
-      targetStatus.textContent = '✓ Not a Truth Button domain. This does not confirm you\'re authorized to test it — that\'s still on you.';
-      targetStatus.className = 'utkw-status ok';
     }
   });
 })();
@@ -7385,7 +7143,7 @@ processSharedFileIfAny();
 // deep-link support for landing pages, e.g. /?mode=flock — lets a dedicated
 // SEO page send visitors straight into the right tool instead of the default tab.
 (function(){
-  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','picvideo','toolkit','toolkitwin']);
+  const VALID_MODES = new Set(['photo','audio','video','flock','flockupdates','datacenter','datacenterupdates','ytlisten','reviews','peptide','scanner','pdf','downloader','qrcode','stego','radio','cropper','mp3library','scamid','videodl','vidblur','picvideo','toolkit']);
   const requestedMode = new URLSearchParams(location.search).get('mode');
   if (requestedMode && VALID_MODES.has(requestedMode)) {
     setMode(requestedMode);
@@ -8532,7 +8290,7 @@ processSharedFileIfAny();
   const photoDropzone = document.getElementById('pvPhotoDropzone');
   const photoInput = document.getElementById('pvPhotoInput');
   const photoPreviewWrap = document.getElementById('pvPhotoPreviewWrap');
-  const photoPreview = document.getElementById('pvPhotoPreview');
+  const thumbsEl = document.getElementById('pvThumbs');
   const photoChangeBtn = document.getElementById('pvPhotoChangeBtn');
 
   const audioDropzone = document.getElementById('pvAudioDropzone');
@@ -8542,8 +8300,15 @@ processSharedFileIfAny();
   const audioChangeBtn = document.getElementById('pvAudioChangeBtn');
 
   const optionsEl = document.getElementById('pvOptions');
+  const zoomRow = document.getElementById('pvZoomRow');
   const zoomToggle = document.getElementById('pvZoomToggle');
+  const perPhotoRow = document.getElementById('pvPerPhotoRow');
+  const perPhotoInput = document.getElementById('pvPerPhoto');
+  const lengthHint = document.getElementById('pvLengthHint');
+  const fitSongRow = document.getElementById('pvFitSongRow');
+  const fitSongToggle = document.getElementById('pvFitSong');
   const stopTimeInput = document.getElementById('pvStopTime');
+  const stopHint = document.getElementById('pvStopHint');
   const controlsRow = document.getElementById('pvControlsRow');
   const exportBtn = document.getElementById('pvExportBtn');
   const startOverBtn = document.getElementById('pvStartOverBtn');
@@ -8555,10 +8320,16 @@ processSharedFileIfAny();
   const downloadLink = document.getElementById('pvDownloadLink');
   const resetBtn = document.getElementById('pvResetBtn');
 
-  let pvPhotoFile = null;
+  // One photo or many: pvPhotos holds { file, url } in play order. The single
+  // -photo case is just length 1, so there is one code path rather than two
+  // that can drift apart. MAX_PHOTOS exists because every frame is encoded by
+  // ffmpeg.wasm on this device — 40 photos at four seconds each is already
+  // nearly three minutes of video to encode single-threaded in a browser tab.
+  const MAX_PHOTOS = 40;
+  let pvPhotos = [];
   let pvAudioFile = null;
-  let pvPhotoObjectUrl = null;
   let pvAudioObjectUrl = null;
+  let pvAudioDuration = null;
   let pvResultObjectUrl = null;
   let pvFileCounter = 0;
 
@@ -8585,26 +8356,127 @@ processSharedFileIfAny();
     return NaN;
   }
 
+  function fmtDuration(sec){
+    if (!isFinite(sec) || sec <= 0) return '';
+    const m = Math.floor(sec / 60), r = Math.round(sec % 60);
+    return m ? (m + 'm ' + String(r).padStart(2, '0') + 's') : (Math.round(sec * 10) / 10 + 's');
+  }
+
+  // Seconds each photo is held. "Stretch to fill the song" divides the song
+  // across the photos instead, which is the thing people actually mean by
+  // "make a slideshow to this song" — otherwise a 4s default against a
+  // 3-minute track either runs out early or needs arithmetic from the user.
+  function secondsPerPhoto(){
+    const n = pvPhotos.length;
+    if (!n) return 0;
+    if (pvAudioFile && fitSongToggle.checked && pvAudioDuration) {
+      return Math.max(0.2, pvAudioDuration / n);
+    }
+    const v = parseFloat(perPhotoInput.value);
+    return (isFinite(v) && v > 0) ? v : 4;
+  }
+
+  function refreshLengthHint(){
+    const n = pvPhotos.length;
+    if (n < 2) { lengthHint.textContent = ''; return; }
+    const per = secondsPerPhoto();
+    const total = per * n;
+    const stretched = pvAudioFile && fitSongToggle.checked && pvAudioDuration;
+    lengthHint.textContent = stretched
+      ? ('Stretching to the song: ' + (Math.round(per * 10) / 10) + 's each, ' + fmtDuration(total) + ' total.')
+      : (n + ' photos \u00d7 ' + (Math.round(per * 10) / 10) + 's = ' + fmtDuration(total) + ' of video.');
+  }
+
   function updateReadyState(){
-    const ready = !!(pvPhotoFile && pvAudioFile);
+    const n = pvPhotos.length;
+    // Music is optional now — one photo is enough to make something.
+    const ready = n > 0;
     optionsEl.style.display = ready ? '' : 'none';
     controlsRow.style.display = ready ? '' : 'none';
     exportBtn.disabled = !ready;
+
+    // The zoom only has a single held frame to act on. Across a slideshow
+    // each photo is its own clip, so the control has nothing to mean there.
+    zoomRow.style.display = (n === 1) ? '' : 'none';
+    perPhotoRow.style.display = (n >= 2) ? '' : 'none';
+    fitSongRow.style.display = (n >= 2 && pvAudioFile) ? '' : 'none';
+    perPhotoInput.disabled = !!(pvAudioFile && fitSongToggle.checked);
+    stopHint.textContent = pvAudioFile
+      ? 'Optional \u2014 leave blank to use the whole song. Enter seconds (30) or minutes:seconds (1:30).'
+      : 'Optional \u2014 leave blank to play every photo in full. Enter seconds (30) or minutes:seconds (1:30).';
+    exportBtn.textContent = (n >= 2) ? '\ud83c\udfac Create Slideshow' : '\ud83c\udfac Create Video';
+    refreshLengthHint();
   }
 
-  function loadPhoto(file){
-    if (!file || !file.type.startsWith('image/')) {
-      setStatus('That doesn\'t look like an image file.', 'error');
-      return;
-    }
-    pvPhotoFile = file;
-    if (pvPhotoObjectUrl) URL.revokeObjectURL(pvPhotoObjectUrl);
-    pvPhotoObjectUrl = URL.createObjectURL(file);
-    photoPreview.src = pvPhotoObjectUrl;
-    photoDropzone.style.display = 'none';
-    photoPreviewWrap.style.display = '';
+  function renderThumbs(){
+    thumbsEl.innerHTML = '';
+    pvPhotos.forEach((p, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'pv-thumb';
+      const img = document.createElement('img');
+      img.src = p.url;
+      img.alt = 'Photo ' + (i + 1);
+      const num = document.createElement('span');
+      num.className = 'pv-thumb-n';
+      num.textContent = i + 1;
+      const x = document.createElement('button');
+      x.className = 'pv-thumb-x'; x.type = 'button';
+      x.textContent = '\u2715';
+      x.title = 'Remove this photo';
+      x.addEventListener('click', () => removePhoto(i));
+      const move = document.createElement('div');
+      move.className = 'pv-thumb-move';
+      const left = document.createElement('button');
+      left.type = 'button'; left.textContent = '\u25c0'; left.title = 'Move earlier';
+      left.disabled = (i === 0);
+      left.addEventListener('click', () => movePhoto(i, -1));
+      const right = document.createElement('button');
+      right.type = 'button'; right.textContent = '\u25b6'; right.title = 'Move later';
+      right.disabled = (i === pvPhotos.length - 1);
+      right.addEventListener('click', () => movePhoto(i, 1));
+      move.appendChild(left); move.appendChild(right);
+      cell.appendChild(img); cell.appendChild(num); cell.appendChild(x); cell.appendChild(move);
+      thumbsEl.appendChild(cell);
+    });
+    photoDropzone.style.display = pvPhotos.length ? 'none' : '';
+    photoPreviewWrap.style.display = pvPhotos.length ? '' : 'none';
+  }
+
+  function movePhoto(i, delta){
+    const j = i + delta;
+    if (j < 0 || j >= pvPhotos.length) return;
+    const tmp = pvPhotos[i]; pvPhotos[i] = pvPhotos[j]; pvPhotos[j] = tmp;
+    renderThumbs();
+    resultEl.classList.remove('show');
+  }
+
+  function removePhoto(i){
+    const gone = pvPhotos.splice(i, 1)[0];
+    if (gone) URL.revokeObjectURL(gone.url);
+    renderThumbs();
     resultEl.classList.remove('show');
     setStatus('');
+    updateReadyState();
+  }
+
+  function loadPhotos(fileList){
+    const incoming = Array.from(fileList || []).filter(f => f && f.type.startsWith('image/'));
+    if (!incoming.length) {
+      setStatus('Those don\'t look like image files.', 'error');
+      return;
+    }
+    const room = MAX_PHOTOS - pvPhotos.length;
+    const accepted = incoming.slice(0, Math.max(0, room));
+    accepted.forEach(f => pvPhotos.push({ file: f, url: URL.createObjectURL(f) }));
+    renderThumbs();
+    resultEl.classList.remove('show');
+    if (!accepted.length) {
+      setStatus('Already at the limit of ' + MAX_PHOTOS + ' photos \u2014 remove one to add another.', 'error');
+    } else if (accepted.length < incoming.length) {
+      setStatus('Added ' + accepted.length + ' of ' + incoming.length + ' \u2014 ' + MAX_PHOTOS + ' photos is the limit, since your own device does the encoding.', 'error');
+    } else {
+      setStatus('');
+    }
     updateReadyState();
   }
 
@@ -8621,23 +8493,38 @@ processSharedFileIfAny();
     audioPreviewWrap.style.display = '';
     resultEl.classList.remove('show');
     setStatus('');
+    // Read the length up front so "stretch to fill the song" can show the
+    // real per-photo figure while the user is still deciding, rather than
+    // only discovering it after an export.
+    pvAudioDuration = null;
+    const probe = new Audio();
+    probe.onloadedmetadata = () => {
+      pvAudioDuration = isFinite(probe.duration) ? probe.duration : null;
+      updateReadyState();
+    };
+    probe.onerror = () => { pvAudioDuration = null; };
+    probe.src = pvAudioObjectUrl;
     updateReadyState();
   }
 
   photoDropzone.addEventListener('click', () => photoInput.click());
-  photoInput.addEventListener('change', () => { if (photoInput.files[0]) loadPhoto(photoInput.files[0]); });
+  photoInput.addEventListener('change', () => {
+    if (photoInput.files && photoInput.files.length) loadPhotos(photoInput.files);
+    // Cleared so picking the same file again still fires a change event —
+    // otherwise "Add More Photos" silently does nothing on a repeat pick.
+    photoInput.value = '';
+  });
   ['dragenter', 'dragover'].forEach(evt => photoDropzone.addEventListener(evt, (e) => { e.preventDefault(); photoDropzone.classList.add('dragover'); }));
   ['dragleave', 'drop'].forEach(evt => photoDropzone.addEventListener(evt, (e) => { e.preventDefault(); photoDropzone.classList.remove('dragover'); }));
-  photoDropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) loadPhoto(e.dataTransfer.files[0]); });
-  photoChangeBtn.addEventListener('click', () => {
-    pvPhotoFile = null;
-    if (pvPhotoObjectUrl) { URL.revokeObjectURL(pvPhotoObjectUrl); pvPhotoObjectUrl = null; }
-    photoPreview.removeAttribute('src');
-    photoInput.value = '';
-    photoPreviewWrap.style.display = 'none';
-    photoDropzone.style.display = '';
-    updateReadyState();
+  photoDropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files && e.dataTransfer.files.length) loadPhotos(e.dataTransfer.files); });
+  // Dropping onto the strip appends too, so once the dropzone is hidden there
+  // is still somewhere to drop.
+  ['dragenter', 'dragover'].forEach(evt => photoPreviewWrap.addEventListener(evt, (e) => e.preventDefault()));
+  photoPreviewWrap.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length) loadPhotos(e.dataTransfer.files);
   });
+  photoChangeBtn.addEventListener('click', () => photoInput.click());
 
   audioDropzone.addEventListener('click', () => audioInput.click());
   audioInput.addEventListener('change', () => { if (audioInput.files[0]) loadAudio(audioInput.files[0]); });
@@ -8646,12 +8533,19 @@ processSharedFileIfAny();
   audioDropzone.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) loadAudio(e.dataTransfer.files[0]); });
   audioChangeBtn.addEventListener('click', () => {
     pvAudioFile = null;
+    pvAudioDuration = null;
     if (pvAudioObjectUrl) { URL.revokeObjectURL(pvAudioObjectUrl); pvAudioObjectUrl = null; }
     audioPreview.removeAttribute('src');
     audioInput.value = '';
     audioPreviewWrap.style.display = 'none';
     audioDropzone.style.display = '';
     updateReadyState();
+  });
+
+  perPhotoInput.addEventListener('input', refreshLengthHint);
+  fitSongToggle.addEventListener('change', () => {
+    perPhotoInput.disabled = !!(pvAudioFile && fitSongToggle.checked);
+    refreshLengthHint();
   });
 
   // ---- MP4 encode via ffmpeg.wasm (self-hosted, single-threaded core).
@@ -8727,18 +8621,20 @@ processSharedFileIfAny();
   // -tune stillimage only applies when the frame genuinely never changes;
   // it's skipped when zoom is on since the frame changes every tick there.
   async function exportVideo(){
-    if (!pvPhotoFile || !pvAudioFile) return;
+    if (!pvPhotos.length) return;
     const stopSecondsRaw = parseStopTime(stopTimeInput.value);
     if (Number.isNaN(stopSecondsRaw)) {
-      setStatus('That stop time doesn\'t look right — use seconds (e.g. 30) or minutes:seconds (e.g. 1:30), or leave it blank for the whole song.', 'error');
+      setStatus('That stop time doesn\'t look right — use seconds (e.g. 30) or minutes:seconds (e.g. 1:30), or leave it blank.', 'error');
       return;
     }
     const stopSeconds = (stopSecondsRaw !== null && stopSecondsRaw > 0) ? stopSecondsRaw : null;
 
-    const photoInputName = 'pvimg_' + pvFileCounter + '.' + (pvPhotoFile.name.split('.').pop() || 'jpg');
-    const audioInputName = 'pvaud_' + pvFileCounter + '.' + (pvAudioFile.name.split('.').pop() || 'mp3');
-    const outputName = 'pvout_' + pvFileCounter + '.mp4';
-    pvFileCounter++;
+    const n = pvPhotos.length;
+    const batch = pvFileCounter++;
+    const photoNames = pvPhotos.map((p, i) => 'pvimg_' + batch + '_' + i + '.' + (p.file.name.split('.').pop() || 'jpg'));
+    const audioInputName = pvAudioFile ? ('pvaud_' + batch + '.' + (pvAudioFile.name.split('.').pop() || 'mp3')) : null;
+    const outputName = 'pvout_' + batch + '.mp4';
+    const written = [];
 
     exportBtn.disabled = true;
     setStatus('Loading video engine (one-time, ~10MB — hang tight)…', 'ok');
@@ -8748,18 +8644,30 @@ processSharedFileIfAny();
         setStatus('Building your video… ' + percent + '% (can take a while for longer songs)', 'ok');
       });
 
-      setStatus('Building your video… 0% (can take a while for longer songs)', 'ok');
+      setStatus('Building your video… 0%' + (n > 1 ? ' (' + n + ' photos)' : ''), 'ok');
       setProgress(0);
-      const photoData = new Uint8Array(await pvPhotoFile.arrayBuffer());
-      const audioData = new Uint8Array(await pvAudioFile.arrayBuffer());
-      await ffmpeg.writeFile(photoInputName, photoData);
-      await ffmpeg.writeFile(audioInputName, audioData);
 
+      for (let i = 0; i < n; i++) {
+        await ffmpeg.writeFile(photoNames[i], new Uint8Array(await pvPhotos[i].file.arrayBuffer()));
+        written.push(photoNames[i]);
+      }
+      if (pvAudioFile) {
+        await ffmpeg.writeFile(audioInputName, new Uint8Array(await pvAudioFile.arrayBuffer()));
+        written.push(audioInputName);
+      }
+
+      // Canvas size comes from the FIRST photo, so the user controls the shape
+      // of the output by choosing what leads — put a portrait shot first and
+      // you get a portrait video. Every later photo is fitted inside that
+      // canvas and padded, never cropped, which keeps the promise the
+      // single-photo version already made: nothing is ever sliced off. Mixed
+      // orientations in one slideshow therefore get bars rather than lost
+      // heads, which is the right trade for a batch of family photos.
       const naturalDims = await new Promise((resolve) => {
         const probe = new Image();
         probe.onload = () => resolve({ w: probe.naturalWidth || 1280, h: probe.naturalHeight || 720 });
         probe.onerror = () => resolve({ w: 1280, h: 720 });
-        probe.src = pvPhotoObjectUrl;
+        probe.src = pvPhotos[0].url;
       });
       const MAX_DIM = 1280, FPS = 15;
       let W = naturalDims.w, H = naturalDims.h;
@@ -8771,49 +8679,100 @@ processSharedFileIfAny();
       W = Math.max(2, W - (W % 2));
       H = Math.max(2, H - (H % 2));
 
-      // A stop time only ever trims the audio (and, since the video is only
-      // ever as long as the audio to begin with, the video along with it) —
-      // it never changes the image or the zoom, just how much of the song
-      // plays before the whole thing cuts off. Capped against the song's
-      // real length so entering something longer than the song just plays
-      // the whole thing, same as leaving it blank.
-      let targetDuration = null;
-      if (stopSeconds !== null) {
-        const audioDuration = await new Promise((resolve) => {
-          if (audioPreview.duration && isFinite(audioPreview.duration)) { resolve(audioPreview.duration); return; }
-          const probe = new Audio();
-          probe.onloadedmetadata = () => resolve(isFinite(probe.duration) ? probe.duration : null);
-          probe.onerror = () => resolve(null);
-          probe.src = pvAudioObjectUrl;
-        });
-        targetDuration = audioDuration ? Math.min(stopSeconds, audioDuration) : stopSeconds;
+      let audioDuration = null;
+      if (pvAudioFile) {
+        audioDuration = pvAudioDuration;
+        if (audioDuration === null) {
+          audioDuration = await new Promise((resolve) => {
+            const probe = new Audio();
+            probe.onloadedmetadata = () => resolve(isFinite(probe.duration) ? probe.duration : null);
+            probe.onerror = () => resolve(null);
+            probe.src = pvAudioObjectUrl;
+          });
+        }
       }
 
-      const zoomOn = zoomToggle.checked;
-      const vf = zoomOn
-        ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
-        : "scale=" + W + ":" + H;
-      const args = ['-loop', '1', '-framerate', String(FPS), '-i', photoInputName, '-i', audioInputName,
-        '-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p'];
-      if (!zoomOn) args.push('-tune', 'stillimage');
-      args.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
-      if (targetDuration !== null) args.push('-t', String(targetDuration));
-      args.push('-movflags', '+faststart', outputName);
+      let args;
+      if (n === 1) {
+        // Single photo: unchanged from before slideshows existed. One image
+        // looped for the length of the song, with the optional zoom. Left
+        // exactly as it was rather than folded into the multi-photo path,
+        // because this is the case that has been working in production.
+        let targetDuration = null;
+        if (pvAudioFile) {
+          if (stopSeconds !== null) targetDuration = audioDuration ? Math.min(stopSeconds, audioDuration) : stopSeconds;
+        } else {
+          // With no song there is nothing to set the length, so the still
+          // needs an explicit one — the stop time if given, else the same
+          // per-photo default the slideshow uses.
+          targetDuration = stopSeconds !== null ? stopSeconds : secondsPerPhoto();
+        }
+        const zoomOn = zoomToggle.checked;
+        const vf = zoomOn
+          ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
+          : "scale=" + W + ":" + H;
+        args = ['-loop', '1', '-framerate', String(FPS), '-i', photoNames[0]];
+        if (pvAudioFile) args.push('-i', audioInputName);
+        args.push('-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
+        if (!zoomOn) args.push('-tune', 'stillimage');
+        if (pvAudioFile) args.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
+        if (targetDuration !== null) args.push('-t', String(targetDuration));
+        args.push('-movflags', '+faststart', outputName);
+      } else {
+        // Slideshow: each photo becomes its own fixed-length clip, then they
+        // are concatenated. Done with filter_complex rather than the concat
+        // demuxer because the photos are arbitrary sizes and orientations —
+        // the demuxer needs its inputs to already match, whereas this scales
+        // and pads each one to the shared canvas before joining them.
+        //
+        // setsar=1 on every branch matters more than it looks: concat refuses
+        // to join streams whose sample aspect ratios disagree, and a phone
+        // photo can carry a non-square SAR that survives scaling.
+        let per = secondsPerPhoto();
+        if (pvAudioFile && fitSongToggle.checked && audioDuration) per = Math.max(0.2, audioDuration / n);
+        let total = per * n;
+        if (stopSeconds !== null) total = Math.min(total, stopSeconds);
+
+        args = [];
+        for (let i = 0; i < n; i++) {
+          args.push('-loop', '1', '-t', String(per), '-framerate', String(FPS), '-i', photoNames[i]);
+        }
+        if (pvAudioFile) args.push('-i', audioInputName);
+
+        const chains = [];
+        for (let i = 0; i < n; i++) {
+          chains.push('[' + i + ':v]scale=' + W + ':' + H +
+            ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H +
+            ':(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=' + FPS + '[v' + i + ']');
+        }
+        let concatIn = '';
+        for (let i = 0; i < n; i++) concatIn += '[v' + i + ']';
+        chains.push(concatIn + 'concat=n=' + n + ':v=1:a=0[outv]');
+
+        args.push('-filter_complex', chains.join(';'), '-map', '[outv]');
+        if (pvAudioFile) args.push('-map', String(n) + ':a', '-c:a', 'aac', '-b:a', '192k');
+        args.push('-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
+        // -t, not -shortest: the slideshow should always play to its end even
+        // when the song is shorter than it. -shortest would cut the pictures
+        // off at the last note.
+        args.push('-t', String(total), '-movflags', '+faststart', outputName);
+      }
 
       await ffmpeg.exec(args);
       const outputData = await ffmpeg.readFile(outputName);
-      await ffmpeg.deleteFile(photoInputName);
-      await ffmpeg.deleteFile(audioInputName);
-      await ffmpeg.deleteFile(outputName);
+      for (const f of written) { try { await ffmpeg.deleteFile(f); } catch (e) {} }
+      try { await ffmpeg.deleteFile(outputName); } catch (e) {}
 
       const blob = new Blob([outputData.buffer], { type: 'video/mp4' });
       if (pvResultObjectUrl) URL.revokeObjectURL(pvResultObjectUrl);
       pvResultObjectUrl = URL.createObjectURL(blob);
       resultVideo.src = pvResultObjectUrl;
       downloadLink.href = pvResultObjectUrl;
-      downloadLink.download = 'photo-video-' + Date.now() + '.mp4';
+      downloadLink.download = (n > 1 ? 'slideshow-' : 'photo-video-') + Date.now() + '.mp4';
       resultEl.classList.add('show');
-      setStatus('Your video is ready below — preview it, then download.', 'ok');
+      setStatus(n > 1
+        ? ('Your slideshow is ready below — ' + n + ' photos, preview it then download.')
+        : 'Your video is ready below — preview it, then download.', 'ok');
     } catch (err) {
       setStatus('Video creation failed: ' + ((err && err.message) ? err.message : String(err)), 'error');
       console.error('Photo to Video Maker export failed:', err);
@@ -8826,11 +8785,15 @@ processSharedFileIfAny();
   exportBtn.addEventListener('click', exportVideo);
 
   function resetToStart(){
-    pvPhotoFile = null;
+    // Every thumbnail holds its own object URL, so they have to be revoked
+    // one by one — dropping the array alone leaks each photo for the life of
+    // the page, and a slideshow batch is a lot more to leak than one photo.
+    pvPhotos.forEach(p => URL.revokeObjectURL(p.url));
+    pvPhotos = [];
     pvAudioFile = null;
-    if (pvPhotoObjectUrl) { URL.revokeObjectURL(pvPhotoObjectUrl); pvPhotoObjectUrl = null; }
+    pvAudioDuration = null;
     if (pvAudioObjectUrl) { URL.revokeObjectURL(pvAudioObjectUrl); pvAudioObjectUrl = null; }
-    photoPreview.removeAttribute('src');
+    thumbsEl.innerHTML = '';
     audioPreview.removeAttribute('src');
     photoInput.value = '';
     audioInput.value = '';
@@ -8838,6 +8801,8 @@ processSharedFileIfAny();
     audioPreviewWrap.style.display = 'none';
     photoDropzone.style.display = '';
     audioDropzone.style.display = '';
+    fitSongToggle.checked = false;
+    perPhotoInput.disabled = false;
     resultEl.classList.remove('show');
     updateReadyState();
     setStatus('');
