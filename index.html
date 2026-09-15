@@ -906,6 +906,47 @@
     color:var(--muted);
   }
 
+  .site-directory{
+    max-width:760px;
+    margin:48px auto 0;
+    padding:28px 24px 0;
+    border-top:1px solid var(--line);
+  }
+  .site-directory h2{
+    font-family:var(--font-stamp);
+    font-size:20px;
+    color:var(--ink);
+    margin:0 0 6px;
+    letter-spacing:0.5px;
+  }
+  .site-directory .dir-intro{
+    font-family:var(--font-body);
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+    max-width:62ch;
+    line-height:1.5;
+  }
+  .site-directory ul{
+    list-style:none;
+    margin:0; padding:0;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:10px 28px;
+  }
+  .site-directory li{margin:0;}
+  .site-directory a{
+    font-family:var(--font-body);
+    font-size:13px;
+    line-height:1.45;
+    color:var(--ink-soft);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+  }
+  .site-directory a:hover{
+    color:var(--teal);
+    border-bottom-color:var(--teal-dim);
+  }
   footer{
     text-align:center;
     font-family:var(--font-mono);
@@ -4156,6 +4197,34 @@ python3 hexstrike_launcher.py</pre>
       <b>Being straight about this:</b> FTC complaint data is self-reported by consumers and unverified — a match means other people flagged this number, not proof of anything, and it only covers the most recent complaints (last 180 days, capped per lookup) for that number's area code, so an older or extremely high-volume number's full history may not be reflected. Caller-name lookup uses official Caller ID (CNAM) data, which is frequently blank or generic ("Wireless Caller") for mobile numbers specifically — that's a real limitation of the underlying telecom data, not a bug here. Community reports are user-submitted and not independently verified either. Toll-free (1-800/833/844/855/866/877/888) numbers aren't covered by caller-name lookup at all — they use a separate registry that doesn't expose subscriber identity.
     </div>
   </div>
+
+  <section class="site-directory">
+    <h2>Every tool on The Truth Button</h2>
+    <p class="dir-intro">Each one has its own page explaining what it does, how it works, and where its limits are.</p>
+    <ul>
+        <li><a href="ai-detector.html">Check if a photo, video, or audio clip is AI-generated</a></li>
+        <li><a href="flock-cameras.html">Find Flock Safety / ALPR surveillance cameras near you</a></li>
+        <li><a href="data-centers.html">Look up data center facilities by state</a></li>
+        <li><a href="reviews.html">Real reviews on prices, work, and local experiences by state</a></li>
+        <li><a href="peptide-calculator.html">Peptide reconstitution &amp; dose calculator</a></li>
+        <li><a href="repo-scanner.html">Scan a GitHub repo for infostealer patterns</a></li>
+        <li><a href="ultimate-tool-kit.html">Ultimate Tool Kit — security-research tools you run on your own machine, starting with HexStrike AI</a></li>
+        <li><a href="lightning-downloader.html">Record music or audio from a browser tab, then download the MP3</a></li>
+        <li><a href="qr-code-generator.html">Generate a QR code from any URL or text</a></li>
+        <li><a href="pro-link-maker.html">Hide a link invisibly inside a photo, then reveal it later</a></li>
+        <li><a href="flashbackman-radio.html">Stream thousands of real FM/AM radio stations, free</a></li>
+        <li><a href="screenshot-cropper.html">Crop a screenshot to the exact ratio each platform wants</a></li>
+        <li><a href="pdf-editor.html">Merge, split, rotate, or watermark a PDF</a></li>
+        <li><a href="mp3-library.html">Play your MP3 library with no internet connection</a></li>
+        <li><a href="scam-caller-id.html">Check a phone number against real FTC scam/robocall complaint data</a></li>
+        <li><a href="thunder-video-downloader.html">Record a browser tab, window, or your screen, and save it as an MP4</a></li>
+        <li><a href="video-blur-out-editor.html">Upload a video and blur out a face, plate, or anything else for the whole clip</a></li>
+        <li><a href="photo-to-video-maker.html">Combine a photo and a song into a real, downloadable video</a></li>
+        <li><a href="flock-updates.html">Flock Safety ownership, contracts &amp; controversy news</a></li>
+        <li><a href="data-center-updates.html">How AI data center land deals get done &mdash; shell LLCs, NDAs &amp; recent news</a></li>
+        <li><a href="social-listen.html">Check a live video or photo from YouTube, Facebook, X, TikTok, or Instagram for AI signs</a></li>
+    </ul>
+  </section>
 
   <footer>
     Contact: <a href="mailto:projectsilverbeam@gmail.com">projectsilverbeam@gmail.com</a>
