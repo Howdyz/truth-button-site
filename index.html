@@ -2720,7 +2720,7 @@ python3 hexstrike_launcher.py</pre>
   <div class="lookup-panel" id="picvideoPanel">
     <div class="lookup-card">
       <h3>🎬 Photo to Video Maker</h3>
-      <div class="lc-sub">Turn a still photo and a song into a real, downloadable video — with a gentle cinematic zoom — so you can share it anywhere a plain photo can't play music. Everything runs locally in your browser; nothing is ever uploaded.</div>
+      <div class="lc-sub">Turn a still photo and a song into a real, downloadable video — with a gentle cinematic zoom — so you can share it anywhere a plain photo can't play music. Or start from a video you already have and put your own music on it. Everything runs locally in your browser; nothing is ever uploaded.</div>
 
       <div id="photo-video-maker-widget">
         <style>
@@ -2743,6 +2743,8 @@ python3 hexstrike_launcher.py</pre>
           #photo-video-maker-widget .pv-preview-thumb{background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px; padding:14px; text-align:center;}
           #photo-video-maker-widget .pv-preview-thumb img{max-width:100%; max-height:140px; border-radius:6px; display:block; margin:0 auto 10px;}
           #photo-video-maker-widget .pv-preview-thumb audio{width:100%; margin-bottom:10px;}
+          #photo-video-maker-widget .pv-preview-thumb video{width:100%; max-height:160px; border-radius:6px; display:block; margin:0 auto 8px; background:#000;}
+          #photo-video-maker-widget .pv-video-meta{font-size:11.5px; color:var(--pv-text-dim); margin-bottom:10px;}
           #photo-video-maker-widget .pv-options{margin-top:16px; padding:12px 14px; background:var(--pv-bg); border:1px solid var(--pv-border); border-radius:8px;}
           #photo-video-maker-widget .pv-checkbox-row{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--pv-text); cursor:pointer;}
           #photo-video-maker-widget .pv-checkbox-row input{accent-color:var(--pv-accent); width:15px; height:15px; cursor:pointer;}
@@ -2800,21 +2802,26 @@ python3 hexstrike_launcher.py</pre>
           #photo-video-maker-widget a.pv-download:hover{opacity:0.88;}
         </style>
 
-        <div class="pv-desc">Pick one photo or a whole batch. One photo gives you a still held on screen; several become a slideshow, playing in the order you arrange them. Add a song if you want one — it's optional. Out comes an MP4 ready to post to Facebook, Instagram, TikTok, or anywhere else that plays video.</div>
+        <div class="pv-desc">Pick one photo or a whole batch. One photo gives you a still held on screen; several become a slideshow, playing in the order you arrange them. Add a song if you want one — it's optional. Already have a video? Drop that in instead and pick a song to put your own music on it. Out comes an MP4 ready to post to Facebook, Instagram, TikTok, or anywhere else that plays video.</div>
 
         <div class="pv-slots">
           <div class="pv-slot" id="pvPhotoSlot">
             <div class="pv-dropzone" id="pvPhotoDropzone">
               <div class="pv-dz-icon">🖼️</div>
-              <div class="pv-dz-text">Choose photos</div>
-              <div class="pv-dz-sub">JPG, PNG, WebP — pick several for a slideshow. Stays on your device.</div>
+              <div class="pv-dz-text">Choose photos or a video</div>
+              <div class="pv-dz-sub">JPG, PNG, WebP — pick several for a slideshow. Or drop in an MP4/MOV to put your own music on a video you already have. Stays on your device.</div>
             </div>
-            <input type="file" id="pvPhotoInput" accept="image/*" multiple style="display:none;" aria-label="Choose photos">
+            <input type="file" id="pvPhotoInput" accept="image/*,video/*" multiple style="display:none;" aria-label="Choose photos or a video">
             <div class="pv-preview-thumb" id="pvPhotoPreviewWrap" style="display:none;">
               <div class="pv-thumbs" id="pvThumbs"></div>
               <div class="pv-addmore">
                 <button class="pv-reset" id="pvPhotoChangeBtn" type="button">+ Add More Photos</button>
               </div>
+            </div>
+            <div class="pv-preview-thumb" id="pvVideoPreviewWrap" style="display:none;">
+              <video id="pvVideoPreview" controls muted playsinline></video>
+              <div class="pv-video-meta" id="pvVideoMeta"></div>
+              <button class="pv-reset" id="pvVideoChangeBtn" type="button">Remove Video</button>
             </div>
           </div>
           <div class="pv-slot" id="pvAudioSlot">
@@ -2839,6 +2846,7 @@ python3 hexstrike_launcher.py</pre>
             <span class="pv-time-hint" id="pvLengthHint"></span>
           </div>
           <label class="pv-checkbox-row" id="pvFitSongRow" style="display:none; margin-top:12px;"><input type="checkbox" id="pvFitSong"> Stretch the slideshow to fill the whole song</label>
+          <label class="pv-checkbox-row" id="pvKeepSoundRow" style="display:none; margin-top:12px;"><input type="checkbox" id="pvKeepSound"> Keep the video's original sound underneath the music</label>
           <div class="pv-time-row" id="pvStopRow">
             <label for="pvStopTime">Stop after:</label>
             <input type="text" class="pv-time-input" id="pvStopTime" placeholder="e.g. 0:30">
@@ -2865,7 +2873,7 @@ python3 hexstrike_launcher.py</pre>
     </div>
 
     <div class="lookup-disclaimer">
-      <b>Being straight about this:</b> your photos and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — none of them ever leaves your device. That also sets the ceiling: a long song or a big pile of photos takes proportionally longer, because your own device is doing the encoding and there is no server to hand it to. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.
+      <b>Being straight about this:</b> your photos, video and song are combined entirely in your browser using ffmpeg compiled to WebAssembly — none of them ever leaves your device. That also sets the ceiling: a long song or a big pile of photos takes proportionally longer, because your own device is doing the encoding and there is no server to hand it to. Putting music on a video you already have is the quick one — the picture is copied across untouched rather than re-encoded, so it usually finishes in seconds. You're responsible for only using a song you actually have the right to use — this doesn't check licensing or copyright for you.
     </div>
   </div>
 
@@ -4455,7 +4463,7 @@ const LOOKUP_TAGLINES = {
   scamid: 'Check a phone number against real FTC robocall/scam complaint data, an optional caller-name lookup, and reports from other users — free, honest about what it actually knows.',
   videodl: 'Record a browser tab, window, or your screen — including audio — and save it as an MP4. No separate app, nothing uploaded.',
   vidblur: 'Upload a video, draw a box over a face, plate, or anything else, and blur it for the whole clip — converted entirely on your device, nothing uploaded.',
-  picvideo: 'Combine a photo and a song into a real, downloadable MP4 — with a gentle cinematic zoom — so you can share it anywhere a plain photo can\'t play music. Converted entirely on your device, nothing uploaded.',
+  picvideo: 'Combine a photo and a song into a real, downloadable MP4 — with a gentle cinematic zoom — or drop in a video you already have and put your own music on it. Converted entirely on your device, nothing uploaded.',
   toolkit: 'A hub for security-research tools that run entirely on your own computer, starting with HexStrike AI — for authorized testing, CTF, and research use only. Linux only.',
 };
 
@@ -8395,6 +8403,10 @@ processSharedFileIfAny();
   const photoPreviewWrap = document.getElementById('pvPhotoPreviewWrap');
   const thumbsEl = document.getElementById('pvThumbs');
   const photoChangeBtn = document.getElementById('pvPhotoChangeBtn');
+  const videoPreviewWrap = document.getElementById('pvVideoPreviewWrap');
+  const videoPreview = document.getElementById('pvVideoPreview');
+  const videoMeta = document.getElementById('pvVideoMeta');
+  const videoChangeBtn = document.getElementById('pvVideoChangeBtn');
 
   const audioDropzone = document.getElementById('pvAudioDropzone');
   const audioInput = document.getElementById('pvAudioInput');
@@ -8410,6 +8422,8 @@ processSharedFileIfAny();
   const lengthHint = document.getElementById('pvLengthHint');
   const fitSongRow = document.getElementById('pvFitSongRow');
   const fitSongToggle = document.getElementById('pvFitSong');
+  const keepSoundRow = document.getElementById('pvKeepSoundRow');
+  const keepSoundToggle = document.getElementById('pvKeepSound');
   const stopTimeInput = document.getElementById('pvStopTime');
   const stopHint = document.getElementById('pvStopHint');
   const controlsRow = document.getElementById('pvControlsRow');
@@ -8435,6 +8449,14 @@ processSharedFileIfAny();
   let pvAudioDuration = null;
   let pvResultObjectUrl = null;
   let pvFileCounter = 0;
+
+  // A source video is an alternative to the photo list, never a companion to
+  // it: pvVideoFile being set means pvPhotos is empty and vice versa. Keeping
+  // them mutually exclusive is what lets every photo-only control simply hide
+  // in video mode instead of having to mean something sensible for both.
+  let pvVideoFile = null;
+  let pvVideoObjectUrl = null;
+  let pvVideoDuration = null;
 
   function setStatus(msg, cls){
     statusEl.className = 'pv-status' + (cls ? ' ' + cls : '');
@@ -8492,6 +8514,30 @@ processSharedFileIfAny();
 
   function updateReadyState(){
     const n = pvPhotos.length;
+
+    // Video mode: the clip supplies the picture and its own length, so every
+    // photo-side control (zoom, seconds-per-photo, stretch-to-song) has
+    // nothing to act on and hides. A song is required here rather than
+    // optional — a video with no music added is just the file you started
+    // with, so there would be nothing to make.
+    if (pvVideoFile) {
+      const ready = !!pvAudioFile;
+      optionsEl.style.display = '';
+      controlsRow.style.display = '';
+      exportBtn.disabled = !ready;
+      zoomRow.style.display = 'none';
+      perPhotoRow.style.display = 'none';
+      fitSongRow.style.display = 'none';
+      keepSoundRow.style.display = '';
+      perPhotoInput.disabled = false;
+      stopHint.textContent = 'Optional \u2014 leave blank to keep the whole video. Enter seconds (30) or minutes:seconds (1:30).';
+      exportBtn.textContent = '\ud83c\udfb5 Add Music to Video';
+      setStatusIfIdle(ready ? '' : 'Now pick a song to put on it.');
+      refreshLengthHint();
+      return;
+    }
+
+    keepSoundRow.style.display = 'none';
     // Music is optional now — one photo is enough to make something.
     const ready = n > 0;
     optionsEl.style.display = ready ? '' : 'none';
@@ -8509,6 +8555,13 @@ processSharedFileIfAny();
       : 'Optional \u2014 leave blank to play every photo in full. Enter seconds (30) or minutes:seconds (1:30).';
     exportBtn.textContent = (n >= 2) ? '\ud83c\udfac Create Slideshow' : '\ud83c\udfac Create Video';
     refreshLengthHint();
+  }
+
+  // Only writes the nudge when nothing more important is on screen, so it
+  // can never stomp an error the user still needs to read.
+  function setStatusIfIdle(msg){
+    if (statusEl.classList.contains('error')) return;
+    statusEl.textContent = msg;
   }
 
   function renderThumbs(){
@@ -8563,11 +8616,20 @@ processSharedFileIfAny();
   }
 
   function loadPhotos(fileList){
-    const incoming = Array.from(fileList || []).filter(f => f && f.type.startsWith('image/'));
+    const all = Array.from(fileList || []).filter(Boolean);
+    // One dropzone takes either photos or a video. A video wins if one is in
+    // the selection, because dropping a clip in here can only mean the
+    // put-music-on-my-video job — there is nothing a video and a photo pile
+    // would sensibly combine into.
+    const video = all.find(f => f.type.startsWith('video/'));
+    if (video) { loadVideo(video); return; }
+
+    const incoming = all.filter(f => f.type.startsWith('image/'));
     if (!incoming.length) {
-      setStatus('Those don\'t look like image files.', 'error');
+      setStatus('Those don\'t look like image or video files.', 'error');
       return;
     }
+    if (pvVideoFile) clearVideo();
     const room = MAX_PHOTOS - pvPhotos.length;
     const accepted = incoming.slice(0, Math.max(0, room));
     accepted.forEach(f => pvPhotos.push({ file: f, url: URL.createObjectURL(f) }));
@@ -8580,6 +8642,66 @@ processSharedFileIfAny();
     } else {
       setStatus('');
     }
+    updateReadyState();
+  }
+
+  // MAX_VIDEO_BYTES is about memory, not policy: ffmpeg.wasm holds the whole
+  // input in the wasm heap, and a browser tab has far less headroom than the
+  // desktop tool people are used to. Refusing early with a clear number beats
+  // an opaque out-of-memory abort several minutes in.
+  const MAX_VIDEO_BYTES = 250 * 1024 * 1024;
+
+  function fmtBytes(b){
+    return b >= 1048576 ? (Math.round(b / 1048576) + 'MB') : (Math.max(1, Math.round(b / 1024)) + 'KB');
+  }
+
+  function clearVideo(){
+    pvVideoFile = null;
+    pvVideoDuration = null;
+    if (pvVideoObjectUrl) { URL.revokeObjectURL(pvVideoObjectUrl); pvVideoObjectUrl = null; }
+    videoPreview.removeAttribute('src');
+    videoPreview.load();
+    videoPreviewWrap.style.display = 'none';
+    videoMeta.textContent = '';
+  }
+
+  function loadVideo(file){
+    if (!file || !file.type.startsWith('video/')) {
+      setStatus('That doesn\'t look like a video file.', 'error');
+      return;
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      setStatus('That video is ' + Math.round(file.size / 1048576) + 'MB \u2014 the limit here is ' +
+        Math.round(MAX_VIDEO_BYTES / 1048576) + 'MB, because the whole file has to fit in memory in this tab.', 'error');
+      return;
+    }
+    // Photos and a video are mutually exclusive, so taking a video drops any
+    // photos already staged — including their object URLs.
+    pvPhotos.forEach(p => URL.revokeObjectURL(p.url));
+    pvPhotos = [];
+    thumbsEl.innerHTML = '';
+    photoPreviewWrap.style.display = 'none';
+    photoInput.value = '';
+
+    if (pvVideoObjectUrl) URL.revokeObjectURL(pvVideoObjectUrl);
+    pvVideoFile = file;
+    pvVideoDuration = null;
+    pvVideoObjectUrl = URL.createObjectURL(file);
+    videoPreview.src = pvVideoObjectUrl;
+    photoDropzone.style.display = 'none';
+    videoPreviewWrap.style.display = '';
+    videoMeta.textContent = file.name + ' \u2014 ' + fmtBytes(file.size);
+    resultEl.classList.remove('show');
+    setStatus('');
+
+    videoPreview.onloadedmetadata = () => {
+      pvVideoDuration = isFinite(videoPreview.duration) ? videoPreview.duration : null;
+      if (pvVideoDuration) {
+        videoMeta.textContent = file.name + ' \u2014 ' + fmtDuration(pvVideoDuration) +
+          ', ' + fmtBytes(file.size);
+      }
+      updateReadyState();
+    };
     updateReadyState();
   }
 
@@ -8724,7 +8846,11 @@ processSharedFileIfAny();
   // -tune stillimage only applies when the frame genuinely never changes;
   // it's skipped when zoom is on since the frame changes every tick there.
   async function exportVideo(){
-    if (!pvPhotos.length) return;
+    if (!pvPhotos.length && !pvVideoFile) return;
+    if (pvVideoFile && !pvAudioFile) {
+      setStatus('Pick a song to put on the video first.', 'error');
+      return;
+    }
     const stopSecondsRaw = parseStopTime(stopTimeInput.value);
     if (Number.isNaN(stopSecondsRaw)) {
       setStatus('That stop time doesn\'t look right — use seconds (e.g. 30) or minutes:seconds (e.g. 1:30), or leave it blank.', 'error');
@@ -8736,6 +8862,7 @@ processSharedFileIfAny();
     const batch = pvFileCounter++;
     const photoNames = pvPhotos.map((p, i) => 'pvimg_' + batch + '_' + i + '.' + (p.file.name.split('.').pop() || 'jpg'));
     const audioInputName = pvAudioFile ? ('pvaud_' + batch + '.' + (pvAudioFile.name.split('.').pop() || 'mp3')) : null;
+    const videoInputName = pvVideoFile ? ('pvsrc_' + batch + '.' + (pvVideoFile.name.split('.').pop() || 'mp4')) : null;
     const outputName = 'pvout_' + batch + '.mp4';
     const written = [];
 
@@ -8744,12 +8871,17 @@ processSharedFileIfAny();
     try {
       const ffmpeg = await getFfmpeg((percent) => {
         setProgress(percent);
-        setStatus('Building your video… ' + percent + '% (can take a while for longer songs)', 'ok');
+        setStatus('Building your video… ' + percent + '%' +
+          (pvVideoFile ? ' (usually quick — the picture is copied, not re-encoded)' : ' (can take a while for longer songs)'), 'ok');
       });
 
       setStatus('Building your video… 0%' + (n > 1 ? ' (' + n + ' photos)' : ''), 'ok');
       setProgress(0);
 
+      if (pvVideoFile) {
+        await ffmpeg.writeFile(videoInputName, new Uint8Array(await pvVideoFile.arrayBuffer()));
+        written.push(videoInputName);
+      }
       for (let i = 0; i < n; i++) {
         await ffmpeg.writeFile(photoNames[i], new Uint8Array(await pvPhotos[i].file.arrayBuffer()));
         written.push(photoNames[i]);
@@ -8759,110 +8891,173 @@ processSharedFileIfAny();
         written.push(audioInputName);
       }
 
-      // Canvas size comes from the FIRST photo, so the user controls the shape
-      // of the output by choosing what leads — put a portrait shot first and
-      // you get a portrait video. Every later photo is fitted inside that
-      // canvas and padded, never cropped, which keeps the promise the
-      // single-photo version already made: nothing is ever sliced off. Mixed
-      // orientations in one slideshow therefore get bars rather than lost
-      // heads, which is the right trade for a batch of family photos.
-      const naturalDims = await new Promise((resolve) => {
-        const probe = new Image();
-        probe.onload = () => resolve({ w: probe.naturalWidth || 1280, h: probe.naturalHeight || 720 });
-        probe.onerror = () => resolve({ w: 1280, h: 720 });
-        probe.src = pvPhotos[0].url;
-      });
-      const MAX_DIM = 1280, FPS = 15;
-      let W = naturalDims.w, H = naturalDims.h;
-      if (Math.max(W, H) > MAX_DIM) {
-        const ratio = MAX_DIM / Math.max(W, H);
-        W = Math.round(W * ratio);
-        H = Math.round(H * ratio);
-      }
-      W = Math.max(2, W - (W % 2));
-      H = Math.max(2, H - (H % 2));
+      // ---- Video + music -------------------------------------------------
+      // The clip already is the picture, so there is nothing to render: the
+      // only job is swapping in a new audio track. That makes -c:v copy the
+      // right first attempt — it remuxes the existing video stream untouched,
+      // which finishes in seconds and loses no quality, where re-encoding a
+      // few minutes of footage single-threaded in wasm can take longer than
+      // the video itself. Copy only fails when the source stream can't sit in
+      // an MP4 container (some WebM/VP9 exports), so a re-encode is kept as a
+      // fallback rather than paid for up front by everyone.
+      let attempts = null;
+      if (pvVideoFile) {
+        // The video sets the length. A song shorter than the clip simply ends
+        // early; a longer one is cut off — the alternative, letting the audio
+        // run past the picture, produces a file that looks broken on every
+        // platform that autoplays it.
+        let dur = pvVideoDuration || null;
+        if (stopSeconds !== null) dur = dur ? Math.min(dur, stopSeconds) : stopSeconds;
 
-      let audioDuration = null;
-      if (pvAudioFile) {
-        audioDuration = pvAudioDuration;
-        if (audioDuration === null) {
-          audioDuration = await new Promise((resolve) => {
-            const probe = new Audio();
-            probe.onloadedmetadata = () => resolve(isFinite(probe.duration) ? probe.duration : null);
-            probe.onerror = () => resolve(null);
-            probe.src = pvAudioObjectUrl;
-          });
+        const tail = [];
+        if (dur) tail.push('-t', String(dur));
+        tail.push('-movflags', '+faststart', outputName);
+
+        const copyV = ['-c:v', 'copy'];
+        const encV = ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p'];
+        const encA = ['-c:a', 'aac', '-b:a', '192k'];
+        // amix halves each input's level by design; volume=2 puts the result
+        // back where the two tracks started rather than handing back a mix
+        // that sounds quieter than either source did.
+        const mixFilter = '[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0,volume=2[aout]';
+
+        const mixArgs = (vc) => ['-i', videoInputName, '-i', audioInputName,
+          '-filter_complex', mixFilter, '-map', '0:v:0', '-map', '[aout]'].concat(vc, encA, tail);
+        const replaceArgs = (vc) => ['-i', videoInputName, '-i', audioInputName,
+          '-map', '0:v:0', '-map', '1:a:0'].concat(vc, encA, tail);
+
+        // Keeping the original sound needs the video to have some. Rather
+        // than probing for an audio stream — which browsers expose
+        // inconsistently — the mix is simply tried first and the
+        // music-only path stands behind it, with a note so the user is told
+        // what happened instead of quietly getting something else.
+        const noSound = 'That video had no sound of its own to keep \u2014 used just the music.';
+        attempts = keepSoundToggle.checked
+          ? [{ args: mixArgs(copyV) }, { args: mixArgs(encV) },
+             { args: replaceArgs(copyV), note: noSound }, { args: replaceArgs(encV), note: noSound }]
+          : [{ args: replaceArgs(copyV) }, { args: replaceArgs(encV) }];
+      }
+
+      if (attempts === null) {
+        // Canvas size comes from the FIRST photo, so the user controls the shape
+        // of the output by choosing what leads — put a portrait shot first and
+        // you get a portrait video. Every later photo is fitted inside that
+        // canvas and padded, never cropped, which keeps the promise the
+        // single-photo version already made: nothing is ever sliced off. Mixed
+        // orientations in one slideshow therefore get bars rather than lost
+        // heads, which is the right trade for a batch of family photos.
+        const naturalDims = await new Promise((resolve) => {
+          const probe = new Image();
+          probe.onload = () => resolve({ w: probe.naturalWidth || 1280, h: probe.naturalHeight || 720 });
+          probe.onerror = () => resolve({ w: 1280, h: 720 });
+          probe.src = pvPhotos[0].url;
+        });
+        const MAX_DIM = 1280, FPS = 15;
+        let W = naturalDims.w, H = naturalDims.h;
+        if (Math.max(W, H) > MAX_DIM) {
+          const ratio = MAX_DIM / Math.max(W, H);
+          W = Math.round(W * ratio);
+          H = Math.round(H * ratio);
         }
-      }
+        W = Math.max(2, W - (W % 2));
+        H = Math.max(2, H - (H % 2));
 
-      let args;
-      if (n === 1) {
-        // Single photo: unchanged from before slideshows existed. One image
-        // looped for the length of the song, with the optional zoom. Left
-        // exactly as it was rather than folded into the multi-photo path,
-        // because this is the case that has been working in production.
-        let targetDuration = null;
+        let audioDuration = null;
         if (pvAudioFile) {
-          if (stopSeconds !== null) targetDuration = audioDuration ? Math.min(stopSeconds, audioDuration) : stopSeconds;
+          audioDuration = pvAudioDuration;
+          if (audioDuration === null) {
+            audioDuration = await new Promise((resolve) => {
+              const probe = new Audio();
+              probe.onloadedmetadata = () => resolve(isFinite(probe.duration) ? probe.duration : null);
+              probe.onerror = () => resolve(null);
+              probe.src = pvAudioObjectUrl;
+            });
+          }
+        }
+
+        let args;
+        if (n === 1) {
+          // Single photo: unchanged from before slideshows existed. One image
+          // looped for the length of the song, with the optional zoom. Left
+          // exactly as it was rather than folded into the multi-photo path,
+          // because this is the case that has been working in production.
+          let targetDuration = null;
+          if (pvAudioFile) {
+            if (stopSeconds !== null) targetDuration = audioDuration ? Math.min(stopSeconds, audioDuration) : stopSeconds;
+          } else {
+            // With no song there is nothing to set the length, so the still
+            // needs an explicit one — the stop time if given, else the same
+            // per-photo default the slideshow uses.
+            targetDuration = stopSeconds !== null ? stopSeconds : secondsPerPhoto();
+          }
+          const zoomOn = zoomToggle.checked;
+          const vf = zoomOn
+            ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
+            : "scale=" + W + ":" + H;
+          args = ['-loop', '1', '-framerate', String(FPS), '-i', photoNames[0]];
+          if (pvAudioFile) args.push('-i', audioInputName);
+          args.push('-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
+          if (!zoomOn) args.push('-tune', 'stillimage');
+          if (pvAudioFile) args.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
+          if (targetDuration !== null) args.push('-t', String(targetDuration));
+          args.push('-movflags', '+faststart', outputName);
         } else {
-          // With no song there is nothing to set the length, so the still
-          // needs an explicit one — the stop time if given, else the same
-          // per-photo default the slideshow uses.
-          targetDuration = stopSeconds !== null ? stopSeconds : secondsPerPhoto();
-        }
-        const zoomOn = zoomToggle.checked;
-        const vf = zoomOn
-          ? "scale=" + W + ":" + H + ",zoompan=z='min(zoom+0.0006,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=" + W + "x" + H + ":fps=" + FPS
-          : "scale=" + W + ":" + H;
-        args = ['-loop', '1', '-framerate', String(FPS), '-i', photoNames[0]];
-        if (pvAudioFile) args.push('-i', audioInputName);
-        args.push('-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
-        if (!zoomOn) args.push('-tune', 'stillimage');
-        if (pvAudioFile) args.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
-        if (targetDuration !== null) args.push('-t', String(targetDuration));
-        args.push('-movflags', '+faststart', outputName);
-      } else {
-        // Slideshow: each photo becomes its own fixed-length clip, then they
-        // are concatenated. Done with filter_complex rather than the concat
-        // demuxer because the photos are arbitrary sizes and orientations —
-        // the demuxer needs its inputs to already match, whereas this scales
-        // and pads each one to the shared canvas before joining them.
-        //
-        // setsar=1 on every branch matters more than it looks: concat refuses
-        // to join streams whose sample aspect ratios disagree, and a phone
-        // photo can carry a non-square SAR that survives scaling.
-        let per = secondsPerPhoto();
-        if (pvAudioFile && fitSongToggle.checked && audioDuration) per = Math.max(0.2, audioDuration / n);
-        let total = per * n;
-        if (stopSeconds !== null) total = Math.min(total, stopSeconds);
+          // Slideshow: each photo becomes its own fixed-length clip, then they
+          // are concatenated. Done with filter_complex rather than the concat
+          // demuxer because the photos are arbitrary sizes and orientations —
+          // the demuxer needs its inputs to already match, whereas this scales
+          // and pads each one to the shared canvas before joining them.
+          //
+          // setsar=1 on every branch matters more than it looks: concat refuses
+          // to join streams whose sample aspect ratios disagree, and a phone
+          // photo can carry a non-square SAR that survives scaling.
+          let per = secondsPerPhoto();
+          if (pvAudioFile && fitSongToggle.checked && audioDuration) per = Math.max(0.2, audioDuration / n);
+          let total = per * n;
+          if (stopSeconds !== null) total = Math.min(total, stopSeconds);
 
-        args = [];
-        for (let i = 0; i < n; i++) {
-          args.push('-loop', '1', '-t', String(per), '-framerate', String(FPS), '-i', photoNames[i]);
-        }
-        if (pvAudioFile) args.push('-i', audioInputName);
+          args = [];
+          for (let i = 0; i < n; i++) {
+            args.push('-loop', '1', '-t', String(per), '-framerate', String(FPS), '-i', photoNames[i]);
+          }
+          if (pvAudioFile) args.push('-i', audioInputName);
 
-        const chains = [];
-        for (let i = 0; i < n; i++) {
-          chains.push('[' + i + ':v]scale=' + W + ':' + H +
-            ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H +
-            ':(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=' + FPS + '[v' + i + ']');
-        }
-        let concatIn = '';
-        for (let i = 0; i < n; i++) concatIn += '[v' + i + ']';
-        chains.push(concatIn + 'concat=n=' + n + ':v=1:a=0[outv]');
+          const chains = [];
+          for (let i = 0; i < n; i++) {
+            chains.push('[' + i + ':v]scale=' + W + ':' + H +
+              ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H +
+              ':(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=' + FPS + '[v' + i + ']');
+          }
+          let concatIn = '';
+          for (let i = 0; i < n; i++) concatIn += '[v' + i + ']';
+          chains.push(concatIn + 'concat=n=' + n + ':v=1:a=0[outv]');
 
-        args.push('-filter_complex', chains.join(';'), '-map', '[outv]');
-        if (pvAudioFile) args.push('-map', String(n) + ':a', '-c:a', 'aac', '-b:a', '192k');
-        args.push('-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
-        // -t, not -shortest: the slideshow should always play to its end even
-        // when the song is shorter than it. -shortest would cut the pictures
-        // off at the last note.
-        args.push('-t', String(total), '-movflags', '+faststart', outputName);
+          args.push('-filter_complex', chains.join(';'), '-map', '[outv]');
+          if (pvAudioFile) args.push('-map', String(n) + ':a', '-c:a', 'aac', '-b:a', '192k');
+          args.push('-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p');
+          // -t, not -shortest: the slideshow should always play to its end even
+          // when the song is shorter than it. -shortest would cut the pictures
+          // off at the last note.
+          args.push('-t', String(total), '-movflags', '+faststart', outputName);
+        }
+        attempts = [{ args: args }];
       }
 
-      await ffmpeg.exec(args);
-      const outputData = await ffmpeg.readFile(outputName);
+      let outputData = null, lastErr = null, usedNote = null;
+      for (const attempt of attempts) {
+        try {
+          await ffmpeg.exec(attempt.args);
+          const data = await ffmpeg.readFile(outputName);
+          if (data && data.length) { outputData = data; usedNote = attempt.note || null; break; }
+          lastErr = new Error('ffmpeg produced no output');
+        } catch (err) {
+          lastErr = err;
+        }
+        // A half-written file from a failed attempt would be picked up as
+        // success by the next readFile, so it goes before anything is retried.
+        try { await ffmpeg.deleteFile(outputName); } catch (e) {}
+      }
+      if (!outputData) throw (lastErr || new Error('ffmpeg produced no output'));
       for (const f of written) { try { await ffmpeg.deleteFile(f); } catch (e) {} }
       try { await ffmpeg.deleteFile(outputName); } catch (e) {}
 
@@ -8871,11 +9066,14 @@ processSharedFileIfAny();
       pvResultObjectUrl = URL.createObjectURL(blob);
       resultVideo.src = pvResultObjectUrl;
       downloadLink.href = pvResultObjectUrl;
-      downloadLink.download = (n > 1 ? 'slideshow-' : 'photo-video-') + Date.now() + '.mp4';
+      downloadLink.download = (pvVideoFile ? 'video-with-music-' : (n > 1 ? 'slideshow-' : 'photo-video-')) + Date.now() + '.mp4';
       resultEl.classList.add('show');
-      setStatus(n > 1
-        ? ('Your slideshow is ready below — ' + n + ' photos, preview it then download.')
-        : 'Your video is ready below — preview it, then download.', 'ok');
+      const doneMsg = pvVideoFile
+        ? 'Your video is ready below — preview it, then download.'
+        : (n > 1
+            ? ('Your slideshow is ready below — ' + n + ' photos, preview it then download.')
+            : 'Your video is ready below — preview it, then download.');
+      setStatus(usedNote ? (doneMsg + ' ' + usedNote) : doneMsg, 'ok');
     } catch (err) {
       setStatus('Video creation failed: ' + ((err && err.message) ? err.message : String(err)), 'error');
       console.error('Photo to Video Maker export failed:', err);
@@ -8893,6 +9091,7 @@ processSharedFileIfAny();
     // the page, and a slideshow batch is a lot more to leak than one photo.
     pvPhotos.forEach(p => URL.revokeObjectURL(p.url));
     pvPhotos = [];
+    clearVideo();
     pvAudioFile = null;
     pvAudioDuration = null;
     if (pvAudioObjectUrl) { URL.revokeObjectURL(pvAudioObjectUrl); pvAudioObjectUrl = null; }
@@ -8905,11 +9104,20 @@ processSharedFileIfAny();
     photoDropzone.style.display = '';
     audioDropzone.style.display = '';
     fitSongToggle.checked = false;
+    keepSoundToggle.checked = false;
     perPhotoInput.disabled = false;
     resultEl.classList.remove('show');
     updateReadyState();
     setStatus('');
   }
+
+  videoChangeBtn.addEventListener('click', () => {
+    clearVideo();
+    photoDropzone.style.display = '';
+    resultEl.classList.remove('show');
+    setStatus('');
+    updateReadyState();
+  });
 
   startOverBtn.addEventListener('click', resetToStart);
   resetBtn.addEventListener('click', () => {
