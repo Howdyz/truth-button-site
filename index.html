@@ -8649,7 +8649,7 @@ processSharedFileIfAny();
   // input in the wasm heap, and a browser tab has far less headroom than the
   // desktop tool people are used to. Refusing early with a clear number beats
   // an opaque out-of-memory abort several minutes in.
-  const MAX_VIDEO_BYTES = 250 * 1024 * 1024;
+  const MAX_VIDEO_BYTES = 320 * 1024 * 1024;
 
   function fmtBytes(b){
     return b >= 1048576 ? (Math.round(b / 1048576) + 'MB') : (Math.max(1, Math.round(b / 1024)) + 'KB');
